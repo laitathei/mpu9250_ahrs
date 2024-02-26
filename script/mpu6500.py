@@ -6,11 +6,6 @@ import numpy as np
 from progress.bar import Bar
 from transformation import NED2ENU, ENU2NED
 
-# Requirement list
-# pip3 install numpy
-# pip3 install numpy-quaternion
-# pip3 install progress progressbar2 alive-progress tqdm
-
 # Reference Github
 # https://github.com/adityanarayanan03/MPU9250/tree/master
 # https://github.com/kevinmcaleer/mpu9250/tree/main
