@@ -68,10 +68,13 @@ class AK8963():
         self.asaz = self.bus.read_byte_data(self.address, ASAZ)
 
     def get_mag(self):
-        mx = self.read_raw_data(HXH, HXL)*self.mag_scale
-        my = self.read_raw_data(HYH, HYL)*self.mag_scale
-        mz = self.read_raw_data(HZH, HZL)*self.mag_scale
-        # print("raw mx my mz: ", mx, my, mz)
+        try:
+            mx = self.read_raw_data(HXH, HXL)*self.mag_scale
+            my = self.read_raw_data(HYH, HYL)*self.mag_scale
+            mz = self.read_raw_data(HZH, HZL)*self.mag_scale
+            # print("raw mx my mz: ", mx, my, mz)
+        except:
+            raise ConnectionError("I2C Connection Failure")
 
         # sensitivity adjustment
         mx = mx*(((self.asax-128)*0.5/128)+1)        
