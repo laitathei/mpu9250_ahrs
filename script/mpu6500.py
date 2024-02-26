@@ -189,10 +189,13 @@ class MPU6500():
 
     def get_accel(self):
         # MPU6500 accelerometer data in Earth’s reference (g)
-        ax = self.read_raw_data(ACCEL_XOUT_H, ACCEL_XOUT_L)*self.accel_scale
-        ay = self.read_raw_data(ACCEL_YOUT_H, ACCEL_YOUT_L)*self.accel_scale
-        az = self.read_raw_data(ACCEL_ZOUT_H, ACCEL_ZOUT_L)*self.accel_scale
-
+        try:
+            ax = self.read_raw_data(ACCEL_XOUT_H, ACCEL_XOUT_L)*self.accel_scale
+            ay = self.read_raw_data(ACCEL_YOUT_H, ACCEL_YOUT_L)*self.accel_scale
+            az = self.read_raw_data(ACCEL_ZOUT_H, ACCEL_ZOUT_L)*self.accel_scale
+        except:
+            raise ConnectionError("I2C Connection Failure")
+            
         accel = np.array([[ax],[ay],[az]])
         accel = accel-self.accel_offset
         ax = -accel[0][0]
@@ -204,9 +207,12 @@ class MPU6500():
         return ax, ay, az
 
     def get_gyro(self):
-        gx = self.read_raw_data(GYRO_XOUT_H, GYRO_XOUT_L)*self.gyro_scale
-        gy = self.read_raw_data(GYRO_YOUT_H, GYRO_YOUT_L)*self.gyro_scale
-        gz = self.read_raw_data(GYRO_ZOUT_H, GYRO_ZOUT_L)*self.gyro_scale
+        try:
+            gx = self.read_raw_data(GYRO_XOUT_H, GYRO_XOUT_L)*self.gyro_scale
+            gy = self.read_raw_data(GYRO_YOUT_H, GYRO_YOUT_L)*self.gyro_scale
+            gz = self.read_raw_data(GYRO_ZOUT_H, GYRO_ZOUT_L)*self.gyro_scale
+        except:
+            raise ConnectionError("I2C Connection Failure")
 
         gyro = np.array([[gx],[gy],[gz]])
         gyro = gyro-self.gyro_offset
