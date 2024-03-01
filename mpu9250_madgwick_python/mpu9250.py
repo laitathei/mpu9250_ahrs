@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from mpu6500 import MPU6500
 from ak8963 import AK8963
 from transformation import acc2eul, acc2quat, accmag2eul, accmag2quat, quat2eul

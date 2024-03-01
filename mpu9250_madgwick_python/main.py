@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from mpu9250 import MPU9250
 from madgwick import Madgwick
 from orientation import quat2eul, eul2quat
@@ -27,7 +28,8 @@ if __name__ == "__main__":
     try:
         while True:
             next = last + interval
-            # print("Hz: ", 1/abs(next - time.time()))
+            print("dt: ", abs(next - time.time()))
+            print("Hz: ", 1/abs(next - time.time()))
             time.sleep(abs(next - time.time()))
             ax, ay, az = imu.get_accel()
             gx, gy, gz = imu.get_gyro()
