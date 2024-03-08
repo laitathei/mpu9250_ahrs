@@ -63,9 +63,13 @@ class AK8963():
 
     def get_adjust_mag(self):
         print("Read sensitivity adjustment value")
-        self.asax = self.bus.read_byte_data(self.address, ASAX)
-        self.asay = self.bus.read_byte_data(self.address, ASAY)
-        self.asaz = self.bus.read_byte_data(self.address, ASAZ)
+        asax = self.bus.read_byte_data(self.address, ASAX)
+        asay = self.bus.read_byte_data(self.address, ASAY)
+        asaz = self.bus.read_byte_data(self.address, ASAZ)
+
+        self.adjustment_x = (((asax-128)*0.5/128)+1)
+        self.adjustment_y = (((asay-128)*0.5/128)+1)
+        self.adjustment_z = (((asaz-128)*0.5/128)+1)
 
     def get_mag(self):
         try:
@@ -77,9 +81,9 @@ class AK8963():
             raise ConnectionError("I2C Connection Failure")
 
         # sensitivity adjustment
-        mx = mx*(((self.asax-128)*0.5/128)+1)        
-        my = my*(((self.asay-128)*0.5/128)+1) 
-        mz = mz*(((self.asaz-128)*0.5/128)+1) 
+        mx = mx*self.adjustment_x       
+        my = my*self.adjustment_y
+        mz = mz*self.adjustment_z
 
         ST2_value = self.bus.read_byte_data(self.address, ST2)
         bit_3 = ST2_value & int("00001000", 2)
@@ -138,10 +142,11 @@ class AK8963():
         low = self.bus.read_byte_data(self.address, low_register)
 
         # Megre higher bytes and lower bytes data
-        value = (high << 8) + low
+        unsigned_value = (high << 8) + low
 
         # Calculate the unsigned int16 range to signed int16 range
-        if(value > 32767):
-            value = value - 65536
-
-        return value
+        if (unsigned_value >= 32768) and (unsigned_value < 65536):
+            signed_value = unsigned_value - 65536
+        elif (unsigned_value >= 0) and (unsigned_value < 32768):
+            signed_value = unsigned_value
+        return signed_value

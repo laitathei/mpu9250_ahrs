@@ -30,21 +30,29 @@ def acc2eul(ax, ay, az, nav="ENU"):
         ax = ax/acc_norm
         ay = ay/acc_norm
         az = az/acc_norm
-        if nav=="ENU": # ZXY (yaw - pitch - roll)
-            # pitch limited between +- 90 degrees as Gimbal Lock problem (Singularity)
+        if nav=="ENU": # ZXY (yaw - roll - pitch)
+            # Windows 8 Coordinate System (Right-handed coordinates system)
+            # roll limited between +- 90 degrees as Gimbal Lock problem (Singularity)
             # [ax (E)] = [-sin_y*sin_p*sin_r+cos_y*cos_p   cos_y*sin_p*sin_r+sin_y*cos_p    -sin_p*cos_r][0]
             # [ay (N)] = [-sin_y*cos_r                     cos_y*cos_r                      sin_r       ][0]
-            # [az (U)] = [sin_y*cos_p*sin_r+cos_y*sin_p    -cos_y*cos_p*sin_r+sin_y*sin_p   cos_p*cos_r ][g]
-            roll = np.arctan2(-ax, az)
-            pitch = np.arctan2(ay, np.sqrt(ax**2 + az**2)) # or np.arcsin(ay)
+            # [az (U)] = [sin_y*cos_p*sin_r+cos_y*sin_p    -cos_y*cos_p*sin_r+sin_y*sin_p   cos_p*cos_r ][-g]
+            # [ax (E)] = [ gsin_p*cos_r]
+            # [ay (N)] = [-gsin_r      ]
+            # [az (U)] = [-gcos_p*cos_r]
+            roll = np.arctan2(-ay, np.sqrt(ax**2 + az**2)) # or np.arcsin(-ay)
+            pitch = np.arctan2(ax, -az)
             yaw = 0.0
         elif nav=="NED": # ZYX (yaw - pitch - roll)
+            # Aerospace Coordinate System (Right-handed coordinates system)
             # pitch limited between +- 90 degrees as Gimbal Lock problem (Singularity)
             # [ax (N)] = [cos_y*cos_p                     sin_y*cos_p                     -sin_p     ][0]
             # [ay (E)] = [cos_y*sin_p*sin_r-sin_y*cos_r   sin_y*sin_p*sin_r+cos_y*cos_r   cos_p*sin_r][0]
             # [az (D)] = [cos_y*sin_p*cos_r+sin_y*sin_r   sin_y*sin_p*cos_r-cos_y*sin_r   cos_p*cos_r][g]
+            # [ax (N)] = [-gsin_p      ]
+            # [ay (E)] = [ gcos_p*sin_r]
+            # [az (D)] = [ gcos_p*cos_r]
             roll = np.arctan2(ay, az)
-            pitch = np.arctan2(-ax, np.sqrt(ay**2 + az**2)) # or np.arcsin(-ax)
+            pitch = np.arctan2(-ax, np.sqrt(ay**2 + az**2)) # or np.arcsin(-ax) 
             yaw = 0.0
         else:
             raise ValueError("Navigation frame should be either ENU or NED")
@@ -96,26 +104,27 @@ def accmag2eul(ax, ay, az, mx, my, mz, nav="ENU"):
         mx = mx/mag_norm
         my = my/mag_norm
         mz = mz/mag_norm
+        mag = np.array([[mx],[my],[mz]])
         if nav == "ENU":
-            # bx = mx*(-sin_y*sin_r*sin_p+cos_y*cos_p) + my*(-sin_y*cos_r) + mz*(sin_y*sin_p*cos_r+cos_y*sin_r)
-            # by = mx*(cos_y*sin_p*sin_r+sin_y*cos_r)  + my*(cos_y*cos_p)  + mz*(-cos_p*sin_p*cos_r+sin_y*sin_r)
-            # bz = mx*(-cos_p*sin_r)                   + my*(sin_p)        + mz*(cos_p*cos_r)
-            DCM = eul2dcm(roll, pitch, yaw, seq="zxy")
-            result = DCM @ mag
-            X = result.tolist()[0][0]
-            Y = result.tolist()[1][0]
-            Z = result.tolist()[2][0]
-            yaw = np.arctan2(X, Y)
+            # mx, my, mz in body frame
+            # bx, by, bz in navigation frame
+            # bx (E) = mx*(-sin_y*sin_p*sin_r+cos_y*cos_p) + my*(-sin_y*cos_r) + mz*(sin_y*cos_p*sin_r+cos_y*sin_p)
+            # by (N) = mx*(cos_y*sin_p*sin_r+sin_y*cos_p)  + my*(cos_y*cos_r)  + mz*(-cos_y*cos_p*sin_r+sin_y*sin_p)
+            # bz (U) = mx*(-sin_p*cos_r)                   + my*(sin_r)        + mz*(cos_p*cos_r)
+
+            # magnetometer reading in East axis will become 0, when body frame overlap with navigation frame
+            # 0 = mx*(-sin_y*sin_p*sin_r+cos_y*cos_p) + my*(-sin_y*cos_r) + mz*(sin_y*cos_p*sin_r+cos_y*sin_p)
+            yaw = np.arctan2(mx*np.cos(pitch) + mz*np.sin(pitch), mx*np.sin(pitch)*np.sin(roll) + my*np.cos(roll) - mz*np.cos(pitch)*np.sin(roll))
         elif nav == "NED":
-            # bx = mx*(cos_y*cos_p) + my*(cos_y*sin_p*sin_r-sin_y*cos_r)  + mz*(cos_y*sin_p*cos_r+sin_y*sin_r)
-            # by = mx*(sin_y*cos_p) + my*(sin_y*sin_p*sin_r+cos_y*cos_r)  + mz*(sin_y*sin_p*cos_r-cos_y*sin_r)
-            # bz = mx*(-sin_p)      + my*(cos_p*sin_r)                    + mz*(cos_p*cos_r)
-            DCM = eul2dcm(roll, pitch, yaw, seq="zyx")
-            result = DCM @ mag
-            X = result.tolist()[0][0]
-            Y = result.tolist()[1][0]
-            Z = result.tolist()[2][0]
-            yaw = np.arctan2(Y, X)
+            # mx, my, mz in body frame
+            # bx, by, bz in navigation frame
+            # bx (N) = mx*(cos_y*cos_p) + my*(cos_y*sin_p*sin_r-sin_y*cos_r)  + mz*(cos_y*sin_p*cos_r+sin_y*sin_r)
+            # by (E) = mx*(sin_y*cos_p) + my*(sin_y*sin_p*sin_r+cos_y*cos_r)  + mz*(sin_y*sin_p*cos_r-cos_y*sin_r)
+            # bz (D) = mx*(-sin_p)      + my*(cos_p*sin_r)                    + mz*(cos_p*cos_r)
+
+            # magnetometer reading in East axis will become 0, when body frame overlap with navigation frame
+            # 0 = mx*(sin_y*cos_p) + my*(sin_y*sin_p*sin_r+cos_y*cos_r)  + mz*(sin_y*sin_p*cos_r-cos_y*sin_r)
+            yaw = -np.arctan2(my*np.cos(roll) - mz*np.sin(roll), mx*np.cos(pitch) + my*np.sin(pitch)*np.sin(roll) + mz*np.sin(pitch)*np.cos(roll))
         else:
             raise ValueError("Navigation frame should be either ENU or NED")
     return roll, pitch, yaw
@@ -145,7 +154,7 @@ def accmag2quat(ax, ay, az, mx, my, mz, nav="ENU"):
 
 def ENU2NED(E, N, U):
     """
-    Convert data from NED frame to ENU frame
+    Convert data from ENU frame to NED frame
     Input: E, N, U
     Output: N, E, D
     """
@@ -163,7 +172,7 @@ def ENU2NED(E, N, U):
 
 def NED2ENU(N, E, D):
     """
-    Convert data from ENU frame to NED frame
+    Convert data from NED frame to ENU frame
     Input: N, E, D
     Output: E, N, U
     """

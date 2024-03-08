@@ -121,11 +121,11 @@ class Madgwick():
                           [2.0*bx*(qx*qy - qw*qz)       + 2.0*by*(0.5 - qx**2 - qz**2)   + 2.0*bz*(qw*qx + qy*qz)       - my],
                           [2.0*bx*(qw*qy + qx*qz)       + 2.0*by*(qy*qz - qw*qx)         + 2.0*bz*(0.5 - qx**2 - qy**2) - mz]])
             J = np.array([[-2.0*qy,                2.0*qz,                          -2.0*qw,                          2.0*qx],       # calculate Jacobian form
-                            [ 2.0*qx,                2.0*qw,                          2.0*qz,                           2.0*qy],
-                            [ 0.0,                   -4.0*qx,                         -4.0*qy,                          0.0],
-                            [ 2.0*by*qz-2.0*bz*qy,   2.0*by*qy+2.0*bz*qz,             -4.0*bx*qy+2.0*by*qx-2.0*bz*qw,   -4.0*bx*qz+2.0*by*qw+2.0*bz*qx],
-                            [-2.0*bx*qz+2.0*bz*qx,   2.0*bx*qy-4.0*by*qx+2.0*bz*qw,   2.0*bx*qx+2.0*bz*qz,              -2.0*bx*qw-4.0*by*qz+2.0*bz*qy],
-                            [ 2.0*bx*qy-2.0*by*qx,   2.0*bx*qz-2.0*bx*qw-4.0*bz*qx,   2.0*bx*qw+2.0*by*qz-4.0*bz*qy,    2.0*bx*qx+2.0*by*qy]])
+                          [ 2.0*qx,                2.0*qw,                          2.0*qz,                           2.0*qy],
+                          [ 0.0,                   -4.0*qx,                         -4.0*qy,                          0.0],
+                          [ 2.0*by*qz-2.0*bz*qy,   2.0*by*qy+2.0*bz*qz,             -4.0*bx*qy+2.0*by*qx-2.0*bz*qw,   -4.0*bx*qz+2.0*by*qw+2.0*bz*qx],
+                          [-2.0*bx*qz+2.0*bz*qx,   2.0*bx*qy-4.0*by*qx+2.0*bz*qw,   2.0*bx*qx+2.0*bz*qz,              -2.0*bx*qw-4.0*by*qz+2.0*bz*qy],
+                          [ 2.0*bx*qy-2.0*by*qx,   2.0*bx*qz-2.0*bx*qw-4.0*bz*qx,   2.0*bx*qw+2.0*by*qz-4.0*bz*qy,    2.0*bx*qx+2.0*by*qy]])
             gradient = J.T@f
             gradient_norm = np.linalg.norm(gradient)
             gradient = gradient/gradient_norm # normalize gradient

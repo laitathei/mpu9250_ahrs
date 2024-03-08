@@ -146,15 +146,16 @@ class MPU6500():
     def read_raw_data(self, high_register, low_register):
         high = self.bus.read_byte_data(self.address, high_register)
         low = self.bus.read_byte_data(self.address, low_register)
-        
+
         # Megre higher bytes and lower bytes data
-        value = (high << 8) + low
+        unsigned_value = (high << 8) + low
 
         # Calculate the unsigned int16 range to signed int16 range
-        if(value > 32767):
-            value = value - 65536
-
-        return value
+        if (unsigned_value >= 32768) and (unsigned_value < 65536):
+            signed_value = unsigned_value - 65536
+        elif (unsigned_value >= 0) and (unsigned_value < 32768):
+            signed_value = unsigned_value
+        return signed_value
 
     def read_register(self, register):
         value = self.bus.read_byte_data(self.address, register)
@@ -191,11 +192,12 @@ class MPU6500():
         except:
             raise ConnectionError("I2C Connection Failure")
             
+        # set the downward gravity is positive
         accel = np.array([[ax],[ay],[az]])
         accel = accel-self.accel_offset
-        ax = -accel[0][0]
-        ay = -accel[1][0]
-        az = accel[2][0]
+        ax = accel[0][0]*-1
+        ay = accel[1][0]*-1
+        az = accel[2][0]*-1
 
         if self.nav_frame == "NED":
             ax, ay, az = ENU2NED(ax, ay, az)

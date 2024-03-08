@@ -3,48 +3,89 @@ import numpy as np
 import math
 import quaternion
 
-def euler_x_rotation(roll):
-    """
-    Convert Roll angle to Direction Cosine Matrix
-    Input: roll (radians)
-    Output: R
-    """
-    sin_r = np.sin(roll)
-    cos_r = np.cos(roll)
-    Rx = np.mat([[1,0, 0],
-                [0, cos_r, -sin_r],
-                [0,sin_r,cos_r]])
-    return Rx
+class right_hand_rule:
+    def euler_x_rotation(roll):
+        """
+        Convert Roll angle to Direction Cosine Matrix in right-handed coordinates system
+        Input: roll (radians)
+        Output: R
+        """
+        sin_r = np.sin(roll)
+        cos_r = np.cos(roll)
+        Rx = np.mat([[1, 0, 0],
+                    [0, cos_r, -sin_r],
+                    [0, sin_r, cos_r]])
+        return Rx
 
-def euler_y_rotation(pitch):
-    """
-    Convert Pitch angle to Direction Cosine Matrix
-    Input: pitch (radians)
-    Output: R
-    """
-    sin_p = np.sin(pitch)
-    cos_p = np.cos(pitch)
-    Ry = np.mat([[cos_p,0, sin_p],
-                [0, 1, 0],
-                [-sin_p,0,cos_p]])
-    return Ry
+    def euler_y_rotation(pitch):
+        """
+        Convert Pitch angle to Direction Cosine Matrix in right-handed coordinates system
+        Input: pitch (radians)
+        Output: R
+        """
+        sin_p = np.sin(pitch)
+        cos_p = np.cos(pitch)
+        Ry = np.mat([[cos_p, 0, sin_p],
+                    [0, 1, 0],
+                    [-sin_p, 0, cos_p]])
+        return Ry
 
-def euler_z_rotation(yaw):
-    """
-    Convert Yaw angle to Direction Cosine Matrix
-    Input: yaw (radians)
-    Output: R
-    """
-    sin_y = np.sin(yaw)
-    cos_y = np.cos(yaw)
-    Rz = np.mat([[cos_y,-sin_y, 0],
-                [sin_y, cos_y, 0],
-                [0,0,1]])
-    return Rz
+    def euler_z_rotation(yaw):
+        """
+        Convert Yaw angle to Direction Cosine Matrix in right-handed coordinates system
+        Input: yaw (radians)
+        Output: R
+        """
+        sin_y = np.sin(yaw)
+        cos_y = np.cos(yaw)
+        Rz = np.mat([[cos_y, -sin_y, 0],
+                    [sin_y, cos_y, 0],
+                    [0, 0, 1]])
+        return Rz
+
+class left_hand_rule:
+    def euler_x_rotation(roll):
+        """
+        Convert Roll angle to Direction Cosine Matrix in left-handed coordinates system
+        Input: roll (radians)
+        Output: R
+        """
+        sin_r = np.sin(roll)
+        cos_r = np.cos(roll)
+        Rx = np.mat([[1, 0, 0],
+                    [0, cos_r, sin_r],
+                    [0, -sin_r, cos_r]])
+        return Rx
+
+    def euler_y_rotation(pitch):
+        """
+        Convert Pitch angle to Direction Cosine Matrix in left-handed coordinates system
+        Input: pitch (radians)
+        Output: R
+        """
+        sin_p = np.sin(pitch)
+        cos_p = np.cos(pitch)
+        Ry = np.mat([[cos_p, 0, -sin_p],
+                    [0, 1, 0],
+                    [sin_p, 0, cos_p]])
+        return Ry
+
+    def euler_z_rotation(yaw):
+        """
+        Convert Yaw angle to Direction Cosine Matrix in left-handed coordinates system
+        Input: yaw (radians)
+        Output: R
+        """
+        sin_y = np.sin(yaw)
+        cos_y = np.cos(yaw)
+        Rz = np.mat([[cos_y, sin_y, 0],
+                    [-sin_y, cos_y, 0],
+                    [0, 0, 1]])
+        return Rz
 
 def quat_x_rotation(roll):
     """
-    Convert Roll angle to Quaternion
+    Convert Roll angle to Quaternion in right-handed coordinates system (Hamilton)
     Input: roll (radians)
     Output: Q (w,x,y,z)
     """
@@ -57,7 +98,7 @@ def quat_x_rotation(roll):
 
 def quat_y_rotation(pitch):
     """
-    Convert Pitch angle to Quaternion
+    Convert Pitch angle to Quaternion in right-handed coordinates system (Hamilton)
     Input: pitch (radians)
     Output: Q (w,x,y,z)
     """
@@ -70,7 +111,7 @@ def quat_y_rotation(pitch):
 
 def quat_z_rotation(yaw):
     """
-    Convert Yaw angle to Quaternion
+    Convert Yaw angle to Quaternion in right-handed coordinates system (Hamilton)
     Input: yaw (radians)
     Output: Q (w,x,y,z)
     """
@@ -81,7 +122,7 @@ def quat_z_rotation(yaw):
     Q = np.quaternion(w, x, y, z)
     return Q
 
-def eul2dcm(roll, pitch, yaw, seq="xyz"):
+def eul2dcm(roll, pitch, yaw, seq="xyz", coordinates="right"):
     """
     Convert Euler angle to Direction Cosine Matrix
     Input: roll, pitch, yaw (radians)
@@ -92,9 +133,16 @@ def eul2dcm(roll, pitch, yaw, seq="xyz"):
     .. [2] https://blog.csdn.net/u014173215/article/details/123831202
     .. [3] https://zhuanlan.zhihu.com/p/85108850
     """
-    Rx = euler_x_rotation(roll)
-    Ry = euler_y_rotation(pitch)
-    Rz = euler_z_rotation(yaw)
+    if coordinates == "right":
+        Rx = right_hand_rule.euler_x_rotation(roll)
+        Ry = right_hand_rule.euler_y_rotation(pitch)
+        Rz = right_hand_rule.euler_z_rotation(yaw)
+    elif coordinates == "left":
+        Rx = left_hand_rule.euler_x_rotation(roll)
+        Ry = left_hand_rule.euler_y_rotation(pitch)
+        Rz = left_hand_rule.euler_z_rotation(yaw)
+    else:
+        raise ValueError("Only have right or left-handed coordinates system")
     R_dict = {"x": Rx, "y": Ry, "z": Rz}
     DCM = R_dict[seq[0]] @ R_dict[seq[1]] @ R_dict[seq[2]]
     return DCM
@@ -260,18 +308,21 @@ def quat_conjugate(q):
     return q
 
 
-# from scipy.spatial.transform import Rotation
-# sinr = np.sin(roll)
-# sinp = np.sin(pitch)
-# siny = np.sin(yaw)
-# cosr = np.cos(roll)
-# cosp = np.cos(pitch)
-# cosy = np.cos(yaw)
+from scipy.spatial.transform import Rotation
+roll = 0.5
+pitch = 1
+yaw = 1.5
+sinr = np.sin(roll)
+sinp = np.sin(pitch)
+siny = np.sin(yaw)
+cosr = np.cos(roll)
+cosp = np.cos(pitch)
+cosy = np.cos(yaw)
 
 # rot = Rotation.from_euler('yzx', [pitch, yaw, roll])
 # rotation_matrix = rot.as_matrix()
 # print(rotation_matrix)
-# print(eul2dcm(roll, pitch, yaw, seq="xzy"))
+# print(eul2dcm(roll, pitch, yaw, seq="xzy", coordinates="right"))
 # matrix=np.array([[cosy*cosp,-siny,cosy*sinp], 
 # [siny*cosp*cosr+sinp*sinr,cosy*cosr,siny*sinp*cosr-cosp*sinr],
 # [siny*cosp*sinr-sinp*cosr,cosy*sinr,siny*sinp*sinr+cosp*cosr]]) 
@@ -280,7 +331,7 @@ def quat_conjugate(q):
 # rot = Rotation.from_euler('zyx', [yaw, pitch, roll])
 # rotation_matrix = rot.as_matrix()
 # print(rotation_matrix)
-# print(eul2dcm(roll, pitch, yaw, seq="xyz"))
+# print(eul2dcm(roll, pitch, yaw, seq="xyz", coordinates="right"))
 # matrix=np.array([[cosy*cosp,-siny*cosp,sinp], 
 # [cosy*sinp*sinr+siny*cosr,-siny*sinp*sinr+cosy*cosr,-cosp*sinr],
 # [-cosy*sinp*cosr+siny*sinr,siny*sinp*cosr+cosy*sinr,cosp*cosr]]) 
@@ -289,7 +340,7 @@ def quat_conjugate(q):
 # rot = Rotation.from_euler('zxy', [yaw, roll, pitch])
 # rotation_matrix = rot.as_matrix()
 # print(rotation_matrix)
-# print(eul2dcm(roll, pitch, yaw, seq="yxz"))
+# print(eul2dcm(roll, pitch, yaw, seq="yxz", coordinates="right"))
 # matrix=np.array([[siny*sinp*sinr+cosy*cosp,cosy*sinp*sinr-siny*cosp,sinp*cosr],
 # [siny*cosr,cosy*cosr,-sinr],
 # [siny*cosp*sinr-cosy*sinp,cosy*cosp*sinr+siny*sinp,cosp*cosr]])  
@@ -298,7 +349,7 @@ def quat_conjugate(q):
 # rot = Rotation.from_euler('xzy', [roll, yaw, pitch])
 # rotation_matrix = rot.as_matrix()
 # print(rotation_matrix)
-# print(eul2dcm(roll, pitch, yaw, seq="yzx"))
+# print(eul2dcm(roll, pitch, yaw, seq="yzx", coordinates="right"))
 # matrix=np.array([[cosy*cosp,-siny*cosp*cosr+sinp*sinr,siny*cosp*sinr+sinp*cosr],
 # [siny,cosy*cosr,-cosy*sinr],
 # [-cosy*sinp,siny*sinp*cosr+cosp*sinr,-siny*sinp*sinr+cosp*cosr]])  
@@ -307,10 +358,19 @@ def quat_conjugate(q):
 # rot = Rotation.from_euler('yxz', [pitch, roll, yaw])
 # rotation_matrix = rot.as_matrix()
 # print(rotation_matrix)
-# print(eul2dcm(roll, pitch, yaw, seq="zxy"))
+# print(eul2dcm(roll, pitch, yaw, seq="zxy", coordinates="right"))
 # matrix=np.array([[-siny*sinp*sinr+cosy*cosp,-siny*cosr,siny*cosp*sinr+cosy*sinp],
 # [cosy*sinp*sinr+siny*cosp,cosy*cosr,-cosy*cosp*sinr+siny*sinp],
 # [-sinp*cosr,sinr,cosp*cosr]])  
+# print(matrix)
+
+# rot = Rotation.from_euler('xyz', [roll, pitch, yaw])
+# rotation_matrix = rot.as_matrix()
+# print(rotation_matrix)
+# print(eul2dcm(roll, pitch, yaw, seq="zyx", coordinates="right"))
+# matrix=np.array([[cosy*cosp,cosy*sinp*sinr-siny*cosr,cosy*sinp*cosr+siny*sinr],
+# [siny*cosp,siny*sinp*sinr+cosy*cosr,siny*sinp*cosr-cosy*sinr],
+# [-sinp,cosp*sinr,cosp*cosr]])  
 # print(matrix)
 
 # rot = Rotation.from_euler('xyz', [roll, pitch, yaw])
