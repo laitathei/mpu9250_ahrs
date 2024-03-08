@@ -11,9 +11,20 @@ import math
 # MPU-9250 Register Map and Descriptions
 # https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf
 
+# sudo i2cdetect -y 1
+#     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+# 00:                         -- -- -- -- 0c -- -- -- 
+# 10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+# 20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+# 30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+# 40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+# 50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+# 60: -- -- -- -- -- -- -- -- 68 -- -- -- -- -- -- -- 
+# 70: -- -- -- -- -- -- -- --
+
 class MPU9250():
     def __init__(self, nav_frame):
-        self.bus = smbus.SMBus(1) # /dev/i2c-1
+        self.bus = smbus.SMBus(1)
         address_list = self.check_i2c_address()
         if len(address_list) == 0:
             raise RuntimeError("No i2c address found")
@@ -29,7 +40,7 @@ class MPU9250():
         self.mpu6500 = MPU6500(self.bus, self.mpu6500_address, self.nav_frame)
         self.mpu6500.who_am_i()
         self.mpu6500.config_MPU6500(0, 0)
-        
+
         # Config AK8963
         self.ak8963 = AK8963(self.bus, self.ak8963_address, self.nav_frame)
         self.ak8963.who_am_i()
