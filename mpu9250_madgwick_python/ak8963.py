@@ -26,7 +26,9 @@ class AK8963():
         self.address = address
         self.mag_offset = np.zeros((3,1))
         self.nav_frame = nav_frame
-
+        if (self.nav_frame != "ENU") and (self.nav_frame != "NED"):
+            raise ValueError("Navigation frame should be either ENU or NED")
+            
     def who_am_i(self):
         value = hex(self.bus.read_byte_data(self.address, WIA))
         print("The register value is {}".format(value))
