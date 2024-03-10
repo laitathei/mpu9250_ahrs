@@ -4,3 +4,4 @@ progress==1.6
 progressbar2==4.3.2
 tqdm==4.66.1
 alive-progress==3.1.5
+pygame==2.5.2

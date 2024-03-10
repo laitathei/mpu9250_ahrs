@@ -61,7 +61,9 @@ class MPU6500():
         self.accel_offset = np.zeros((3,1))
         self.gyro_offset = np.zeros((3,1))
         self.nav_frame = nav_frame
-        
+        if (self.nav_frame != "ENU") and (self.nav_frame != "NED"):
+            raise ValueError("Navigation frame should be either ENU or NED")
+            
     def control_accel_gyro(self, ax=True, ay=True, az=True, gx=True, gy=True, gz=True):
         value = 0 # 0b00000000
         if ax == False:
