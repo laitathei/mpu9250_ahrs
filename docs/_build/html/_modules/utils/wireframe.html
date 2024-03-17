@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utils.wireframe &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">python</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">utils.wireframe</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for utils.wireframe</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">.orientation</span> <span class="kn">import</span> <span class="n">eul2dcm</span><span class="p">,</span> <span class="n">right_hand_rule</span>
+
+<span class="c1"># navigation frame:</span>
+<span class="c1">#     ENU               NED</span>
+<span class="c1"># y    z                   x</span>
+<span class="c1">#  \   |                  /</span>
+<span class="c1">#   \  |                 ------- y </span>
+<span class="c1">#    \ |                 |</span>
+<span class="c1">#     \|------- x        z</span>
+
+<span class="c1"># vertice indexs:</span>
+<span class="c1">#           5-------7</span>
+<span class="c1">#           | \     |\</span>
+<span class="c1">#           |  1------3</span>
+<span class="c1">#           |  |    | |</span>
+<span class="c1">#           4--|----6 |</span>
+<span class="c1">#            \ |     \|</span>
+<span class="c1">#              0------2</span>
+
+<div class="viewcode-block" id="Vertice">
+<a class="viewcode-back" href="../../utils.html#utils.wireframe.Vertice">[docs]</a>
+<span class="k">class</span> <span class="nc">Vertice</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vertice of Cube</span>
+
+<span class="sd">    :param tuple coordinates: xyz axis vertice coordinates</span>
+<span class="sd">    :param tuple color: color</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Vertice x: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">Vertice y: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">Vertice z: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">Vertice color: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Face">
+<a class="viewcode-back" href="../../utils.html#utils.wireframe.Face">[docs]</a>
+<span class="k">class</span> <span class="nc">Face</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Face of Cube</span>
+
+<span class="sd">    :param tuple vertices: vertice index combined into face</span>
+<span class="sd">    :param tuple color: color</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertice_indexs</span> <span class="o">=</span> <span class="n">vertices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Face vertice_indexs: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">Face color: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="wireframe">
+<a class="viewcode-back" href="../../utils.html#utils.wireframe.wireframe">[docs]</a>
+<span class="k">class</span> <span class="nc">wireframe</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces [1]_ [2]_</span>
+
+<span class="sd">    axis color: \n</span>
+<span class="sd">    Positive of x axis is Red, Negative of x axis is Cyan \n</span>
+<span class="sd">    Positive of y axis is Green, Negative of y axis is Magenta \n</span>
+<span class="sd">    Positive of z axis is Blue, Negative of z axis is Yellow \n</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] `Cube property references &lt;https://en.wikipedia.org/wiki/Cube&gt;`</span>
+<span class="sd">    .. [2] `Github references &lt;https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nav_frame</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rpy</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;ENU&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;NED&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span> <span class="o">=</span> <span class="s2">&quot;zxy&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span> <span class="o">=</span> <span class="s2">&quot;zyx&quot;</span>
+
+<div class="viewcode-block" id="wireframe.initialize_cube">
+<a class="viewcode-back" href="../../utils.html#utils.wireframe.wireframe.initialize_cube">[docs]</a>
+    <span class="k">def</span> <span class="nf">initialize_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_x</span><span class="p">,</span> <span class="n">min_x</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">min_y</span><span class="p">,</span> <span class="n">max_z</span><span class="p">,</span> <span class="n">min_z</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the IMU model of the specified size</span>
+
+<span class="sd">        :param int max_x: maximum x axis cube coordinates</span>
+<span class="sd">        :param int min_x: minimum x axis cube coordinates</span>
+<span class="sd">        :param int max_y: maximum y axis cube coordinates</span>
+<span class="sd">        :param int min_y: minimum y axis cube coordinates</span>
+<span class="sd">        :param int max_z: maximum z axis cube coordinates</span>
+<span class="sd">        :param int min_z: minimum z axis cube coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cube_vertices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">min_x</span><span class="p">,</span> <span class="n">max_x</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="p">(</span><span class="n">min_y</span><span class="p">,</span> <span class="n">max_y</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="p">(</span><span class="n">min_z</span><span class="p">,</span> <span class="n">max_z</span><span class="p">)]</span>
+        <span class="n">vertice_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">cube_vertices</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_vertices</span><span class="p">(</span><span class="n">cube_vertices</span><span class="p">,</span> <span class="n">vertice_colors</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="o">==</span><span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+            <span class="n">cube_faces</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+            <span class="n">face_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="o">==</span><span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="n">cube_faces</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+            <span class="n">face_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_faces</span><span class="p">(</span><span class="n">cube_faces</span><span class="p">,</span> <span class="n">face_colors</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="wireframe.add_vertices">
+<a class="viewcode-back" href="../../utils.html#utils.wireframe.wireframe.add_vertices">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertice_list</span><span class="p">,</span> <span class="n">color_list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add vertice into IMU model</span>
+
+<span class="sd">        :param list vertice_list: IMU model vertice coordinates</span>
+<span class="sd">        :param list color_list: list stored each vertice color</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">vertice</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">vertice_list</span><span class="p">,</span> <span class="n">color_list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vertice</span><span class="p">(</span><span class="n">vertice</span><span class="p">,</span> <span class="n">color</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="wireframe.add_faces">
+<a class="viewcode-back" href="../../utils.html#utils.wireframe.wireframe.add_faces">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_list</span><span class="p">,</span> <span class="n">color_list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add face into IMU model</span>
+
+<span class="sd">        :param list face_list: IMU model face index</span>
+<span class="sd">        :param list color_list: list stored each face color</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">face</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">face_list</span><span class="p">,</span> <span class="n">color_list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Face</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">color</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="wireframe.update_attitude">
+<a class="viewcode-back" href="../../utils.html#utils.wireframe.wireframe.update_attitude">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_attitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rpy</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update IMU model attitude</span>
+
+<span class="sd">        :param ndarray rpy: roll, pitch, yaw angle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">roll</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rpy</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rpy</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">yaw</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rpy</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">rpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">roll</span><span class="p">],[</span><span class="n">pitch</span><span class="p">],[</span><span class="n">yaw</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rpy</span> <span class="o">=</span> <span class="n">rpy</span></div>
+
+
+<div class="viewcode-block" id="wireframe.rotate_point">
+<a class="viewcode-back" href="../../utils.html#utils.wireframe.wireframe.rotate_point">[docs]</a>
+    <span class="k">def</span> <span class="nf">rotate_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rotate the IMU vertice coordinates</span>
+
+<span class="sd">        :param ndarray point: xyz position</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - new_point (numpy.matrix) - rotated coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+            <span class="n">maxtrix</span> <span class="o">=</span> <span class="n">right_hand_rule</span><span class="o">.</span><span class="n">euler_x_rotation</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">))</span>
+            <span class="n">new_rpy</span> <span class="o">=</span> <span class="n">maxtrix</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpy</span>
+            <span class="n">roll</span> <span class="o">=</span> <span class="o">-</span><span class="n">new_rpy</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">pitch</span> <span class="o">=</span> <span class="o">-</span><span class="n">new_rpy</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">yaw</span> <span class="o">=</span> <span class="n">new_rpy</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="n">maxtrix</span> <span class="o">=</span> <span class="n">right_hand_rule</span><span class="o">.</span><span class="n">euler_z_rotation</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">90</span><span class="p">))</span>
+            <span class="n">new_rpy</span> <span class="o">=</span> <span class="n">maxtrix</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpy</span>
+            <span class="n">roll</span> <span class="o">=</span> <span class="n">new_rpy</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">pitch</span> <span class="o">=</span> <span class="n">new_rpy</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">yaw</span> <span class="o">=</span> <span class="n">new_rpy</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">DCM</span> <span class="o">=</span> <span class="n">eul2dcm</span><span class="p">(</span><span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+        <span class="n">new_point</span> <span class="o">=</span> <span class="n">DCM</span> <span class="o">@</span> <span class="n">point</span>
+        <span class="k">return</span> <span class="n">new_point</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

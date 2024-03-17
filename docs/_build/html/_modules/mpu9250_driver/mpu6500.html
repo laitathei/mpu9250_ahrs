@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mpu9250_driver.mpu6500 &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">python</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mpu9250_driver.mpu6500</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mpu9250_driver.mpu6500</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python3</span>
+<span class="kn">import</span> <span class="nn">smbus</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">utils.transformation</span> <span class="kn">import</span> <span class="n">ENU2NED</span>
+
+<span class="n">SMPLRT_DIV</span> <span class="o">=</span> <span class="mh">0x19</span>
+<span class="n">BYPASS_ENABLE</span> <span class="o">=</span> <span class="mh">0x37</span>
+<span class="n">GYRO_CONFIG_2</span> <span class="o">=</span> <span class="mh">0x1a</span>
+<span class="n">GYRO_CONFIG</span> <span class="o">=</span> <span class="mh">0x1b</span>
+<span class="n">ACCEL_CONFIG</span> <span class="o">=</span> <span class="mh">0x1c</span>
+<span class="n">ACCEL_CONFIG_2</span> <span class="o">=</span> <span class="mh">0x1d</span>
+<span class="n">ACCEL_XOUT_H</span> <span class="o">=</span> <span class="mh">0x3b</span>
+<span class="n">ACCEL_XOUT_L</span> <span class="o">=</span> <span class="mh">0x3c</span>
+<span class="n">ACCEL_YOUT_H</span> <span class="o">=</span> <span class="mh">0x3d</span>
+<span class="n">ACCEL_YOUT_L</span> <span class="o">=</span> <span class="mh">0x3e</span>
+<span class="n">ACCEL_ZOUT_H</span> <span class="o">=</span> <span class="mh">0x3f</span>
+<span class="n">ACCEL_ZOUT_L</span> <span class="o">=</span> <span class="mh">0x40</span>
+<span class="n">TEMP_OUT_H</span> <span class="o">=</span> <span class="mh">0x41</span>
+<span class="n">TEMP_OUT_L</span> <span class="o">=</span> <span class="mh">0x42</span>
+<span class="n">GYRO_XOUT_H</span> <span class="o">=</span> <span class="mh">0x43</span>
+<span class="n">GYRO_XOUT_L</span> <span class="o">=</span> <span class="mh">0x44</span>
+<span class="n">GYRO_YOUT_H</span> <span class="o">=</span> <span class="mh">0x45</span>
+<span class="n">GYRO_YOUT_L</span> <span class="o">=</span> <span class="mh">0x46</span>
+<span class="n">GYRO_ZOUT_H</span> <span class="o">=</span> <span class="mh">0x47</span>
+<span class="n">GYRO_ZOUT_L</span> <span class="o">=</span> <span class="mh">0x48</span>
+
+<span class="n">PWR_MGMT_1</span> <span class="o">=</span> <span class="mh">0x6b</span>
+<span class="n">PWR_MGMT_2</span> <span class="o">=</span> <span class="mh">0x6c</span>
+<span class="n">WHO_AM_I</span> <span class="o">=</span> <span class="mh">0x75</span> <span class="c1"># default return 0x71</span>
+
+<span class="n">ACCEL_FS_SEL_2G</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># 0b00000000</span>
+<span class="n">ACCEL_FS_SEL_4G</span> <span class="o">=</span> <span class="mi">8</span> <span class="c1"># 0b00001000</span>
+<span class="n">ACCEL_FS_SEL_8G</span> <span class="o">=</span> <span class="mi">16</span> <span class="c1"># 0b00010000</span>
+<span class="n">ACCEL_FS_SEL_16G</span> <span class="o">=</span> <span class="mi">24</span> <span class="c1"># 0b00011000</span>
+
+<span class="n">GYRO_FS_SEL_250DPS</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># 0b00000000</span>
+<span class="n">GYRO_FS_SEL_500DPS</span> <span class="o">=</span> <span class="mi">8</span> <span class="c1"># 0b00001000</span>
+<span class="n">GYRO_FS_SEL_1000DPS</span> <span class="o">=</span> <span class="mi">16</span> <span class="c1"># 0b00010000</span>
+<span class="n">GYRO_FS_SEL_2000DPS</span> <span class="o">=</span> <span class="mi">24</span> <span class="c1"># 0b00011000</span>
+
+<span class="c1"># From MPU9250 datasheet 3.4.2</span>
+<span class="n">TEMP_SENSITIVITY</span> <span class="o">=</span> <span class="mf">333.87</span>
+<span class="n">ROOM_TEMP_OFFSET</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># standard acceleration of gravity</span>
+<span class="n">g</span> <span class="o">=</span> <span class="mf">9.80665</span>
+
+<div class="viewcode-block" id="MPU6500">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500">[docs]</a>
+<span class="k">class</span> <span class="nc">MPU6500</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MPU6500 I2C driver for acquire accelerometer and gyroscope data</span>
+
+<span class="sd">    :param SMBus bus: device I2C port</span>
+<span class="sd">    :param int address: MPU6500 I2C address</span>
+<span class="sd">    :param str nav_frame: navigation frame</span>
+<span class="sd">    :param int hz: IMU frequency</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;ENU&quot;</span><span class="p">,</span> <span class="n">hz</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="c1"># I2C connection parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span> <span class="o">=</span> <span class="n">bus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>
+
+        <span class="c1"># Accelerometer and gyroscope parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accel_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># driver parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span> <span class="c1"># original navigation frame of MPU6500 is ENU</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hz</span> <span class="o">=</span> <span class="n">hz</span>
+
+        <span class="c1"># Check parameter</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;ENU&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;NED&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+            
+<div class="viewcode-block" id="MPU6500.control_accel_gyro">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.control_accel_gyro">[docs]</a>
+    <span class="k">def</span> <span class="nf">control_accel_gyro</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ay</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">az</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gz</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whether to enable accelerometer and gyroscope xyz axis data</span>
+
+<span class="sd">        :param bool ax: enable x axis accelerometer data</span>
+<span class="sd">        :param bool ay: enable y axis accelerometer data</span>
+<span class="sd">        :param bool az: enable z axis accelerometer data</span>
+<span class="sd">        :param bool gx: enable x axis gyroscope data</span>
+<span class="sd">        :param bool gy: enable y axis gyroscope data</span>
+<span class="sd">        :param bool gz: enable z axis gyroscope data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># 0b00000000</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">4</span> <span class="c1"># 0b10000000</span>
+        <span class="k">if</span> <span class="n">ay</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">8</span> <span class="c1"># 0b01000000</span>
+        <span class="k">if</span> <span class="n">az</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">16</span> <span class="c1"># 0b00100000</span>
+        <span class="k">if</span> <span class="n">gx</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">32</span> <span class="c1"># 0b10000000</span>
+        <span class="k">if</span> <span class="n">gy</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">64</span> <span class="c1"># 0b01000000</span>
+        <span class="k">if</span> <span class="n">gz</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">128</span> <span class="c1"># 0b00100000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">PWR_MGMT_2</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.who_am_i">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.who_am_i">[docs]</a>
+    <span class="k">def</span> <span class="nf">who_am_i</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check MPU6500 WHOAMI register value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">WHO_AM_I</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The register value is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;0x71&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;It is MPU6500 default value&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;It is not MPU6500 default value&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;MPU6500 not found&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.config_MPU6500">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.config_MPU6500">[docs]</a>
+    <span class="k">def</span> <span class="nf">config_MPU6500</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accel_parameter</span><span class="p">,</span> <span class="n">gyro_parameter</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Config MPU6500 accelerometer and gyroscope scale with internal DMP</span>
+
+<span class="sd">        :param int accel_parameter: accelerometer configuration register value</span>
+<span class="sd">        :param int gyro_parameter: gyroscope configuration register value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">accel_parameter</span> <span class="o">==</span> <span class="n">ACCEL_FS_SEL_2G</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">/</span><span class="mf">32768.0</span>
+        <span class="k">elif</span> <span class="n">accel_parameter</span> <span class="o">==</span> <span class="n">ACCEL_FS_SEL_4G</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="mf">4.0</span><span class="o">/</span><span class="mf">32768.0</span>
+        <span class="k">elif</span> <span class="n">accel_parameter</span> <span class="o">==</span> <span class="n">ACCEL_FS_SEL_8G</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="mf">8.0</span><span class="o">/</span><span class="mf">32768.0</span>
+        <span class="k">elif</span> <span class="n">accel_parameter</span> <span class="o">==</span> <span class="n">ACCEL_FS_SEL_16G</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="mf">16.0</span><span class="o">/</span><span class="mf">32768.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong accel config parameter&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">gyro_parameter</span> <span class="o">==</span> <span class="n">GYRO_FS_SEL_250DPS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="mf">250.0</span><span class="o">/</span><span class="mf">32768.0</span>
+        <span class="k">elif</span> <span class="n">gyro_parameter</span> <span class="o">==</span> <span class="n">GYRO_FS_SEL_500DPS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="mf">500.0</span><span class="o">/</span><span class="mf">32768.0</span>
+        <span class="k">elif</span> <span class="n">gyro_parameter</span> <span class="o">==</span> <span class="n">GYRO_FS_SEL_1000DPS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="o">/</span><span class="mf">32768.0</span>
+        <span class="k">elif</span> <span class="n">gyro_parameter</span> <span class="o">==</span> <span class="n">GYRO_FS_SEL_2000DPS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="mf">2000.0</span><span class="o">/</span><span class="mf">32768.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong gyro config parameter&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write byte data to MPU6500 gyroscope and accelerometer configuration register</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ACCEL_CONFIG</span><span class="p">,</span> <span class="n">accel_parameter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">GYRO_CONFIG</span><span class="p">,</span> <span class="n">gyro_parameter</span><span class="p">)</span>
+
+        <span class="c1"># MPU6500 and AK8963 share the same I2C</span>
+        <span class="c1"># MPU6500 is master</span>
+        <span class="c1"># AK8963 is slave</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="mh">0x02</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">BYPASS_ENABLE</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># ACCEL_CONFIG_2   | Bandwidth | Delay   </span>
+        <span class="c1"># 0x00             | 250Hz     | 1.88ms</span>
+        <span class="c1"># 0x01             | 184Hz     | 1.88ms  </span>
+        <span class="c1"># 0x02             | 92Hz      | 2.88ms  </span>
+        <span class="c1"># 0x03             | 41Hz      | 4.88ms  </span>
+        <span class="c1"># 0x04             | 20Hz      | 8.87ms  </span>
+        <span class="c1"># 0x05             | 10Hz      | 16.83ms</span>
+        <span class="c1"># 0x06             | 5Hz       | 32.48ms</span>
+        <span class="c1"># 0x07             | 3600Hz    | 1.38ms</span>
+
+        <span class="c1"># GYRO_CONFIG_2   | Bandwidth | Delay   | Fs   | </span>
+        <span class="c1"># 0x00            | 250Hz     | 0.97ms  | 8kHz | </span>
+        <span class="c1"># 0x01            | 184Hz     | 2.9ms   | 1kHz | </span>
+        <span class="c1"># 0x02            | 92Hz      | 3.9ms   | 1kHz | </span>
+        <span class="c1"># 0x03            | 41Hz      | 5.9ms   | 1kHz | </span>
+        <span class="c1"># 0x04            | 20Hz      | 9.9ms   | 1kHz | </span>
+        <span class="c1"># 0x05            | 10Hz      | 17.85ms | 1kHz | </span>
+        <span class="c1"># 0x06            | 5Hz       | 33.48ms | 1kHz | </span>
+        <span class="c1"># 0x07            | 3600Hz    | 0.17ms  | 8kHz | </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ACCEL_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set acc digital high-pass filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">GYRO_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set gyro digital low-pass filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">SMPLRT_DIV</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">)</span> <span class="c1"># Set sample rate to 1 kHz</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.read_raw_data">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.read_raw_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">high_register</span><span class="p">,</span> <span class="n">low_register</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access the high and low registers of the accelerometer and gyroscope to calculate their values into int16 format</span>
+
+<span class="sd">        :param int high_register: high registers of the accelerometer or gyroscope</span>
+<span class="sd">        :param int low_register: low registers of the accelerometer or gyroscope</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - signed_value (int) - sensor value in int16 format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">high_register</span><span class="p">)</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">low_register</span><span class="p">)</span>
+
+        <span class="c1"># Megre higher bytes and lower bytes data</span>
+        <span class="n">unsigned_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">high</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">low</span>
+
+        <span class="c1"># Calculate the unsigned int16 range to signed int16 range</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">32768</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">65536</span><span class="p">):</span>
+            <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span> <span class="o">-</span> <span class="mi">65536</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">32768</span><span class="p">):</span>
+            <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span>
+        <span class="k">return</span> <span class="n">signed_value</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.gyro_calibration">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.gyro_calibration">[docs]</a>
+    <span class="k">def</span> <span class="nf">gyro_calibration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the gyroscope offset to calibrate the gyroscope</span>
+
+<span class="sd">        :param int s: time for calibration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Start gyroscope calibration - Do not move the IMU for </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+            <span class="n">gyro_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
+                <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gyro</span><span class="p">()</span>
+                <span class="n">gyro_offset</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_offset</span> <span class="o">=</span> <span class="n">gyro_offset</span><span class="o">/</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finish gyroscope calibration&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.get_accel">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.get_accel">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_accel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU6500 accelerometer data in Earth&#39;s reference (m/s^2)</span>
+<span class="sd">        Accelerometer channel is negative when pointing up and aligned against gravity</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing upward \n</span>
+<span class="sd">        ax = +9.80665 m/s^2 when the right hand side pointing upward \n</span>
+<span class="sd">        ay = +9.80665 m/s^2 when front side pointing upward \n</span>
+<span class="sd">        az = +9.80665 m/s^2 when upper side pointing upward \n</span>
+
+<span class="sd">        NED:</span>
+<span class="sd">        Gravity is defined as negative when pointing downward \n</span>
+<span class="sd">        ax = +9.80665 m/s^2 when front side pointing downward \n</span>
+<span class="sd">        ay = +9.80665 m/s^2 when the right hand side pointing downward \n</span>
+<span class="sd">        az = +9.80665 m/s^2 when under side pointing upward \n</span>
+<span class="sd">    </span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - ax (float) - x-axis accelerometer data in m/s^2</span>
+<span class="sd">            - ay (float) - y-axis accelerometer data in m/s^2</span>
+<span class="sd">            - az (float) - z-axis accelerometer data in m/s^2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_XOUT_H</span><span class="p">,</span> <span class="n">ACCEL_XOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span>
+            <span class="n">ay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_YOUT_H</span><span class="p">,</span> <span class="n">ACCEL_YOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span>
+            <span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_ZOUT_H</span><span class="p">,</span> <span class="n">ACCEL_ZOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;I2C Connection Failure&quot;</span><span class="p">)</span>
+            
+        <span class="n">accel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">ax</span><span class="p">],[</span><span class="n">ay</span><span class="p">],[</span><span class="n">az</span><span class="p">]])</span>
+        <span class="n">accel</span> <span class="o">=</span> <span class="n">accel</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_offset</span>
+
+        <span class="c1"># convert to m/s^2</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">accel</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">g</span>
+        <span class="n">ay</span> <span class="o">=</span> <span class="n">accel</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">g</span>
+        <span class="n">az</span> <span class="o">=</span> <span class="n">accel</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">g</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">*-</span><span class="mi">1</span>
+            <span class="n">ay</span> <span class="o">=</span> <span class="n">ay</span><span class="o">*-</span><span class="mi">1</span>
+            <span class="n">az</span> <span class="o">=</span> <span class="n">az</span><span class="o">*-</span><span class="mi">1</span>
+            <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span> <span class="o">=</span> <span class="n">ENU2NED</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.get_gyro">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.get_gyro">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_gyro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU6500 gyroscope data in right hand coordinates (rad/s)</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        gx is positive when rotate clockwise along x-axis \n</span>
+<span class="sd">        gy is positive when rotate clockwise along y-axis \n</span>
+<span class="sd">        gz is positive when rotate anti-clockwise along z-axis \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        gx is positive when rotate clockwise along x-axis \n</span>
+<span class="sd">        gy is positive when rotate clockwise along y-axis \n</span>
+<span class="sd">        gz is positive when rotate clockwise along z-axis \n</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - gx (float) - x-axis gyroscope data in rad/s</span>
+<span class="sd">            - gy (float) - y-axis gyroscope data in rad/s</span>
+<span class="sd">            - gz (float) - z-axis gyroscope data in rad/s</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">gx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_XOUT_H</span><span class="p">,</span> <span class="n">GYRO_XOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span>
+            <span class="n">gy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_YOUT_H</span><span class="p">,</span> <span class="n">GYRO_YOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span>
+            <span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_ZOUT_H</span><span class="p">,</span> <span class="n">GYRO_ZOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;I2C Connection Failure&quot;</span><span class="p">)</span>
+
+        <span class="n">gyro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span>
+        <span class="n">gyro</span> <span class="o">=</span> <span class="n">gyro</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_offset</span>
+
+        <span class="c1"># convert to rad/s</span>
+        <span class="n">gx</span> <span class="o">=</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+        <span class="n">gy</span> <span class="o">=</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+        <span class="n">gz</span> <span class="o">=</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="n">ENU2NED</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.get_temp">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.get_temp">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU6500 temperature data</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - temp (float) - temperature data in °C</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">TEMP_OUT_H</span><span class="p">,</span> <span class="n">TEMP_OUT_L</span><span class="p">)</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="p">((</span><span class="n">temp</span> <span class="o">-</span> <span class="n">ROOM_TEMP_OFFSET</span><span class="p">)</span><span class="o">/</span><span class="n">TEMP_SENSITIVITY</span><span class="p">)</span> <span class="o">+</span> <span class="mf">21.0</span>
+        <span class="k">return</span> <span class="n">temp</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

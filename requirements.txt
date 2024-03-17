@@ -5,3 +5,5 @@ progressbar2==4.3.2
 tqdm==4.66.1
 alive-progress==3.1.5
 pygame==2.5.2
+sphinx==7.2.6
+sphinx_rtd_theme==2.0.0
