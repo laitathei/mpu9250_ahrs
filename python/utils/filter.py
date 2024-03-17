@@ -23,13 +23,13 @@ import numpy as np
 
 def sliding_window(data, window_size):
     """
-    Sliding window algorithm
+    Sliding window algorithm [1]_
 
     :param list data: data list
     :param int window_size: sliding window size
 
     :returns: 
-        - result - smoothed data
+        - result (list) - smoothed data
 
     .. Reference
     .. [1] `algorithm explanations <https://blog.csdn.net/u012611644/article/details/126153999>`

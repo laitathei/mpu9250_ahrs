@@ -1,11 +1,10 @@
-# mpu9250_madgwick
+# mpu9250_ahrs
 
 ## System Requirement
 ```
 Ubuntu: 20.04/22.04
 Python: 3.10.12
 ROS: noetic
-ROS2: humble
 ```
 
 ## Install Dependencies

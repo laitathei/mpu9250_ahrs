@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mpu9250_driver.ak8963 &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">python</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mpu9250_driver.ak8963</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mpu9250_driver.ak8963</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python3</span>
+<span class="kn">import</span> <span class="nn">smbus</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">utils.transformation</span> <span class="kn">import</span> <span class="n">NED2ENU</span>
+
+<span class="n">WIA</span> <span class="o">=</span> <span class="mh">0x00</span>
+<span class="n">INFO</span> <span class="o">=</span> <span class="mh">0x01</span>
+<span class="n">ST1</span> <span class="o">=</span> <span class="mh">0x02</span>
+<span class="n">HXL</span> <span class="o">=</span> <span class="mh">0x03</span>
+<span class="n">HXH</span> <span class="o">=</span> <span class="mh">0x04</span>
+<span class="n">HYL</span> <span class="o">=</span> <span class="mh">0x05</span>
+<span class="n">HYH</span> <span class="o">=</span> <span class="mh">0x06</span>
+<span class="n">HZL</span> <span class="o">=</span> <span class="mh">0x07</span>
+<span class="n">HZH</span> <span class="o">=</span> <span class="mh">0x08</span>
+<span class="n">ST2</span> <span class="o">=</span> <span class="mh">0x09</span>
+<span class="n">CNTL</span> <span class="o">=</span> <span class="mh">0x0A</span>
+<span class="n">ASAX</span> <span class="o">=</span> <span class="mh">0x10</span>
+<span class="n">ASAY</span> <span class="o">=</span> <span class="mh">0x11</span>
+<span class="n">ASAZ</span> <span class="o">=</span> <span class="mh">0x12</span>
+
+<div class="viewcode-block" id="AK8963">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963">[docs]</a>
+<span class="k">class</span> <span class="nc">AK8963</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    AK8963 I2C driver for acquire magnetometer data</span>
+
+<span class="sd">    :param SMBus bus: device I2C port</span>
+<span class="sd">    :param int address: AK8963 I2C address</span>
+<span class="sd">    :param str nav_frame: navigation frame</span>
+<span class="sd">    :param int hz: IMU frequency</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;NED&quot;</span><span class="p">,</span> <span class="n">hz</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="c1"># I2C connection parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span> <span class="o">=</span> <span class="n">bus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>
+
+        <span class="c1"># Magnetometer parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># driver parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span> <span class="c1"># original navigation frame of AK8963 is NED</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hz</span> <span class="o">=</span> <span class="n">hz</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;ENU&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;NED&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+            
+<div class="viewcode-block" id="AK8963.who_am_i">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.who_am_i">[docs]</a>
+    <span class="k">def</span> <span class="nf">who_am_i</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check AK8963 WHOAMI register value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">WIA</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The register value is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;0x48&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;It is AK8963 default value&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;It is not AK8963 default value&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;AK8963 not found&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AK8963.config_AK8963">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.config_AK8963">[docs]</a>
+    <span class="k">def</span> <span class="nf">config_AK8963</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bit</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Config AK8963 magnetometer mode</span>
+
+<span class="sd">        :param int bit: accelerometer configuration register value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;fuse rom access&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_adjust_mag</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;power down&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;continuous measure 2&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AK8963.get_status">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_status">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check AK8963 magnetometer status</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ST1_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ST1</span><span class="p">)</span>
+        <span class="n">bit_0</span> <span class="o">=</span> <span class="n">ST1_value</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;00000001&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">bit_1</span> <span class="o">=</span> <span class="n">ST1_value</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;00000010&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bit_0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ready in measurement data register or ST2 register&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">bit_0</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ready in single measurement mode or self-test mode&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;AK8963 status 1 register bit 0 error&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">bit_1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ready in measurement data register or ST2 register&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">bit_1</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data overrun&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;AK8963 status 1 register bit 1 error&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AK8963.get_adjust_mag">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_adjust_mag">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_adjust_mag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        AK8963 sensitivity adjustment value for xyz axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Read sensitivity adjustment value&quot;</span><span class="p">)</span>
+        <span class="n">asax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ASAX</span><span class="p">)</span>
+        <span class="n">asay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ASAY</span><span class="p">)</span>
+        <span class="n">asaz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ASAZ</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjustment_x</span> <span class="o">=</span> <span class="p">(((</span><span class="n">asax</span><span class="o">-</span><span class="mi">128</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="o">/</span><span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjustment_y</span> <span class="o">=</span> <span class="p">(((</span><span class="n">asay</span><span class="o">-</span><span class="mi">128</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="o">/</span><span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjustment_z</span> <span class="o">=</span> <span class="p">(((</span><span class="n">asaz</span><span class="o">-</span><span class="mi">128</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="o">/</span><span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AK8963.get_mag">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_mag">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_mag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        AK8963 magnetometer data in Earth&#39;s reference (µT)</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        mx is positive when the right hand side pointing to north \n</span>
+<span class="sd">        my is positive when the front side pointing to north \n</span>
+<span class="sd">        mz is positive when the upper side pointing to north \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        mx is positive when the front side pointing to north \n</span>
+<span class="sd">        my is positive when the right hand side pointing to north \n</span>
+<span class="sd">        mz is positive when the under side pointing to north \n</span>
+<span class="sd">    </span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - mx (float) - x-axis magnetometer data in µT</span>
+<span class="sd">            - my (float) - y-axis magnetometer data in µT</span>
+<span class="sd">            - mz (float) - z-axis magnetometer data in µT</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HXH</span><span class="p">,</span> <span class="n">HXL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span>
+            <span class="n">my</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HYH</span><span class="p">,</span> <span class="n">HYL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span>
+            <span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HZH</span><span class="p">,</span> <span class="n">HZL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span>
+            <span class="c1"># print(&quot;raw mx my mz: &quot;, mx, my, mz)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;I2C Connection Failure&quot;</span><span class="p">)</span>
+
+        <span class="c1"># sensitivity adjustment</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="n">mx</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustment_x</span>       
+        <span class="n">my</span> <span class="o">=</span> <span class="n">my</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustment_y</span>
+        <span class="n">mz</span> <span class="o">=</span> <span class="n">mz</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustment_z</span>
+
+        <span class="n">ST2_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ST2</span><span class="p">)</span>
+        <span class="n">bit_3</span> <span class="o">=</span> <span class="n">ST2_value</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;00001000&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">bit_4</span> <span class="o">=</span> <span class="n">ST2_value</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;00010000&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># if bit_3 == 0:</span>
+        <span class="c1">#     print(&quot;Ready in measurement data register or ST2 register&quot;)</span>
+        <span class="c1"># elif bit_3 == 8:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  </span>
+        <span class="c1">#     print(&quot;Magnetic sensor overflow occurred&quot;)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     raise ValueError(&quot;AK8963 status 2 register bit 3 error&quot;)</span>
+
+        <span class="c1"># if bit_4 == 0:</span>
+        <span class="c1">#     print(&quot;Magnetic sensor in 14-bit coding&quot;)</span>
+        <span class="c1"># elif bit_4 == 16:</span>
+        <span class="c1">#     print(&quot;Magnetic sensor in 16-bit coding&quot;)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     raise ValueError(&quot;AK8963 status 2 register bit 4 error&quot;)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+            <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="n">NED2ENU</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span></div>
+
+
+<div class="viewcode-block" id="AK8963.set_mode">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.set_mode">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">bit</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        AK8963 CNTL1 register configuration</span>
+
+<span class="sd">        :param bool mode: operation mode setting</span>
+<span class="sd">        :param int bit: output bit setting </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># power down mode</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;power down&quot;</span><span class="p">:</span> <span class="c1"># 00000000</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mh">0x00</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;single measure&quot;</span><span class="p">:</span> <span class="c1"># 00000001</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mh">0x01</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;continuous measure 1&quot;</span><span class="p">:</span> <span class="c1"># 00000010</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mh">0x02</span> <span class="c1"># 8Hz</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;continuous measure 2&quot;</span><span class="p">:</span> <span class="c1"># 00000110</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mh">0x06</span> <span class="c1"># 100Hz</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;external trigger measurement&quot;</span><span class="p">:</span> <span class="c1"># 00000100</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mh">0x04</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;self test&quot;</span><span class="p">:</span> <span class="c1"># 00001000</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mh">0x08</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;fuse rom access&quot;</span><span class="p">:</span> <span class="c1"># 00001111 </span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mh">0x0F</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Prohibit mode coding&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">bit</span> <span class="o">==</span> <span class="mi">14</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">bit</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="mi">16</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong bit coding&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span> <span class="o">=</span> <span class="mi">4912</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">bit</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Set AK8963 to </span><span class="si">{}</span><span class="s2"> mode&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">CNTL</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="AK8963.read_raw_data">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.read_raw_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">high_register</span><span class="p">,</span> <span class="n">low_register</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access the high and low registers of the magnetometer to calculate their values into int16 format</span>
+
+<span class="sd">        :param int high_register: high registers of the magnetometer</span>
+<span class="sd">        :param int low_register: low registers of the magnetometer</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - signed_value (int) - sensor value in int16 format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">high_register</span><span class="p">)</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">low_register</span><span class="p">)</span>
+
+        <span class="c1"># Megre higher bytes and lower bytes data</span>
+        <span class="n">unsigned_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">high</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">low</span>
+
+        <span class="c1"># Calculate the unsigned int16 range to signed int16 range</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">32768</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">65536</span><span class="p">):</span>
+            <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span> <span class="o">-</span> <span class="mi">65536</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">32768</span><span class="p">):</span>
+            <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span>
+        <span class="k">return</span> <span class="n">signed_value</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

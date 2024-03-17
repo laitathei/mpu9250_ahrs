@@ -10,19 +10,19 @@ import numpy as np
 from threading import Thread
 
 class MPU9250():
+    """
+    MPU9250 I2C driver for accessing MPU6500 and AK8963 [1]_ [2]_
+
+    :param str nav_frame: navigation frame
+    :param int axis: axis data
+    :param float hz: IMU frequency
+    :param float s: calibration time
+
+    .. Reference
+    .. [1] `MPU-9250 Product Specification <https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf>`
+    .. [2] `MPU-9250 Register Map and Descriptions <https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf>`
+    """
     def __init__(self, nav_frame, axis, hz, s):
-        """
-        MPU9250 I2C driver for accessing MPU6500 and AK8963
-
-        :param str nav_frame: navigation frame
-        :param int axis: axis data
-        :param float hz: IMU frequency
-        :param float s: calibration time
-
-        .. Reference
-        .. [1] `MPU-9250 Product Specification <https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf>`
-        .. [2] `MPU-9250 Register Map and Descriptions <https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf>`
-        """
         # I2C connection parameter
         self.mpu6500_address = 0x68
         self.ak8963_address = 0x0c
@@ -77,7 +77,7 @@ class MPU9250():
         Search all I2C addresses and record accessible addresses
 
         :returns: 
-            - address_list - stores a list of all accessible I2C addresses
+            - address_list (list) - stores a list of all accessible I2C addresses
         """
         address_list = []
         for device in range(128):
@@ -93,22 +93,22 @@ class MPU9250():
         MPU9250 accelerometer data in Earth's reference (m/s^2)
         Accelerometer channel is negative when pointing up and aligned against gravity
 
-        ENU:
-        Gravity is defined as negative when pointing upward
-        ax = +9.80665 m/s^2 when the right hand side pointing upward
-        ay = +9.80665 m/s^2 when front side pointing upward
-        az = +9.80665 m/s^2 when upper side pointing upward
+        ENU: \n
+        Gravity is defined as negative when pointing upward \n
+        ax = +9.80665 m/s^2 when the right hand side pointing upward \n
+        ay = +9.80665 m/s^2 when front side pointing upward \n
+        az = +9.80665 m/s^2 when upper side pointing upward \n
 
-        NED:
-        Gravity is defined as negative when pointing downward
-        ax = +9.80665 m/s^2 when front side pointing downward
-        ay = +9.80665 m/s^2 when the right hand side pointing downward
-        az = +9.80665 m/s^2 when under side pointing upward
+        NED: \n
+        Gravity is defined as negative when pointing downward \n
+        ax = +9.80665 m/s^2 when front side pointing downward \n
+        ay = +9.80665 m/s^2 when the right hand side pointing downward \n
+        az = +9.80665 m/s^2 when under side pointing upward \n
     
         :returns: 
-            - ax - x-axis accelerometer data in m/s^2
-            - ay - y-axis accelerometer data in m/s^2
-            - az - z-axis accelerometer data in m/s^2
+            - ax (float) - x-axis accelerometer data in m/s^2
+            - ay (float) - y-axis accelerometer data in m/s^2
+            - az (float) - z-axis accelerometer data in m/s^2
         """
         self.ax, self.ay, self.az = self.mpu6500.get_accel()
         self.acc = np.array([[self.ax],[self.ay],[self.az]])
@@ -118,20 +118,20 @@ class MPU9250():
         """
         MPU9250 gyroscope data in right hand coordinates (rad/s)
 
-        ENU:
-        gx is positive when rotate clockwise along x-axis
-        gy is positive when rotate clockwise along y-axis
-        gz is positive when rotate anti-clockwise along z-axis
+        ENU: \n
+        gx is positive when rotate clockwise along x-axis \n
+        gy is positive when rotate clockwise along y-axis \n
+        gz is positive when rotate anti-clockwise along z-axis \n
 
-        NED:
-        gx is positive when rotate clockwise along x-axis
-        gy is positive when rotate clockwise along y-axis
-        gz is positive when rotate clockwise along z-axis
+        NED: \n
+        gx is positive when rotate clockwise along x-axis \n
+        gy is positive when rotate clockwise along y-axis \n
+        gz is positive when rotate clockwise along z-axis \n
 
         :returns: 
-            - gx - x-axis gyroscope data in rad/s
-            - gy - y-axis gyroscope data in rad/s
-            - gz - z-axis gyroscope data in rad/s
+            - gx (float) - x-axis gyroscope data in rad/s
+            - gy (float) - y-axis gyroscope data in rad/s
+            - gz (float) - z-axis gyroscope data in rad/s
         """
         self.gx, self.gy, self.gz = self.mpu6500.get_gyro()
         self.gyr = np.array([[self.gx],[self.gy],[self.gz]])
@@ -156,20 +156,20 @@ class MPU9250():
         """
         MPU9250 magnetometer data in Earth's reference (µT)
 
-        ENU:
-        mx is positive when the right hand side pointing to north
-        my is positive when the front side pointing to north
-        mz is positive when the upper side pointing to north
+        ENU: \n
+        mx is positive when the right hand side pointing to north \n
+        my is positive when the front side pointing to north \n
+        mz is positive when the upper side pointing to north \n
 
-        NED:
-        mx is positive when the front side pointing to north
-        my is positive when the right hand side pointing to north
-        mz is positive when the under side pointing to north
+        NED: \n
+        mx is positive when the front side pointing to north \n
+        my is positive when the right hand side pointing to north \n
+        mz is positive when the under side pointing to north \n
     
         :returns: 
-            - mx - x-axis magnetometer data in µT
-            - my - y-axis magnetometer data in µT
-            - mz - z-axis magnetometer data in µT
+            - mx (float) - x-axis magnetometer data in µT
+            - my (float) - y-axis magnetometer data in µT
+            - mz (float) - z-axis magnetometer data in µT
         """
         self.mx, self.my, self.mz = self.ak8963.get_mag()
         self.mag = np.array([[self.mx],[self.my],[self.mz]])
@@ -179,7 +179,8 @@ class MPU9250():
         """
         MPU9250 temperature data
 
-        :returns: temperature data in °C
+        :returns: 
+            - temp (float) - temperature data in °C
         """
         self.temp = self.mpu6500.get_temp()
         return self.temp
@@ -189,9 +190,9 @@ class MPU9250():
         MPU9250 Euler angle
 
         :returns: 
-            - roll - x-axis Euler angle in degree
-            - pitch - y-axis Euler angle in degree
-            - yaw - z-axis Euler angle in degree
+            - roll (float) - x-axis Euler angle in degree
+            - pitch (float) - y-axis Euler angle in degree
+            - yaw (float) - z-axis Euler angle in degree
         """
         if self.axis == 6:
             self.roll, self.pitch, self.yaw = acc2eul(self.ax, self.ay, self.az, nav=self.nav_frame)
@@ -206,9 +207,9 @@ class MPU9250():
         MPU9250 Euler angle processed by AHRS
 
         :returns: 
-            - roll - x-axis Euler angle in degree
-            - pitch - y-axis Euler angle in degree
-            - yaw - z-axis Euler angle in degree
+            - roll (float) - x-axis Euler angle in degree
+            - pitch (float) - y-axis Euler angle in degree
+            - yaw (float) - z-axis Euler angle in degree
         """
         self.w, self.x, self.y, self.z = self.ahrs.run(self.acc, self.gyr, self.mag, self.hz)
         self.roll, self.pitch, self.yaw = quat2eul(self.w, self.x, self.y, self.z, seq=self.rotation_seq)
@@ -222,10 +223,10 @@ class MPU9250():
         MPU9250 Quaternion
 
         :returns: 
-            - w - Quaternion magnitude
-            - x - Quaternion X axis
-            - y - Quaternion Y axis
-            - z - Quaternion Z axis
+            - w (float) - Quaternion magnitude
+            - x (float) - Quaternion X axis
+            - y (float) - Quaternion Y axis
+            - z (float) - Quaternion Z axis
         """
         if self.axis == 6:
             self.w, self.x, self.y, self.z = acc2quat(self.ax, self.ay, self.az, nav=self.nav_frame)
@@ -239,10 +240,10 @@ class MPU9250():
         MPU9250 quaternion processed by AHRS
 
         :returns: 
-            - w - Quaternion magnitude
-            - x - Quaternion X axis
-            - y - Quaternion Y axis
-            - z - Quaternion Z axis
+            - w (float) - Quaternion magnitude
+            - x (float) - Quaternion X axis
+            - y (float) - Quaternion Y axis
+            - z (float) - Quaternion Z axis
         """
         self.w, self.x, self.y, self.z = self.ahrs.run(self.acc, self.gyr, self.mag, self.hz)
         self.quaternion = np.array([[self.w],[self.x],[self.y],[self.z]])

@@ -48,15 +48,15 @@ ROOM_TEMP_OFFSET = 0
 g = 9.80665
 
 class MPU6500():
-    def __init__(self, bus, address, nav_frame="ENU", hz=100):
-        """
-        MPU6500 I2C driver for acquire accelerometer and gyroscope data
+    """
+    MPU6500 I2C driver for acquire accelerometer and gyroscope data
 
-        :param SMBus bus: device I2C port
-        :param int address: MPU6500 I2C address
-        :param str nav_frame: navigation frame
-        :param int hz: IMU frequency
-        """
+    :param SMBus bus: device I2C port
+    :param int address: MPU6500 I2C address
+    :param str nav_frame: navigation frame
+    :param int hz: IMU frequency
+    """
+    def __init__(self, bus, address, nav_frame="ENU", hz=100):
         # I2C connection parameter
         self.bus = bus
         self.address = address
@@ -181,7 +181,7 @@ class MPU6500():
         :param int low_register: low registers of the accelerometer or gyroscope
 
         :returns: 
-            - signed_value - sensor value in int16 format
+            - signed_value (int) - sensor value in int16 format
         """
         high = self.bus.read_byte_data(self.address, high_register)
         low = self.bus.read_byte_data(self.address, low_register)
@@ -218,22 +218,22 @@ class MPU6500():
         MPU6500 accelerometer data in Earth's reference (m/s^2)
         Accelerometer channel is negative when pointing up and aligned against gravity
 
-        ENU:
-        Gravity is defined as negative when pointing upward
-        ax = +9.80665 m/s^2 when the right hand side pointing upward
-        ay = +9.80665 m/s^2 when front side pointing upward
-        az = +9.80665 m/s^2 when upper side pointing upward
+        ENU: \n
+        Gravity is defined as negative when pointing upward \n
+        ax = +9.80665 m/s^2 when the right hand side pointing upward \n
+        ay = +9.80665 m/s^2 when front side pointing upward \n
+        az = +9.80665 m/s^2 when upper side pointing upward \n
 
         NED:
-        Gravity is defined as negative when pointing downward
-        ax = +9.80665 m/s^2 when front side pointing downward
-        ay = +9.80665 m/s^2 when the right hand side pointing downward
-        az = +9.80665 m/s^2 when under side pointing upward
+        Gravity is defined as negative when pointing downward \n
+        ax = +9.80665 m/s^2 when front side pointing downward \n
+        ay = +9.80665 m/s^2 when the right hand side pointing downward \n
+        az = +9.80665 m/s^2 when under side pointing upward \n
     
         :returns: 
-            - ax - x-axis accelerometer data in m/s^2
-            - ay - y-axis accelerometer data in m/s^2
-            - az - z-axis accelerometer data in m/s^2
+            - ax (float) - x-axis accelerometer data in m/s^2
+            - ay (float) - y-axis accelerometer data in m/s^2
+            - az (float) - z-axis accelerometer data in m/s^2
         """
         try:
             ax = self.read_raw_data(ACCEL_XOUT_H, ACCEL_XOUT_L)*self.accel_scale
@@ -261,20 +261,20 @@ class MPU6500():
         """
         MPU6500 gyroscope data in right hand coordinates (rad/s)
 
-        ENU:
-        gx is positive when rotate clockwise along x-axis
-        gy is positive when rotate clockwise along y-axis
-        gz is positive when rotate anti-clockwise along z-axis
+        ENU: \n
+        gx is positive when rotate clockwise along x-axis \n
+        gy is positive when rotate clockwise along y-axis \n
+        gz is positive when rotate anti-clockwise along z-axis \n
 
-        NED:
-        gx is positive when rotate clockwise along x-axis
-        gy is positive when rotate clockwise along y-axis
-        gz is positive when rotate clockwise along z-axis
+        NED: \n
+        gx is positive when rotate clockwise along x-axis \n
+        gy is positive when rotate clockwise along y-axis \n
+        gz is positive when rotate clockwise along z-axis \n
 
         :returns: 
-            - gx - x-axis gyroscope data in rad/s
-            - gy - y-axis gyroscope data in rad/s
-            - gz - z-axis gyroscope data in rad/s
+            - gx (float) - x-axis gyroscope data in rad/s
+            - gy (float) - y-axis gyroscope data in rad/s
+            - gz (float) - z-axis gyroscope data in rad/s
         """
         try:
             gx = self.read_raw_data(GYRO_XOUT_H, GYRO_XOUT_L)*self.gyro_scale
@@ -299,7 +299,8 @@ class MPU6500():
         """
         MPU6500 temperature data
 
-        :returns: temperature data in °C
+        :returns: 
+            - temp (float) - temperature data in °C
         """
         temp = self.read_raw_data(TEMP_OUT_H, TEMP_OUT_L)
         temp = ((temp - ROOM_TEMP_OFFSET)/TEMP_SENSITIVITY) + 21.0

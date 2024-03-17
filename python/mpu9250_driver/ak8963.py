@@ -19,16 +19,15 @@ ASAY = 0x11
 ASAZ = 0x12
 
 class AK8963():
-    def __init__(self, bus, address, nav_frame="NED", hz=100):
-        """
-        AK8963 I2C driver for acquire magnetometer data
+    """
+    AK8963 I2C driver for acquire magnetometer data
 
-        :param SMBus bus: device I2C port
-        :param int address: AK8963 I2C address
-        :param str nav_frame: navigation frame
-        :param int hz: IMU frequency
-        """
-        
+    :param SMBus bus: device I2C port
+    :param int address: AK8963 I2C address
+    :param str nav_frame: navigation frame
+    :param int hz: IMU frequency
+    """
+    def __init__(self, bus, address, nav_frame="NED", hz=100):
         # I2C connection parameter
         self.bus = bus
         self.address = address
@@ -104,20 +103,20 @@ class AK8963():
         """
         AK8963 magnetometer data in Earth's reference (µT)
 
-        ENU:
-        mx is positive when the right hand side pointing to north
-        my is positive when the front side pointing to north
-        mz is positive when the upper side pointing to north
+        ENU: \n
+        mx is positive when the right hand side pointing to north \n
+        my is positive when the front side pointing to north \n
+        mz is positive when the upper side pointing to north \n
 
-        NED:
-        mx is positive when the front side pointing to north
-        my is positive when the right hand side pointing to north
-        mz is positive when the under side pointing to north
+        NED: \n
+        mx is positive when the front side pointing to north \n
+        my is positive when the right hand side pointing to north \n
+        mz is positive when the under side pointing to north \n
     
         :returns: 
-            - mx - x-axis magnetometer data in µT
-            - my - y-axis magnetometer data in µT
-            - mz - z-axis magnetometer data in µT
+            - mx (float) - x-axis magnetometer data in µT
+            - my (float) - y-axis magnetometer data in µT
+            - mz (float) - z-axis magnetometer data in µT
         """
         try:
             mx = self.read_raw_data(HXH, HXL)*self.mag_scale
@@ -198,7 +197,7 @@ class AK8963():
         :param int low_register: low registers of the magnetometer
 
         :returns: 
-            - signed_value - sensor value in int16 format
+            - signed_value (int) - sensor value in int16 format
         """
         high = self.bus.read_byte_data(self.address, high_register)
         low = self.bus.read_byte_data(self.address, low_register)

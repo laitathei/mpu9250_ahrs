@@ -13,16 +13,16 @@ from .orientation import eul2quat
 
 def acc2eul(ax, ay, az, nav="ENU"):
     """
-    Convert acceleration vector with gravity to Euler angle in ENU or NED frame
+    Convert acceleration vector with gravity to Euler angle in ENU or NED frame [1]_ [2]_
 
     :param float ax: x axis accelerometer
     :param float ay: y axis accelerometer
     :param float az: z axis accelerometer
     :param str nav: navigation frame
     :returns: 
-        - roll - roll in radians
-        - pitch - pitch in radians
-        - yaw - yaw in radians
+        - roll (float) - x-axis Euler angle in radians
+        - pitch (float) - y-axis Euler angle in radians
+        - yaw (float) - z-axis Euler angle in radians
 
     .. Reference
     .. [1] Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013 
@@ -72,10 +72,10 @@ def acc2quat(ax, ay, az, nav="ENU"):
     :param float az: z axis accelerometer
     :param str nav: navigation frame
     :returns: 
-        - w - Quaternion magnitude
-        - x - Quaternion X axis
-        - y - Quaternion Y axis
-        - z - Quaternion Z axis
+        - w (float) - Quaternion magnitude
+        - x (float) - Quaternion X axis
+        - y (float) - Quaternion Y axis
+        - z (float) - Quaternion Z axis
     """
     roll, pitch, yaw = acc2eul(ax, ay, az, nav)
     if nav=="ENU": # ZXY (yaw - pitch - roll)
@@ -96,7 +96,7 @@ def acc2quat(ax, ay, az, nav="ENU"):
 
 def accmag2eul(ax, ay, az, mx, my, mz, nav="ENU"):
     """
-    Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame
+    Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame [1]_
 
     :param float ax: x axis accelerometer
     :param float ay: y axis accelerometer
@@ -106,9 +106,9 @@ def accmag2eul(ax, ay, az, mx, my, mz, nav="ENU"):
     :param float mz: z axis gyroscope
     :param str nav: navigation frame
     :returns: 
-        - roll - roll in radians
-        - pitch - pitch in radians
-        - yaw - yaw in radians
+        - roll (float) - x-axis Euler angle in radians
+        - pitch (float) - y-axis Euler angle in radians
+        - yaw (float) - z-axis Euler angle in radians
 
     .. Reference
     .. [1] Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013 
@@ -157,10 +157,10 @@ def accmag2quat(ax, ay, az, mx, my, mz, nav="ENU"):
     :param float mz: z axis magnetometer
     :param str nav: navigation frame
     :returns: 
-        - w - Quaternion magnitude
-        - x - Quaternion X axis
-        - y - Quaternion Y axis
-        - z - Quaternion Z axis
+        - w (float) - Quaternion magnitude
+        - x (float) - Quaternion X axis
+        - y (float) - Quaternion Y axis
+        - z (float) - Quaternion Z axis
     """
     roll, pitch, yaw = accmag2eul(ax, ay, az, mx, my, mz, nav)
     if nav=="ENU": # ZXY (yaw - pitch - roll)
@@ -187,9 +187,9 @@ def ENU2NED(E, N, U):
     :param float N: North axis value
     :param float U: Upward value
     :returns: 
-        - N - North axis value
-        - E - East axis value
-        - D - Downward value
+        - N (float) - North axis value
+        - E (float) - East axis value
+        - D (float) - Downward value
     """
     ENU = np.array([[E],
                     [N],
@@ -211,9 +211,9 @@ def NED2ENU(N, E, D):
     :param float E: East axis value
     :param float D: Downward value
     :returns: 
-        - E - East axis value
-        - N - North axis value
-        - U - Upward value
+        - E (float) - East axis value
+        - N (float) - North axis value
+        - U (float) - Upward value
     """
     NED = np.array([[N],
                     [E],

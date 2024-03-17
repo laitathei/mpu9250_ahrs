@@ -4,12 +4,16 @@ import math
 import quaternion
 
 class right_hand_rule:
+    """
+    Right-handed coordinates system rotation
+    """
     def euler_x_rotation(roll):
         """
         Convert Roll angle to Direction Cosine Matrix in right-handed coordinates system
-        :param float roll: roll angle in radians
+
+        :param float roll: x-axis Euler angle in radians
         :returns: 
-            - Rx - x axis rotation matrix
+            - Rx (ndarray) - x axis rotation matrix
         """
         sin_r = np.sin(roll)
         cos_r = np.cos(roll)
@@ -21,9 +25,10 @@ class right_hand_rule:
     def euler_y_rotation(pitch):
         """
         Convert Pitch angle to Direction Cosine Matrix in right-handed coordinates system
-        :param float pitch: pitch angle in radians
+
+        :param float pitch: y-axis Euler angle in radians
         :returns: 
-            - Ry - y axis rotation matrix
+            - Ry (ndarray) - y axis rotation matrix
         """
         sin_p = np.sin(pitch)
         cos_p = np.cos(pitch)
@@ -35,9 +40,10 @@ class right_hand_rule:
     def euler_z_rotation(yaw):
         """
         Convert Yaw angle to Direction Cosine Matrix in right-handed coordinates system
-        :param float yaw: yaw angle in radians
+
+        :param float yaw: z-axis Euler angle in radians
         :returns: 
-            - Rz - z axis rotation matrix
+            - Rz (ndarray) - z axis rotation matrix
         """
         sin_y = np.sin(yaw)
         cos_y = np.cos(yaw)
@@ -47,12 +53,16 @@ class right_hand_rule:
         return Rz
 
 class left_hand_rule:
+    """
+    Left-handed coordinates system rotation
+    """
     def euler_x_rotation(roll):
         """
         Convert Roll angle to Direction Cosine Matrix in left-handed coordinates system
-        :param float roll: roll angle in radians
+
+        :param float roll: x-axis Euler angle in radians
         :returns: 
-            - Rx - x axis rotation matrix
+            - Rx (ndarray) - x axis rotation matrix
         """
         sin_r = np.sin(roll)
         cos_r = np.cos(roll)
@@ -64,9 +74,10 @@ class left_hand_rule:
     def euler_y_rotation(pitch):
         """
         Convert Pitch angle to Direction Cosine Matrix in left-handed coordinates system
-        :param float pitch: pitch angle in radians
+
+        :param float pitch: y-axis Euler angle in radians
         :returns: 
-            - Ry - y axis rotation matrix
+            - Ry (ndarray) - y axis rotation matrix
         """
         sin_p = np.sin(pitch)
         cos_p = np.cos(pitch)
@@ -78,9 +89,10 @@ class left_hand_rule:
     def euler_z_rotation(yaw):
         """
         Convert Yaw angle to Direction Cosine Matrix in left-handed coordinates system
-        :param float yaw: yaw angle in radians
+
+        :param float yaw: z-axis Euler angle in radians
         :returns: 
-            - Rz - z axis rotation matrix
+            - Rz (ndarray) - z axis rotation matrix
         """
         sin_y = np.sin(yaw)
         cos_y = np.cos(yaw)
@@ -93,9 +105,9 @@ def quat_x_rotation(roll):
     """
     Convert Roll angle to Quaternion in right-handed coordinates system (Hamilton)
 
-    :param float roll: roll angle in radians
+    :param float roll: x-axis Euler angle in radians
     :returns: 
-        - Q - quaternion in w,x,y,z sequence
+        - Q (quaternion.quaternion) - quaternion in w,x,y,z sequence
     """
     w = np.cos(roll/2)
     x = np.sin(roll/2)
@@ -108,9 +120,9 @@ def quat_y_rotation(pitch):
     """
     Convert Pitch angle to Quaternion in right-handed coordinates system (Hamilton)
 
-    :param float pitch: pitch angle in radians
+    :param float pitch: y-axis Euler angle in radians
     :returns: 
-        - Q - quaternion in w,x,y,z sequence
+        - Q (quaternion.quaternion) - quaternion in w,x,y,z sequence
     """
     w = np.cos(pitch/2)
     x = 0
@@ -123,9 +135,9 @@ def quat_z_rotation(yaw):
     """
     Convert Yaw angle to Quaternion in right-handed coordinates system (Hamilton)
 
-    :param float yaw: yaw angle in radians
+    :param float yaw: z-axis Euler angle in radians
     :returns: 
-        - Q - quaternion in w,x,y,z sequence
+        - Q (quaternion.quaternion) - quaternion in w,x,y,z sequence
     """
     w = np.cos(yaw/2)
     x = 0
@@ -136,18 +148,18 @@ def quat_z_rotation(yaw):
 
 def eul2dcm(roll, pitch, yaw, seq="xyz", coordinates="right"):
     """
-    Convert Euler angle to Direction Cosine Matrix
+    Convert Euler angle to Direction Cosine Matrix [1]_
 
-    :param float roll: roll angle in radians
-    :param float pitch: pitch angle in radians
-    :param float yaw: yaw angle in radians
+    :param float roll: x-axis Euler angle in radians
+    :param float pitch: y-axis Euler angle in radians
+    :param float yaw: z-axis Euler angle in radians
     :param str seq: rotation sequence
     :param str coordinates: right-handed or left-handed coordinates system
     :returns: 
-        - DCM - rotation matrix
+        - DCM (numpy.matrix) - rotation matrix
 
     .. Reference
-    .. [1] https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles
+    .. [1] `Wiki <https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles>`
     """
     if coordinates == "right":
         Rx = right_hand_rule.euler_x_rotation(roll)
@@ -165,17 +177,20 @@ def eul2dcm(roll, pitch, yaw, seq="xyz", coordinates="right"):
 
 def eul2quat(roll, pitch, yaw, seq="xyz"):
     """
-    Convert Euler angle to Quaternion
+    Convert Euler angle to Quaternion [1]_
 
-    :param float roll: roll angle in radians
-    :param float pitch: pitch angle in radians
-    :param float yaw: yaw angle in radians
+    :param float roll: x-axis Euler angle in radians
+    :param float pitch: y-axis Euler angle in radians
+    :param float yaw: z-axis Euler angle in radians
     :param str seq: rotation sequence
     :returns: 
-        - Q - quaternion in w,x,y,z sequence
+        - w (float) - Quaternion magnitude
+        - x (float) - Quaternion X axis
+        - y (float) - Quaternion Y axis
+        - z (float) - Quaternion Z axis
 
     .. Reference
-    .. [1] https://zhuanlan.zhihu.com/p/45404840
+    .. [1] `zhihu <https://zhuanlan.zhihu.com/p/45404840>`
     """
     Qx = quat_x_rotation(roll)
     Qy = quat_y_rotation(pitch)
@@ -187,17 +202,17 @@ def eul2quat(roll, pitch, yaw, seq="xyz"):
 
 def dcm2eul(dcm: np.matrix, seq="xyz"):
     """
-    Convert Direction Cosine Matrix with specific order to Euler angle
+    Convert Direction Cosine Matrix with specific order to Euler angle [1]_
 
     :param np.matrix dcm: rotation matrix
     :param str seq: rotation sequence
     :returns: 
-        - roll - roll anlge in radians
-        - pitch - pitch anlge in radians
-        - yaw - yaw anlge in radians
+        - roll (float) - x-axis Euler angle in radians
+        - pitch (float) - y-axis Euler angle in radians
+        - yaw (float) - z-axis Euler angle in radians
 
     .. Reference
-    .. [1] https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles
+    .. [1] `Wiki <https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles>`
     """
     if round(np.linalg.det(dcm),2) != 1:
         raise ValueError("Wrong rotation matrix")
@@ -230,13 +245,14 @@ def dcm2eul(dcm: np.matrix, seq="xyz"):
 def dcm2quat(dcm: np.matrix, seq="xyz"):
     """
     Convert Direction Cosine Matrix with specific order to Quaternion
-    Input: dcm
-    Output: w, x, y, z
 
     :param np.matrix dcm: rotation matrix
     :param str seq: rotation sequence
     :returns: 
-        - Q - quaternion in w,x,y,z sequence
+        - w (float) - Quaternion magnitude
+        - x (float) - Quaternion X axis
+        - y (float) - Quaternion Y axis
+        - z (float) - Quaternion Z axis
     """
     if round(np.linalg.det(dcm),2) != 1:
         raise ValueError("Wrong rotation matrix")
@@ -248,17 +264,17 @@ def dcm2quat(dcm: np.matrix, seq="xyz"):
 
 def quat2dcm(w, x, y, z):
     """
-    Convert Quaternion to Direction Cosine Matrix
+    Convert Quaternion to Direction Cosine Matrix [1]_
 
     :param float w: Quaternion magnitude
     :param float x: Quaternion X axis
     :param float y: Quaternion Y axis
     :param float z: Quaternion Z axis
     :returns: 
-        - DCM - rotation matrix
+        - DCM (numpy.matrix) - rotation matrix
 
     .. Reference
-    .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+    .. [1] `Wiki <https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion>`
     """
     n = w*w + x*x + y*y + z*z
     if n == 0:
@@ -283,9 +299,9 @@ def quat2eul(w, x, y, z, seq="xyz"):
     :param float z: Quaternion Z axis
     :param str seq: rotation sequence
     :returns: 
-        - roll - roll anlge in radians
-        - pitch - pitch anlge in radians
-        - yaw - yaw anlge in radians
+        - roll (float) - x-axis Euler angle in radians
+        - pitch (float) - y-axis Euler angle in radians
+        - yaw (float) - z-axis Euler angle in radians
     """
     # convert Quaternion to DCM
     DCM = quat2dcm(w, x, y, z)
@@ -295,26 +311,26 @@ def quat2eul(w, x, y, z, seq="xyz"):
 
 def quat_multi(q1, q2):
     """
-    Calculate the product of two quaternion multiplication
+    Calculate the product of two quaternion multiplication [1]_ [2]_
 
     :param ndarray q1: quaternion
     :param ndarray q2: quaternion
     :returns: 
-        - q - product of two quaternion multiplication
+        - q (ndarray) - product of two quaternion multiplication
 
-    Mathematical expression:
-    q1 = (s1, v1)
-    q2 = (s2, v2)
-    q1q2 = q1 x q2 - q1 · q2 (Cross product minus Dot product)
-         = (s1 + v1)(s2 + v2)
-         = s1s2 + s1v2 + s2v1 + v1v2
-         = s1s2 + s1v2 + s2v1 + (v1 x v2 - v1 · v2)
-         = (s1s2 - v1 · v2) + (s1v2 + s2v1 + v1 x v2)
-         = scalar part + vector part
+    Mathematical expression: \n
+    q1 = (s1, v1) \n
+    q2 = (s2, v2) \n
+    q1q2 = q1 x q2 - q1 · q2 (Cross product minus Dot product) \n
+         = (s1 + v1)(s2 + v2) \n
+         = s1s2 + s1v2 + s2v1 + v1v2 \n
+         = s1s2 + s1v2 + s2v1 + (v1 x v2 - v1 · v2) \n
+         = (s1s2 - v1 · v2) + (s1v2 + s2v1 + v1 x v2) \n
+         = scalar part + vector part \n
 
     .. Reference
-    .. [1] https://slideplayer.com/slide/16243043/
-    .. [2] https://personal.utdallas.edu/~sxb027100/dock/quaternion.html
+    .. [1] '<https://slideplayer.com/slide/16243043/>'
+    .. [2] '<https://personal.utdallas.edu/~sxb027100/dock/quaternion.html>'
     """
     s1, x1, y1, z1 = q1[0][0], q1[1][0], q1[2][0], q1[3][0]
     s2, x2, y2, z2 = q2[0][0], q2[1][0], q2[2][0], q2[3][0]
@@ -335,25 +351,21 @@ def quat_multi(q1, q2):
 
 def quat_conjugate(q):
     """
-    Calculate the conjugate of Quaternion
-    Input: q
-    Output: q
+    Calculate the conjugate of Quaternion [1]_
 
     :param ndarray q: quaternion
     :returns: 
-        - q - the conjugate of quaternion
+        - q (ndarray) - the conjugate of quaternion multiplication
 
     .. Reference
-    .. [1] https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal
+    .. [1] `Wiki <https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal>'
     """
-
     w = q[0][0]
     x = q[1][0] * -1
     y = q[2][0] * -1
     z = q[3][0] * -1
     q = np.array([[w],[x],[y],[z]])
     return q
-
 
 # from scipy.spatial.transform import Rotation
 # roll = 0.5

@@ -2,14 +2,31 @@ import numpy as np
 import math
 from .orientation import eul2dcm, right_hand_rule
 
-class Vertice:
-    def __init__(self, coordinates, color):
-        """
-        Vertice of Cube
+# navigation frame:
+#     ENU               NED
+# y    z                   x
+#  \   |                  /
+#   \  |                 ------- y 
+#    \ |                 |
+#     \|------- x        z
 
-        :param tuple coordinates: xyz axis vertice coordinates
-        :param tuple color: color
-        """
+# vertice indexs:
+#           5-------7
+#           | \     |\
+#           |  1------3
+#           |  |    | |
+#           4--|----6 |
+#            \ |     \|
+#              0------2
+
+class Vertice:
+    """
+    Vertice of Cube
+
+    :param tuple coordinates: xyz axis vertice coordinates
+    :param tuple color: color
+    """
+    def __init__(self, coordinates, color):
         self.x = coordinates[0]
         self.y = coordinates[1]
         self.z = coordinates[2]
@@ -19,13 +36,13 @@ class Vertice:
         return "Vertice x: {}\nVertice y: {}\nVertice z: {}\nVertice color: {}".format(self.x, self.y, self.z, self.color)
 
 class Face:
-    def __init__(self, vertices, color):
-        """
-        Face of Cube
+    """
+    Face of Cube
 
-        :param tuple vertices: vertice index combined into face
-        :param tuple color: color
-        """
+    :param tuple vertices: vertice index combined into face
+    :param tuple color: color
+    """
+    def __init__(self, vertices, color):
         self.vertice_indexs = vertices
         self.color = color
 
@@ -33,36 +50,19 @@ class Face:
         return "Face vertice_indexs: {}\nFace color: {}".format(self.vertice_indexs, self.color)
 
 class wireframe:
+    """
+    Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces [1]_ [2]_
+
+    axis color: \n
+    Positive of x axis is Red, Negative of x axis is Cyan \n
+    Positive of y axis is Green, Negative of y axis is Magenta \n
+    Positive of z axis is Blue, Negative of z axis is Yellow \n
+
+    .. Reference
+    .. [1] `Cube property references <https://en.wikipedia.org/wiki/Cube>`
+    .. [2] `Github references <https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master>`
+    """
     def __init__(self, nav_frame):
-        """
-        Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces
-
-        axis color:
-        Positive of x axis is Red, Negative of x axis is Cyan
-        Positive of y axis is Green, Negative of y axis is Magenta
-        Positive of z axis is Blue, Negative of z axis is Yellow
-
-        navigation frame:
-            ENU               NED
-        y    z                   x
-         \   |                  /
-          \  |                 ------- y 
-           \ |                 |
-            \|------- x        z
-
-        vertice indexs:
-                  5-------7
-                  | \     |\
-                  |  1------3  
-                  |  |    | |
-                  4--|----6 |
-                   \ |     \|
-                     0------2
-
-        .. Reference
-        .. [1] `Cube property references <https://en.wikipedia.org/wiki/Cube>`
-        .. [2] `Github references <https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master>`
-        """
         self.vertices = []
         self.edges = []
         self.faces = []
@@ -135,7 +135,7 @@ class wireframe:
 
         :param ndarray point: xyz position
         :returns: 
-            - new_point - rotated coordinates
+            - new_point (numpy.matrix) - rotated coordinates
         """
         if self.nav_frame == "ENU":
             maxtrix = right_hand_rule.euler_x_rotation(math.radians(-180))

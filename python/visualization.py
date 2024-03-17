@@ -127,6 +127,7 @@ class imu_viewer():
         for vertice in self.wireframe.vertices:
             point = np.array([[vertice.x],[vertice.y],[vertice.z]])
             new_point = self.wireframe.rotate_point(point)
+            print(type(new_point))
             viewer_vertices.append(self.project2window(new_point.tolist()[0][0], new_point.tolist()[1][0], 70))
             viewer_depth.append(new_point.tolist()[2][0])
 
@@ -183,9 +184,9 @@ if __name__ == '__main__':
     nav_frame = "NED" # ENU/NED
     axis = 9
     gain = 1
-    calibration_time = 0
+    calibration_time = 5
     ahrs = Madgwick(axis, gain)
     imu = MPU9250(nav_frame, axis, window_hz, calibration_time)
-    imu.start_thread()
+    imu.start_thread(ahrs)
     viewer = imu_viewer(window_width, window_height, window_hz)
     viewer.run(imu)

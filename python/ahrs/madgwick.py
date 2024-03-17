@@ -3,17 +3,17 @@ import numpy as np
 from utils.orientation import quat_multi, quat_conjugate
 
 class Madgwick():
+    """
+    Madgwick is one of the AHRS filter applied with gradient descent technique [1]_
+
+    :param int axis: axis data for fusion
+    :param float gain: 6 axis fusion gain
+    :param str nav_frame: navigation frame
+
+    .. Reference
+    .. [1] 'ahrs <https://ahrs.readthedocs.io/en/latest/filters/madgwick.html#orientation-from-angular-rate>'
+    """
     def __init__(self, axis, gain, nav_frame="NED"):
-        """
-        Madgwick is one of the AHRS filter applied with gradient descent technique
-
-        :param int axis: axis data for fusion
-        :param float gain: 6 axis fusion gain
-        :param str nav_frame: navigation frame
-
-        .. Reference
-        .. [1] https://ahrs.readthedocs.io/en/latest/filters/madgwick.html#orientation-from-angular-rate
-        """
         # Body frame is front(X)-right(Y)-down(Z), Navigation frame is NED
         # Body frame is front(Y)-right(X)-down(Z), Navigation frame is ENU
 
@@ -31,6 +31,11 @@ class Madgwick():
     def init_quat(self, w, x, y, z):
         """
         Madgwick filter initial attitude
+
+        :param float w: Quaternion magnitude
+        :param float x: Quaternion X axis
+        :param float y: Quaternion Y axis
+        :param float z: Quaternion Z axis
         """
         self.est_quat = np.array([[w],[x],[y],[z]])
 
@@ -43,10 +48,10 @@ class Madgwick():
         :param ndarray mag: magnetometer data
         :param int hz: IMU frequency
         :returns: 
-            - w - Quaternion magnitude
-            - x - Quaternion X axis
-            - y - Quaternion Y axis
-            - z - Quaternion Z axis
+            - w (float) - Quaternion magnitude
+            - x (float) - Quaternion X axis
+            - y (float) - Quaternion Y axis
+            - z (float) - Quaternion Z axis
         """
         if acc.shape != (3,1):
             raise ValueError("acc shape must be (3,1)")
@@ -70,21 +75,21 @@ class Madgwick():
         """
         Madgwick filter 6 axis data fusion
 
-        ENU:
-        Gravity is defined as negative when pointing upwards
-        Accelerometer in Earth's reference (m/s^2)
-        Gyroscope in right hand coordinates (rad/s)
+        ENU: \n
+        Gravity is defined as negative when pointing upwards \n
+        Accelerometer in Earth's reference (m/s^2) \n
+        Gyroscope in right hand coordinates (rad/s) \n
 
-        NED:
-        Gravity is defined as negative when pointing downwards
-        Accelerometer in Earth's reference (m/s^2)
-        Gyroscope in right hand coordinates (rad/s)
+        NED: \n
+        Gravity is defined as negative when pointing downwards \n
+        Accelerometer in Earth's reference (m/s^2) \n
+        Gyroscope in right hand coordinates (rad/s) \n
 
         :returns: 
-            - w - Quaternion magnitude
-            - x - Quaternion X axis
-            - y - Quaternion Y axis
-            - z - Quaternion Z axis
+            - w (float) - Quaternion magnitude
+            - x (float) - Quaternion X axis
+            - y (float) - Quaternion Y axis
+            - z (float) - Quaternion Z axis
         """
         acc = np.copy(self.acc)
         gyr = np.copy(self.gyr)
@@ -119,23 +124,23 @@ class Madgwick():
         """
         Madgwick filter 9 axis data fusion
 
-        ENU:
-        Gravity is defined as negative when pointing upwards
-        Accelerometer in Earth's reference (m/s^2)
-        Gyroscope in right hand coordinates (rad/s)
-        Magnetometer data in Earth's reference (µT)
+        ENU: \n
+        Gravity is defined as negative when pointing upwards \n
+        Accelerometer in Earth's reference (m/s^2) \n
+        Gyroscope in right hand coordinates (rad/s) \n
+        Magnetometer data in Earth's reference (µT) \n
 
-        NED:
-        Gravity is defined as negative when pointing downwards
-        Accelerometer in Earth's reference (m/s^2)
-        Gyroscope in right hand coordinates (rad/s)
-        Magnetometer data in Earth's reference (µT)
+        NED: \n
+        Gravity is defined as negative when pointing downwards \n
+        Accelerometer in Earth's reference (m/s^2) \n
+        Gyroscope in right hand coordinates (rad/s) \n
+        Magnetometer data in Earth's reference (µT) \n
 
         :returns: 
-            - w - Quaternion magnitude
-            - x - Quaternion X axis
-            - y - Quaternion Y axis
-            - z - Quaternion Z axis
+            - w (float) - Quaternion magnitude
+            - x (float) - Quaternion X axis
+            - y (float) - Quaternion Y axis
+            - z (float) - Quaternion Z axis
         """
         acc = np.copy(self.acc)
         gyr = np.copy(self.gyr)
