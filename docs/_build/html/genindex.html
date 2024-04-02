@@ -99,16 +99,18 @@
 </li>
       <li><a href="utils.html#utils.transformation.acc2quat">acc2quat() (in module utils.transformation)</a>
 </li>
+      <li><a href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.accel_calibration">accel_calibration() (mpu9250_driver.mpu6500.MPU6500 method)</a>
+</li>
       <li><a href="utils.html#utils.transformation.accmag2eul">accmag2eul() (in module utils.transformation)</a>
 </li>
       <li><a href="utils.html#utils.transformation.accmag2quat">accmag2quat() (in module utils.transformation)</a>
 </li>
       <li><a href="utils.html#utils.wireframe.wireframe.add_faces">add_faces() (utils.wireframe.wireframe method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#utils.wireframe.wireframe.add_vertices">add_vertices() (utils.wireframe.wireframe method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     ahrs
 
@@ -123,7 +125,16 @@
         <li><a href="ahrs.html#module-ahrs.madgwick">module</a>
 </li>
       </ul></li>
+      <li>
+    ahrs.mahony
+
+      <ul>
+        <li><a href="ahrs.html#module-ahrs.mahony">module</a>
+</li>
+      </ul></li>
       <li><a href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963">AK8963 (class in mpu9250_driver.ak8963)</a>
+</li>
+      <li><a href="ahrs.html#ahrs.mahony.Mahony.algo">algo() (ahrs.mahony.Mahony method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -221,14 +232,14 @@
         <li><a href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_gyro">(mpu9250_driver.mpu9250.MPU9250 method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_mag">get_mag() (mpu9250_driver.ak8963.AK8963 method)</a>
 
       <ul>
         <li><a href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_mag">(mpu9250_driver.mpu9250.MPU9250 method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_quaternion">get_quaternion() (mpu9250_driver.mpu9250.MPU9250 method)</a>
 </li>
       <li><a href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_status">get_status() (mpu9250_driver.ak8963.AK8963 method)</a>
@@ -240,9 +251,17 @@
 </li>
       </ul></li>
       <li><a href="ahrs.html#ahrs.madgwick.Madgwick.gyro_acc_fusion">gyro_acc_fusion() (ahrs.madgwick.Madgwick method)</a>
+
+      <ul>
+        <li><a href="ahrs.html#ahrs.mahony.Mahony.gyro_acc_fusion">(ahrs.mahony.Mahony method)</a>
 </li>
+      </ul></li>
       <li><a href="ahrs.html#ahrs.madgwick.Madgwick.gyro_acc_mag_fusion">gyro_acc_mag_fusion() (ahrs.madgwick.Madgwick method)</a>
+
+      <ul>
+        <li><a href="ahrs.html#ahrs.mahony.Mahony.gyro_acc_mag_fusion">(ahrs.mahony.Mahony method)</a>
 </li>
+      </ul></li>
       <li><a href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.gyro_calibration">gyro_calibration() (mpu9250_driver.mpu6500.MPU6500 method)</a>
 </li>
   </ul></td>
@@ -254,7 +273,11 @@
       <li><a href="visualization.html#visualization.imu_viewer">imu_viewer (class in visualization)</a>
 </li>
       <li><a href="ahrs.html#ahrs.madgwick.Madgwick.init_quat">init_quat() (ahrs.madgwick.Madgwick method)</a>
+
+      <ul>
+        <li><a href="ahrs.html#ahrs.mahony.Mahony.init_quat">(ahrs.mahony.Mahony method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.initialization">initialization() (mpu9250_driver.mpu9250.MPU9250 method)</a>
@@ -277,6 +300,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ahrs.html#ahrs.madgwick.Madgwick">Madgwick (class in ahrs.madgwick)</a>
 </li>
+      <li><a href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.mag_calibration">mag_calibration() (mpu9250_driver.ak8963.AK8963 method)</a>
+</li>
+      <li><a href="ahrs.html#ahrs.mahony.Mahony">Mahony (class in ahrs.mahony)</a>
+</li>
       <li>
     main
 
@@ -293,6 +320,8 @@
         <li><a href="ahrs.html#module-ahrs">ahrs</a>
 </li>
         <li><a href="ahrs.html#module-ahrs.madgwick">ahrs.madgwick</a>
+</li>
+        <li><a href="ahrs.html#module-ahrs.mahony">ahrs.mahony</a>
 </li>
         <li><a href="main.html#module-main">main</a>
 </li>
@@ -403,13 +432,15 @@
       </ul></li>
       <li><a href="utils.html#utils.orientation.right_hand_rule">right_hand_rule (class in utils.orientation)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#utils.wireframe.wireframe.rotate_point">rotate_point() (utils.wireframe.wireframe method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ahrs.html#ahrs.madgwick.Madgwick.run">run() (ahrs.madgwick.Madgwick method)</a>
 
       <ul>
+        <li><a href="ahrs.html#ahrs.mahony.Mahony.run">(ahrs.mahony.Mahony method)</a>
+</li>
         <li><a href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.run">(mpu9250_driver.mpu9250.MPU9250 method)</a>
 </li>
         <li><a href="visualization.html#visualization.imu_viewer.run">(visualization.imu_viewer method)</a>

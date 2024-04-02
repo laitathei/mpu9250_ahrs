@@ -76,6 +76,7 @@
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">from</span> <span class="nn">utils.transformation</span> <span class="kn">import</span> <span class="n">ENU2NED</span>
 
 <span class="n">SMPLRT_DIV</span> <span class="o">=</span> <span class="mh">0x19</span>
@@ -130,19 +131,48 @@
 <span class="sd">    :param int address: MPU6500 I2C address</span>
 <span class="sd">    :param str nav_frame: navigation frame</span>
 <span class="sd">    :param int hz: IMU frequency</span>
+<span class="sd">    :param bool calibration: calibrate gyroscope and accelerometer</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;ENU&quot;</span><span class="p">,</span> <span class="n">hz</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;ENU&quot;</span><span class="p">,</span> <span class="n">hz</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">calibration</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1"># I2C connection parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bus</span> <span class="o">=</span> <span class="n">bus</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>
 
         <span class="c1"># Accelerometer and gyroscope parameter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">accel_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accel_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">=</span> <span class="n">calibration</span>
 
         <span class="c1"># driver parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span> <span class="c1"># original navigation frame of MPU6500 is ENU</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hz</span> <span class="o">=</span> <span class="n">hz</span>
+
+        <span class="c1"># Load old config from yaml file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> 
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+            <span class="n">gyro_bias</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gx_bias&quot;</span><span class="p">,</span><span class="s2">&quot;gy_bias&quot;</span><span class="p">,</span><span class="s2">&quot;gz_bias&quot;</span><span class="p">]</span>
+            <span class="n">gyro_scale</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gx_scale&quot;</span><span class="p">,</span><span class="s2">&quot;gy_scale&quot;</span><span class="p">,</span><span class="s2">&quot;gz_scale&quot;</span><span class="p">]</span>
+            <span class="c1"># gyro_misalignment = [&quot;gyro_xy_mis&quot;,&quot;gyro_xz_mis&quot;,&quot;gyro_yx_mis&quot;,&quot;gyro_yz_mis&quot;,&quot;gyro_zx_mis&quot;,&quot;gyro_zy_mis&quot;]</span>
+            <span class="n">accel_bias</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ax_bias&quot;</span><span class="p">,</span><span class="s2">&quot;ay_bias&quot;</span><span class="p">,</span><span class="s2">&quot;az_bias&quot;</span><span class="p">]</span>
+            <span class="n">accel_scale</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ax_scale&quot;</span><span class="p">,</span><span class="s2">&quot;ay_scale&quot;</span><span class="p">,</span><span class="s2">&quot;az_scale&quot;</span><span class="p">]</span>
+            <span class="c1"># accel_misalignment = [&quot;accel_xy_mis&quot;,&quot;accel_xz_mis&quot;,&quot;accel_yx_mis&quot;,&quot;accel_yz_mis&quot;,&quot;accel_zx_mis&quot;,&quot;accel_zy_mis&quot;]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gyro_bias</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">nav_frame</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gyro_scale</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">nav_frame</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+            <span class="c1"># for i, element in enumerate(gyro_misalignment):</span>
+            <span class="c1">#     self.gyro_misalignment[i][0] = self.config[nav_frame][element]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">accel_bias</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">accel_bias</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">nav_frame</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">accel_scale</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">nav_frame</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+            <span class="c1"># for i, element in enumerate(accel_misalignment):</span>
+            <span class="c1">#     self.accel_misalignment[i][0] = self.config[nav_frame][element]</span>
 
         <span class="c1"># Check parameter</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;ENU&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;NED&quot;</span><span class="p">):</span>
@@ -201,25 +231,27 @@
 <span class="sd">        :param int accel_parameter: accelerometer configuration register value</span>
 <span class="sd">        :param int gyro_parameter: gyroscope configuration register value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># config accelerometer full scale</span>
         <span class="k">if</span> <span class="n">accel_parameter</span> <span class="o">==</span> <span class="n">ACCEL_FS_SEL_2G</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">/</span><span class="mf">32768.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_fs</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">/</span><span class="mf">32768.0</span>
         <span class="k">elif</span> <span class="n">accel_parameter</span> <span class="o">==</span> <span class="n">ACCEL_FS_SEL_4G</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="mf">4.0</span><span class="o">/</span><span class="mf">32768.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_fs</span> <span class="o">=</span> <span class="mf">4.0</span><span class="o">/</span><span class="mf">32768.0</span>
         <span class="k">elif</span> <span class="n">accel_parameter</span> <span class="o">==</span> <span class="n">ACCEL_FS_SEL_8G</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="mf">8.0</span><span class="o">/</span><span class="mf">32768.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_fs</span> <span class="o">=</span> <span class="mf">8.0</span><span class="o">/</span><span class="mf">32768.0</span>
         <span class="k">elif</span> <span class="n">accel_parameter</span> <span class="o">==</span> <span class="n">ACCEL_FS_SEL_16G</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="mf">16.0</span><span class="o">/</span><span class="mf">32768.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_fs</span> <span class="o">=</span> <span class="mf">16.0</span><span class="o">/</span><span class="mf">32768.0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong accel config parameter&quot;</span><span class="p">)</span>
 
+        <span class="c1"># config gyroscope full scale</span>
         <span class="k">if</span> <span class="n">gyro_parameter</span> <span class="o">==</span> <span class="n">GYRO_FS_SEL_250DPS</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="mf">250.0</span><span class="o">/</span><span class="mf">32768.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_fs</span> <span class="o">=</span> <span class="mf">250.0</span><span class="o">/</span><span class="mf">32768.0</span>
         <span class="k">elif</span> <span class="n">gyro_parameter</span> <span class="o">==</span> <span class="n">GYRO_FS_SEL_500DPS</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="mf">500.0</span><span class="o">/</span><span class="mf">32768.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_fs</span> <span class="o">=</span> <span class="mf">500.0</span><span class="o">/</span><span class="mf">32768.0</span>
         <span class="k">elif</span> <span class="n">gyro_parameter</span> <span class="o">==</span> <span class="n">GYRO_FS_SEL_1000DPS</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="o">/</span><span class="mf">32768.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_fs</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="o">/</span><span class="mf">32768.0</span>
         <span class="k">elif</span> <span class="n">gyro_parameter</span> <span class="o">==</span> <span class="n">GYRO_FS_SEL_2000DPS</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="mf">2000.0</span><span class="o">/</span><span class="mf">32768.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_fs</span> <span class="o">=</span> <span class="mf">2000.0</span><span class="o">/</span><span class="mf">32768.0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong gyro config parameter&quot;</span><span class="p">)</span>
 
@@ -252,7 +284,7 @@
         <span class="c1"># 0x05            | 10Hz      | 17.85ms | 1kHz | </span>
         <span class="c1"># 0x06            | 5Hz       | 33.48ms | 1kHz | </span>
         <span class="c1"># 0x07            | 3600Hz    | 0.17ms  | 8kHz | </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ACCEL_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set acc digital high-pass filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ACCEL_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set accel digital high-pass filter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">GYRO_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set gyro digital low-pass filter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">SMPLRT_DIV</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">)</span> <span class="c1"># Set sample rate to 1 kHz</span></div>
 
@@ -287,20 +319,97 @@
 <a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.gyro_calibration">[docs]</a>
     <span class="k">def</span> <span class="nf">gyro_calibration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the gyroscope offset to calibrate the gyroscope</span>
+<span class="sd">        Calculate the gyroscope bias to calibrate the gyroscope</span>
 
 <span class="sd">        :param int s: time for calibration</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - gyro_scale (ndarray) - 3-axis gyroscope scale</span>
+<span class="sd">            - gyro_bias (ndarray) - 3-axis gyroscope bias</span>
+<span class="sd">            - gyro_misalignment (ndarray) - 3-axis gyroscope misalignment</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Start gyroscope calibration - Do not move the IMU for </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
-            <span class="n">gyro_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">gyro_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
                 <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gyro</span><span class="p">()</span>
-                <span class="n">gyro_offset</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span>
+                <span class="n">gyro_bias</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span>
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_offset</span> <span class="o">=</span> <span class="n">gyro_offset</span><span class="o">/</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finish gyroscope calibration&quot;</span><span class="p">)</span></div>
+            
+            <span class="c1"># Calculate bias</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">=</span> <span class="n">gyro_bias</span><span class="o">/</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+
+            <span class="c1"># calculate scale</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">]])</span>
+
+            <span class="c1"># calculate misalignment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]])</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finish gyroscope calibration&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.accel_calibration">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.accel_calibration">[docs]</a>
+    <span class="k">def</span> <span class="nf">accel_calibration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the accelerometer bias, scale, misalignment with six calibration measurements</span>
+<span class="sd">        Using least square method to solve the error</span>
+
+<span class="sd">        :param int s: time for calibration</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - accel_scale (ndarray) - 3-axis accelerometer scale</span>
+<span class="sd">            - accel_bias (ndarray) - 3-axis accelerometer bias</span>
+<span class="sd">            - accel_misalignment (ndarray) - 3-axis accelerometer misalignment</span>
+<span class="sd">        .. Reference</span>
+<span class="sd">        .. [1] `Accelerometer calibration &lt;https://zhuanlan.zhihu.com/p/296381805&gt;`</span>
+<span class="sd">        .. [2] &#39;Least square prove &lt;https://zhuanlan.zhihu.com/p/87582571&gt;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="s2">&quot;y&quot;</span><span class="p">,</span><span class="s2">&quot;z&quot;</span><span class="p">,</span><span class="s2">&quot;-x&quot;</span><span class="p">,</span><span class="s2">&quot;-y&quot;</span><span class="p">,</span><span class="s2">&quot;-z&quot;</span><span class="p">]</span>
+            <span class="n">calibration</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+                <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Place IMU </span><span class="si">{}</span><span class="s1"> axis (</span><span class="si">{}</span><span class="s1">) pointing downward and do not move the IMU for </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">order</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">,</span> <span class="n">s</span><span class="p">))</span>
+                <span class="n">total_accel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
+                    <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_accel</span><span class="p">()</span>
+                    <span class="n">total_accel</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">])</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+                <span class="n">avg_accel</span> <span class="o">=</span> <span class="n">total_accel</span><span class="o">/</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+                <span class="n">calibration</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_accel</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">calibration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">calibration</span><span class="p">)</span>
+            <span class="n">calibration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calibration</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">*-</span><span class="mi">1</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">positive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">g</span><span class="p">))</span>
+            <span class="n">negative</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="n">g</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">negative</span><span class="p">,</span><span class="n">positive</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">positive</span><span class="p">,</span><span class="n">negative</span><span class="p">))</span>
+            <span class="n">error_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">calibration</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">calibration</span><span class="p">)</span> <span class="o">@</span> <span class="n">calibration</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">target</span>
+
+            <span class="c1"># calculate bias</span>
+            <span class="n">x_bias</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y_bias</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">z_bias</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x_bias</span><span class="p">],[</span><span class="n">y_bias</span><span class="p">],[</span><span class="n">z_bias</span><span class="p">]])</span>
+
+            <span class="c1"># calculate scale</span>
+            <span class="n">x_scale</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y_scale</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">z_scale</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x_scale</span><span class="p">],[</span><span class="n">y_scale</span><span class="p">],[</span><span class="n">z_scale</span><span class="p">]])</span>
+
+            <span class="c1"># calculate misalignment</span>
+            <span class="n">xy_mis</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">xz_mis</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">yx_mis</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">yz_mis</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">zx_mis</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">zy_mis</span> <span class="o">=</span> <span class="n">error_matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">xy_mis</span><span class="p">],[</span><span class="n">xz_mis</span><span class="p">],[</span><span class="n">yx_mis</span><span class="p">],[</span><span class="n">yz_mis</span><span class="p">],[</span><span class="n">zx_mis</span><span class="p">],[</span><span class="n">zy_mis</span><span class="p">]])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finish accelerometer calibration&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span></div>
 
 
 <div class="viewcode-block" id="MPU6500.get_accel">
@@ -320,7 +429,7 @@
 <span class="sd">        Gravity is defined as negative when pointing downward \n</span>
 <span class="sd">        ax = +9.80665 m/s^2 when front side pointing downward \n</span>
 <span class="sd">        ay = +9.80665 m/s^2 when the right hand side pointing downward \n</span>
-<span class="sd">        az = +9.80665 m/s^2 when under side pointing upward \n</span>
+<span class="sd">        az = +9.80665 m/s^2 when under side pointing downward \n</span>
 <span class="sd">    </span>
 <span class="sd">        :returns: </span>
 <span class="sd">            - ax (float) - x-axis accelerometer data in m/s^2</span>
@@ -328,25 +437,41 @@
 <span class="sd">            - az (float) - z-axis accelerometer data in m/s^2</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_XOUT_H</span><span class="p">,</span> <span class="n">ACCEL_XOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span>
-            <span class="n">ay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_YOUT_H</span><span class="p">,</span> <span class="n">ACCEL_YOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span>
-            <span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_ZOUT_H</span><span class="p">,</span> <span class="n">ACCEL_ZOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_XOUT_H</span><span class="p">,</span> <span class="n">ACCEL_XOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_fs</span>
+            <span class="n">ay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_YOUT_H</span><span class="p">,</span> <span class="n">ACCEL_YOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_fs</span>
+            <span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">ACCEL_ZOUT_H</span><span class="p">,</span> <span class="n">ACCEL_ZOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_fs</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;I2C Connection Failure&quot;</span><span class="p">)</span>
             
-        <span class="n">accel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">ax</span><span class="p">],[</span><span class="n">ay</span><span class="p">],[</span><span class="n">az</span><span class="p">]])</span>
-        <span class="n">accel</span> <span class="o">=</span> <span class="n">accel</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_offset</span>
-
         <span class="c1"># convert to m/s^2</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">accel</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">g</span>
-        <span class="n">ay</span> <span class="o">=</span> <span class="n">accel</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">g</span>
-        <span class="n">az</span> <span class="o">=</span> <span class="n">accel</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">g</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">*</span><span class="n">g</span>
+        <span class="n">ay</span> <span class="o">=</span> <span class="n">ay</span><span class="o">*</span><span class="n">g</span>
+        <span class="n">az</span> <span class="o">=</span> <span class="n">az</span><span class="o">*</span><span class="n">g</span>
 
+        <span class="c1"># convert to NED frame</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">*-</span><span class="mi">1</span>
             <span class="n">ay</span> <span class="o">=</span> <span class="n">ay</span><span class="o">*-</span><span class="mi">1</span>
             <span class="n">az</span> <span class="o">=</span> <span class="n">az</span><span class="o">*-</span><span class="mi">1</span>
             <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span> <span class="o">=</span> <span class="n">ENU2NED</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">)</span>
+
+        <span class="c1"># accelerometer model: calibrated measurement = (matrix)*(raw measurement - bias)</span>
+        <span class="n">x_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">z_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_bias</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_bias</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">z_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_bias</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xy_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xz_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">yx_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">yz_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zx_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zy_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_scale</span> <span class="o">*</span> <span class="n">ax</span> <span class="o">+</span> <span class="n">xy_mis</span> <span class="o">*</span> <span class="n">ay</span> <span class="o">+</span> <span class="n">xz_mis</span> <span class="o">*</span> <span class="n">az</span><span class="p">)</span> <span class="o">-</span> <span class="n">x_bias</span>
+            <span class="n">ay</span> <span class="o">=</span> <span class="p">(</span><span class="n">yx_mis</span> <span class="o">*</span> <span class="n">ax</span> <span class="o">+</span> <span class="n">y_scale</span> <span class="o">*</span> <span class="n">ay</span> <span class="o">+</span> <span class="n">yz_mis</span> <span class="o">*</span> <span class="n">az</span><span class="p">)</span> <span class="o">-</span> <span class="n">y_bias</span>
+            <span class="n">az</span> <span class="o">=</span> <span class="p">(</span><span class="n">zx_mis</span> <span class="o">*</span> <span class="n">ax</span> <span class="o">+</span> <span class="n">zy_mis</span> <span class="o">*</span> <span class="n">ay</span> <span class="o">+</span> <span class="n">z_scale</span> <span class="o">*</span> <span class="n">az</span><span class="p">)</span> <span class="o">-</span> <span class="n">z_bias</span>
         <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span></div>
 
 
@@ -372,22 +497,34 @@
 <span class="sd">            - gz (float) - z-axis gyroscope data in rad/s</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">gx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_XOUT_H</span><span class="p">,</span> <span class="n">GYRO_XOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span>
-            <span class="n">gy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_YOUT_H</span><span class="p">,</span> <span class="n">GYRO_YOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span>
-            <span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_ZOUT_H</span><span class="p">,</span> <span class="n">GYRO_ZOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span>
+            <span class="n">gx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_XOUT_H</span><span class="p">,</span> <span class="n">GYRO_XOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_fs</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+            <span class="n">gy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_YOUT_H</span><span class="p">,</span> <span class="n">GYRO_YOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_fs</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+            <span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">GYRO_ZOUT_H</span><span class="p">,</span> <span class="n">GYRO_ZOUT_L</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_fs</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;I2C Connection Failure&quot;</span><span class="p">)</span>
 
-        <span class="n">gyro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span>
-        <span class="n">gyro</span> <span class="o">=</span> <span class="n">gyro</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">gyro_offset</span>
-
-        <span class="c1"># convert to rad/s</span>
-        <span class="n">gx</span> <span class="o">=</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
-        <span class="n">gy</span> <span class="o">=</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
-        <span class="n">gz</span> <span class="o">=</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
-
+        <span class="c1"># convert to NED frame</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
             <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="n">ENU2NED</span><span class="p">(</span><span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span><span class="p">)</span>
+
+        <span class="c1"># gyroscope model: calibrated measurement = (matrix)*(raw measurement - bias)</span>
+        <span class="n">x_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">z_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">z_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xy_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xz_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">yx_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">yz_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zx_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zy_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">gx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_scale</span> <span class="o">*</span> <span class="n">gx</span> <span class="o">+</span> <span class="n">xy_mis</span> <span class="o">*</span> <span class="n">gy</span> <span class="o">+</span> <span class="n">xz_mis</span> <span class="o">*</span> <span class="n">gz</span><span class="p">)</span> <span class="o">-</span> <span class="n">x_bias</span>
+            <span class="n">gy</span> <span class="o">=</span> <span class="p">(</span><span class="n">yx_mis</span> <span class="o">*</span> <span class="n">gx</span> <span class="o">+</span> <span class="n">y_scale</span> <span class="o">*</span> <span class="n">gy</span> <span class="o">+</span> <span class="n">yz_mis</span> <span class="o">*</span> <span class="n">gz</span><span class="p">)</span> <span class="o">-</span> <span class="n">y_bias</span>
+            <span class="n">gz</span> <span class="o">=</span> <span class="p">(</span><span class="n">zx_mis</span> <span class="o">*</span> <span class="n">gx</span> <span class="o">+</span> <span class="n">zy_mis</span> <span class="o">*</span> <span class="n">gy</span> <span class="o">+</span> <span class="n">z_scale</span> <span class="o">*</span> <span class="n">gz</span><span class="p">)</span> <span class="o">-</span> <span class="n">z_bias</span>
+
         <span class="k">return</span> <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span></div>
 
 

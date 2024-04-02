@@ -3,21 +3,23 @@ import numpy as np
 from utils.wireframe import wireframe
 from operator import itemgetter
 from mpu9250_driver.mpu9250 import MPU9250
-from ahrs.madgwick import Madgwick
+from ahrs import madgwick, mahony
 import time
 
 class imu_viewer():
-    def __init__(self, width, height, hz):
+    def __init__(self, width, height, hz, nav_frame):
         """
         Create window to display IMU information and visualize the IMU model
 
         :param int width: display window width
         :param int height: display window height
         :param int hz: window update rate
+        :param str nav_frame: navigation frame
         """
         self.width = width
         self.height = height
         self.hz = hz
+        self.nav_frame = nav_frame
         self.screen = pygame.display.set_mode((width, height))
         self.update_rate = pygame.time.Clock()
         pygame.font.init()
@@ -26,6 +28,14 @@ class imu_viewer():
         # self.font = pygame.font.SysFont('Comic Sans MS', 15)
         self.background_color = (0, 0, 0)
         pygame.display.set_caption('IMU attitude display with euler angle and quaternion')
+
+        # Check parameter
+        if (self.nav_frame != "ENU") and (self.nav_frame != "NED"):
+            raise ValueError("Navigation frame should be either ENU or NED")
+        if self.nav_frame == "ENU":
+            self.rotation_seq = "zxy"
+        elif self.nav_frame == "NED":
+            self.rotation_seq = "zyx"
 
     def run(self, imu):
         """
@@ -61,7 +71,7 @@ class imu_viewer():
         """
         self.screen.fill(self.background_color)
         self.wireframe.update_attitude(euler)
-
+        
         ax = round(acc[0][0],2)
         ay = round(acc[1][0],2)
         az = round(acc[2][0],2)
@@ -114,21 +124,21 @@ class imu_viewer():
 
         # Display euler angle
         self.message_display("Euler Angles (Degree): ", self.width * 0.85, self.font_size * 0, (255, 255, 255))
-        self.message_display("Roll: {} ({})".format(roll, "X-axis"), self.width * 0.85, self.font_size * 1,(255, 255, 255))
-        self.message_display("Pitch: {} ({})".format(pitch, "Y-axis"), self.width * 0.85, self.font_size * 2, (255, 255, 255))
-        self.message_display("Yaw: {} ({})".format(yaw, "Z-axis"), self.width * 0.85, self.font_size * 3, (255, 255, 255))
+        self.message_display("Roll: {} ({}-axis)".format(roll, list(self.rotation_seq)[2].upper()), self.width * 0.85, self.font_size * 1,(255, 255, 255))
+        self.message_display("Pitch: {} ({}-axis)".format(pitch, list(self.rotation_seq)[1].upper()), self.width * 0.85, self.font_size * 2, (255, 255, 255))
+        self.message_display("Yaw: {} ({}-axis)".format(yaw, list(self.rotation_seq)[0].upper()), self.width * 0.85, self.font_size * 3, (255, 255, 255))
 
         # Display observation message
         self.message_display("Please observe the imu from top view", self.width * 0.4, self.height * 0.95, (255, 255, 255))
-
+    
         # Transform vertices to perspective view
         viewer_vertices = []
         viewer_depth = []
         for vertice in self.wireframe.vertices:
             point = np.array([[vertice.x],[vertice.y],[vertice.z]])
             new_point = self.wireframe.rotate_point(point)
-            print(type(new_point))
-            viewer_vertices.append(self.project2window(new_point.tolist()[0][0], new_point.tolist()[1][0], 70))
+            window_x, window_y = self.project2window(new_point.tolist()[0][0], new_point.tolist()[1][0], 70)
+            viewer_vertices.append((window_x, window_y))
             viewer_depth.append(new_point.tolist()[2][0])
 
         # Calculate the average Z values of each face.
@@ -181,12 +191,13 @@ if __name__ == '__main__':
     window_width = 1080
     window_height = 720
     window_hz = 100
-    nav_frame = "NED" # ENU/NED
+    nav_frame = "ENU" # ENU/NED
     axis = 9
-    gain = 1
-    calibration_time = 5
-    ahrs = Madgwick(axis, gain)
-    imu = MPU9250(nav_frame, axis, window_hz, calibration_time)
+    calibration = False
+    # ahrs = madgwick.Madgwick(axis, 1, nav_frame)
+    ahrs = mahony.Mahony(axis, 0.1, 0, nav_frame)
+    imu = MPU9250(nav_frame, axis, window_hz, calibration)
+    imu.initialization()
     imu.start_thread(ahrs)
-    viewer = imu_viewer(window_width, window_height, window_hz)
+    viewer = imu_viewer(window_width, window_height, window_hz, nav_frame)
     viewer.run(imu)

@@ -21,6 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="visualization module" href="visualization.html" />
     <link rel="prev" title="mpu9250_driver package" href="mpu9250_driver.html" /> 
 </head>
 
@@ -88,6 +89,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-utils">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
 </ul>
 </li>
 </ul>
@@ -127,7 +130,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.filter.sliding_window">
 <span class="sig-prename descclassname"><span class="pre">utils.filter.</span></span><span class="sig-name descname"><span class="pre">sliding_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/filter.html#sliding_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.filter.sliding_window" title="Link to this definition"></a></dt>
-<dd><p>Sliding window algorithm <a href="#id29"><span class="problematic" id="id1">[1]_</span></a></p>
+<dd><p>Sliding window algorithm <a href="#id28"><span class="problematic" id="id1">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -156,7 +159,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.dcm2eul">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">dcm2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dcm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#dcm2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.dcm2eul" title="Link to this definition"></a></dt>
-<dd><p>Convert Direction Cosine Matrix with specific order to Euler angle <a href="#id30"><span class="problematic" id="id3">[1]_</span></a></p>
+<dd><p>Convert Direction Cosine Matrix with specific order to Euler angle <a href="#id29"><span class="problematic" id="id3">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -207,7 +210,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.eul2dcm">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">eul2dcm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'right'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#eul2dcm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.eul2dcm" title="Link to this definition"></a></dt>
-<dd><p>Convert Euler angle to Direction Cosine Matrix <a href="#id31"><span class="problematic" id="id5">[1]_</span></a></p>
+<dd><p>Convert Euler angle to Direction Cosine Matrix <a href="#id30"><span class="problematic" id="id5">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -236,7 +239,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.eul2quat">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">eul2quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#eul2quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.eul2quat" title="Link to this definition"></a></dt>
-<dd><p>Convert Euler angle to Quaternion <a href="#id32"><span class="problematic" id="id7">[1]_</span></a></p>
+<dd><p>Convert Euler angle to Quaternion <a href="#id31"><span class="problematic" id="id7">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -325,7 +328,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.quat2dcm">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat2dcm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat2dcm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat2dcm" title="Link to this definition"></a></dt>
-<dd><p>Convert Quaternion to Direction Cosine Matrix <a href="#id33"><span class="problematic" id="id9">[1]_</span></a></p>
+<dd><p>Convert Quaternion to Direction Cosine Matrix <a href="#id32"><span class="problematic" id="id9">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -378,7 +381,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.quat_conjugate">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_conjugate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_conjugate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_conjugate" title="Link to this definition"></a></dt>
-<dd><p>Calculate the conjugate of Quaternion <a href="#id34"><span class="problematic" id="id11">[1]_</span></a></p>
+<dd><p>Calculate the conjugate of Quaternion <a href="#id33"><span class="problematic" id="id11">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em>) – quaternion</p>
@@ -401,7 +404,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.quat_multi">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_multi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_multi" title="Link to this definition"></a></dt>
-<dd><p>Calculate the product of two quaternion multiplication <a href="#id35"><span class="problematic" id="id15">[1]_</span></a> <a href="#id36"><span class="problematic" id="id16">[2]_</span></a></p>
+<dd><p>Calculate the product of two quaternion multiplication <a href="#id34"><span class="problematic" id="id15">[1]_</span></a> <a href="#id35"><span class="problematic" id="id16">[2]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -600,7 +603,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.transformation.acc2eul">
 <span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">acc2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#acc2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.acc2eul" title="Link to this definition"></a></dt>
-<dd><p>Convert acceleration vector with gravity to Euler angle in ENU or NED frame <a href="#id37"><span class="problematic" id="id19">[1]_</span></a> <a href="#id38"><span class="problematic" id="id20">[2]_</span></a></p>
+<dd><p>Convert acceleration vector with gravity to Euler angle in ENU or NED frame <a href="#id36"><span class="problematic" id="id19">[1]_</span></a> <a href="#id37"><span class="problematic" id="id20">[2]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -659,7 +662,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.transformation.accmag2eul">
 <span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">accmag2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">my</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#accmag2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.accmag2eul" title="Link to this definition"></a></dt>
-<dd><p>Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame <a href="#id39"><span class="problematic" id="id23">[1]_</span></a></p>
+<dd><p>Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame included tilt compensation[1]_</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -682,7 +685,7 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id24" role="doc-footnote">
+<aside class="footnote brackets" id="id23" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p>Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013</p>
 </aside>
@@ -754,17 +757,22 @@
 <dt class="sig sig-object py" id="utils.wireframe.wireframe">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.wireframe.</span></span><span class="sig-name descname"><span class="pre">wireframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#wireframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.wireframe" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces <a href="#id40"><span class="problematic" id="id25">[1]_</span></a> <a href="#id41"><span class="problematic" id="id26">[2]_</span></a></p>
+<p>Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces <a href="#id38"><span class="problematic" id="id24">[1]_</span></a> <a href="#id39"><span class="problematic" id="id25">[2]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p>
+</dd>
+</dl>
 <p>axis color:</p>
 <p>Positive of x axis is Red, Negative of x axis is Cyan</p>
 <p>Positive of y axis is Green, Negative of y axis is Magenta</p>
 <p>Positive of z axis is Blue, Negative of z axis is Yellow</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id27" role="doc-footnote">
+<aside class="footnote brackets" id="id26" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p><cite>Cube property references &lt;https://en.wikipedia.org/wiki/Cube&gt;</cite></p>
 </aside>
-<aside class="footnote brackets" id="id28" role="doc-footnote">
+<aside class="footnote brackets" id="id27" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
 <p><cite>Github references &lt;https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master&gt;</cite></p>
 </aside>
@@ -838,7 +846,7 @@
 <dd><p>Update IMU model attitude</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rpy</strong> (<em>ndarray</em>) – roll, pitch, yaw angle</p>
+<dd class="field-odd"><p><strong>rpy</strong> (<em>ndarray</em>) – roll, pitch, yaw angle in degree</p>
 </dd>
 </dl>
 </dd></dl>
@@ -856,6 +864,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mpu9250_driver.html" class="btn btn-neutral float-left" title="mpu9250_driver package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="visualization.html" class="btn btn-neutral float-right" title="visualization module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

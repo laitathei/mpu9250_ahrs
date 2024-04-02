@@ -1,20 +1,24 @@
 #!/usr/bin/python3
 from mpu9250_driver.mpu9250 import MPU9250
 from utils.orientation import quat2eul, eul2quat
-from ahrs.madgwick import Madgwick
+from ahrs import madgwick, mahony
 import time
 import numpy as np
 import math
 
 if __name__ == '__main__':
+    """
+    Display all the information about MPU9250
+    """
     nav_frame = "NED" # ENU/NED
     axis = 9
     gain = 1
     hz = 100
     interval = 1/hz
-    calibration_time = 5
+    calibration = False
     ahrs = Madgwick(axis, gain)
-    imu = MPU9250(nav_frame, axis, hz, calibration_time)
+    imu = MPU9250(nav_frame, axis, hz, calibration)
+    imu.initialization()
     imu.start_thread(ahrs)
     last = time.time()
     try:

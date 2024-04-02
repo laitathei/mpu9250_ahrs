@@ -91,13 +91,13 @@
 <span class="sd">    :param str nav_frame: navigation frame</span>
 <span class="sd">    :param int axis: axis data</span>
 <span class="sd">    :param float hz: IMU frequency</span>
-<span class="sd">    :param float s: calibration time</span>
+<span class="sd">    :param bool calibration: calibrate gyroscope and accelerometer</span>
 
 <span class="sd">    .. Reference</span>
 <span class="sd">    .. [1] `MPU-9250 Product Specification &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf&gt;`</span>
 <span class="sd">    .. [2] `MPU-9250 Register Map and Descriptions &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf&gt;`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nav_frame</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">hz</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nav_frame</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">hz</span><span class="p">,</span> <span class="n">calibration</span><span class="p">):</span>
         <span class="c1"># I2C connection parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500_address</span> <span class="o">=</span> <span class="mh">0x68</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ak8963_address</span> <span class="o">=</span> <span class="mh">0x0c</span>
@@ -114,10 +114,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hz</span> <span class="o">=</span> <span class="n">hz</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calibration_time</span> <span class="o">=</span> <span class="n">s</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue_size</span> <span class="o">=</span> <span class="mi">20</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="mi">5</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gyro_queue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">=</span> <span class="n">calibration</span>
 
         <span class="c1"># Check parameter</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">):</span>
@@ -132,20 +132,15 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
 
         <span class="c1"># Config MPU6500</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span> <span class="o">=</span> <span class="n">MPU6500</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span> <span class="o">=</span> <span class="n">MPU6500</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">control_accel_gyro</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">config_MPU6500</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># Config AK8963</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ak8963</span> <span class="o">=</span> <span class="n">AK8963</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ak8963_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ak8963</span> <span class="o">=</span> <span class="n">AK8963</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ak8963_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ak8963</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ak8963</span><span class="o">.</span><span class="n">config_AK8963</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
-
-        <span class="c1"># initialization</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initialization</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">gyro_calibration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calibration_time</span><span class="p">)</span>
-        <span class="c1"># self.mpu6500.accel_calibration(self.calibration_time)</span>
 
 <div class="viewcode-block" id="MPU9250.check_i2c_address">
 <a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.check_i2c_address">[docs]</a>
@@ -183,7 +178,7 @@
 <span class="sd">        Gravity is defined as negative when pointing downward \n</span>
 <span class="sd">        ax = +9.80665 m/s^2 when front side pointing downward \n</span>
 <span class="sd">        ay = +9.80665 m/s^2 when the right hand side pointing downward \n</span>
-<span class="sd">        az = +9.80665 m/s^2 when under side pointing upward \n</span>
+<span class="sd">        az = +9.80665 m/s^2 when under side pointing downward \n</span>
 <span class="sd">    </span>
 <span class="sd">        :returns: </span>
 <span class="sd">            - ax (float) - x-axis accelerometer data in m/s^2</span>

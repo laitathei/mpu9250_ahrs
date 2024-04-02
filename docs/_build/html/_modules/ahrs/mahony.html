@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ahrs.mahony &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">python</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ahrs.mahony</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ahrs.mahony</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">utils.orientation</span> <span class="kn">import</span> <span class="n">quat2dcm</span><span class="p">,</span> <span class="n">quat_multi</span><span class="p">,</span> <span class="n">quat2eul</span>
+
+<div class="viewcode-block" id="Mahony">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.mahony.Mahony">[docs]</a>
+<span class="k">class</span> <span class="nc">Mahony</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mahony is one of the AHRS filter applied with complementary filter [1]_</span>
+<span class="sd">    Kp refers to</span>
+
+<span class="sd">    :param int axis: axis data for fusion</span>
+<span class="sd">    :param float kp: proportional gain</span>
+<span class="sd">    :param float ki: integral gain</span>
+<span class="sd">    :param str nav_frame: navigation frame</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] &#39;ahrs &lt;https://ahrs.readthedocs.io/en/latest/filters/mahony.html#ahrs.filters.mahony.Mahony.updateIMU&gt;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">kp</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">ki</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;NED&quot;</span><span class="p">):</span>
+        <span class="c1"># Body frame is front(X)-right(Y)-down(Z), Navigation frame is NED</span>
+        <span class="c1"># Body frame is front(Y)-right(X)-down(Z), Navigation frame is ENU</span>
+
+        <span class="c1"># algorithm parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span> <span class="c1"># 6 or 9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ki</span> <span class="o">=</span> <span class="n">ki</span> <span class="c1"># reduce the steady-state error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kp</span> <span class="o">=</span> <span class="n">kp</span> <span class="c1"># increasing trusts more accelerometers and magnetometers, decreasing trusts more gyroscopes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span> <span class="c1"># ENU or NED</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;ENU&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame must be ENU or NED&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">!=</span> <span class="mi">6</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Axis must be 6 or 9&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mahony filter in use&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Mahony.init_quat">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.mahony.Mahony.init_quat">[docs]</a>
+    <span class="k">def</span> <span class="nf">init_quat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mahony filter initial attitude</span>
+
+<span class="sd">        :param float w: Quaternion magnitude</span>
+<span class="sd">        :param float x: Quaternion X axis</span>
+<span class="sd">        :param float y: Quaternion Y axis</span>
+<span class="sd">        :param float z: Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">w</span><span class="p">],[</span><span class="n">x</span><span class="p">],[</span><span class="n">y</span><span class="p">],[</span><span class="n">z</span><span class="p">]])</span></div>
+
+
+<div class="viewcode-block" id="Mahony.run">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.mahony.Mahony.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">gyr</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">hz</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iteration of Mahony filter</span>
+
+<span class="sd">        :param ndarray acc: accelerometer data</span>
+<span class="sd">        :param ndarray gyr: gyroscope data</span>
+<span class="sd">        :param ndarray mag: magnetometer data</span>
+<span class="sd">        :param int hz: IMU frequency</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - w (float) - Quaternion magnitude</span>
+<span class="sd">            - x (float) - Quaternion X axis</span>
+<span class="sd">            - y (float) - Quaternion Y axis</span>
+<span class="sd">            - z (float) - Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">acc</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;acc shape must be (3,1)&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">gyr</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;gyr shape must be (3,1)&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mag</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mag shape must be (3,1)&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">imu_hz</span> <span class="o">=</span> <span class="n">hz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">imu_hz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">acc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyr</span> <span class="o">=</span> <span class="n">gyr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag</span> <span class="o">=</span> <span class="n">mag</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span> <span class="c1"># 6 axis fusion (gyroscope and accelerometer)</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_fusion</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span> <span class="c1"># 9 axis fusion (gyroscope, accelerometer and magnetometer)</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_mag_fusion</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+
+        
+<div class="viewcode-block" id="Mahony.algo">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.mahony.Mahony.algo">[docs]</a>
+    <span class="k">def</span> <span class="nf">algo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span> <span class="c1"># 6 axis fusion (gyroscope and accelerometer)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_fusion</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span> <span class="c1"># 9 axis fusion (gyroscope, accelerometer and magnetometer)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_mag_fusion</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Mahony.gyro_acc_fusion">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.mahony.Mahony.gyro_acc_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">gyro_acc_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mahony filter 6 axis data fusion</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing upwards \n</span>
+<span class="sd">        Accelerometer in Earth&#39;s reference (m/s^2) \n</span>
+<span class="sd">        Gyroscope in right hand coordinates (rad/s) \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing downwards \n</span>
+<span class="sd">        Accelerometer in Earth&#39;s reference (m/s^2) \n</span>
+<span class="sd">        Gyroscope in right hand coordinates (rad/s) \n</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - w (float) - Quaternion magnitude</span>
+<span class="sd">            - x (float) - Quaternion X axis</span>
+<span class="sd">            - y (float) - Quaternion Y axis</span>
+<span class="sd">            - z (float) - Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">gyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gyr</span><span class="p">)</span>
+        <span class="n">a_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">DCM</span> <span class="o">=</span> <span class="n">quat2dcm</span><span class="p">(</span><span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span><span class="p">)</span> <span class="c1"># DCM from body frame to navigation frame</span>
+        <span class="k">if</span> <span class="n">a_norm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># accelerometer part</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">acc</span><span class="o">/</span><span class="n">a_norm</span> <span class="c1"># normalize acceleration vector</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+                <span class="n">v_g</span> <span class="o">=</span> <span class="n">DCM</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span> <span class="c1"># convert expected gravity vector from navigation frame to body frame</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+                <span class="n">v_g</span> <span class="o">=</span> <span class="n">DCM</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">])</span> <span class="c1"># convert expected gravity vector from navigation frame to body frame</span>
+            <span class="n">acc_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">v_g</span><span class="p">)</span> <span class="c1"># error of accelerometer (gravity vector in body frame cross prodcut with accelerometer vector)</span>
+
+            <span class="c1"># Mahony algorithm</span>
+            <span class="n">total_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">acc_error</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ki</span> <span class="o">*</span> <span class="n">total_error</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span> <span class="c1"># estimate current gyroscope bias by adding past changes</span>
+            <span class="n">gyr</span> <span class="o">=</span> <span class="n">gyr</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">kp</span> <span class="o">*</span> <span class="n">total_error</span> <span class="c1"># gyroscope correction</span>
+            <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">origin_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span> <span class="c1"># the current reading of gyroscope in quaternion form</span>
+        <span class="n">quat_diff</span> <span class="o">=</span> <span class="n">quat_multi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">,</span> <span class="n">origin_q</span><span class="p">)</span>
+        <span class="n">quat_change</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">quat_diff</span> <span class="c1"># compute the rate of change of quaternion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">+</span> <span class="n">quat_change</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span> <span class="c1"># update the quaternion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">)</span> <span class="c1"># normalize quaternion vector</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="Mahony.gyro_acc_mag_fusion">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.mahony.Mahony.gyro_acc_mag_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">gyro_acc_mag_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mahony filter 9 axis data fusion</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing upwards \n</span>
+<span class="sd">        Accelerometer in Earth&#39;s reference (m/s^2) \n</span>
+<span class="sd">        Gyroscope in right hand coordinates (rad/s) \n</span>
+<span class="sd">        Magnetometer data in Earth&#39;s reference (µT) \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing downwards \n</span>
+<span class="sd">        Accelerometer in Earth&#39;s reference (m/s^2) \n</span>
+<span class="sd">        Gyroscope in right hand coordinates (rad/s) \n</span>
+<span class="sd">        Magnetometer data in Earth&#39;s reference (µT) \n</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - w (float) - Quaternion magnitude</span>
+<span class="sd">            - x (float) - Quaternion X axis</span>
+<span class="sd">            - y (float) - Quaternion Y axis</span>
+<span class="sd">            - z (float) - Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">gyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gyr</span><span class="p">)</span>
+        <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mag</span><span class="p">)</span>
+        <span class="n">a_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">m_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span>
+        <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">DCM</span> <span class="o">=</span> <span class="n">quat2dcm</span><span class="p">(</span><span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span><span class="p">)</span> <span class="c1"># DCM from body frame to navigation frame</span>
+        <span class="k">if</span> <span class="n">a_norm</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">m_norm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># accelerometer part</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">acc</span><span class="o">/</span><span class="n">a_norm</span> <span class="c1"># normalize acceleration vector</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+                <span class="n">v_g</span> <span class="o">=</span> <span class="n">DCM</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span> <span class="c1"># convert expected gravity vector from navigation frame to body frame</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+                <span class="n">v_g</span> <span class="o">=</span> <span class="n">DCM</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">])</span> <span class="c1"># convert expected gravity vector from navigation frame to body frame</span>
+            <span class="n">acc_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">v_g</span><span class="p">)</span> <span class="c1"># error of accelerometer (gravity vector in body frame cross prodcut with accelerometer vector)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;acc_error:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">acc_error</span><span class="p">)</span>
+            <span class="c1"># magnetometer part</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">mag</span><span class="o">/</span><span class="n">m_norm</span> <span class="c1"># normalize magnetometer vector</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">DCM</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">m</span> <span class="c1"># convert magnetic field from body frame to navigation frame</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+                <span class="c1"># In ENU frame, Y axis in body frame align to north, X axis will 0</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">([</span><span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]])],</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="mi">2</span><span class="p">]]])</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+                <span class="c1"># In NED frame, X axis in body frame align to north, Y axis will 0</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">([</span><span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]])],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="mi">2</span><span class="p">]]])</span>
+            <span class="n">v_m</span> <span class="o">=</span> <span class="n">DCM</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">b</span> <span class="c1"># convert the aligned magnetometer vector from navigation frame to body frame</span>
+            <span class="n">v_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">v_m</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">mag_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v_m</span><span class="p">)</span> <span class="c1"># error of magnetometer (aligned magnetometer vector in body frame cross prodcut with origin magnetometer vector)</span>
+
+            <span class="c1"># Mahony algorithm</span>
+            <span class="n">total_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">acc_error</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">mag_error</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ki</span> <span class="o">*</span> <span class="n">total_error</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span> <span class="c1"># estimate current gyroscope bias by adding past changes</span>
+            <span class="n">gyr</span> <span class="o">=</span> <span class="n">gyr</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">kp</span> <span class="o">*</span> <span class="n">total_error</span> <span class="c1"># gyroscope correction</span>
+            <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">origin_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span> <span class="c1"># the current reading of gyroscope in quaternion form</span>
+        <span class="n">quat_diff</span> <span class="o">=</span> <span class="n">quat_multi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">,</span> <span class="n">origin_q</span><span class="p">)</span>
+        <span class="n">quat_change</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">quat_diff</span> <span class="c1"># compute the rate of change of quaternion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">+</span> <span class="n">quat_change</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span> <span class="c1"># update the quaternion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">)</span> <span class="c1"># normalize quaternion vector</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

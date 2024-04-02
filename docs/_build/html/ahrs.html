@@ -53,11 +53,17 @@
 <li class="toctree-l4"><a class="reference internal" href="#ahrs.madgwick.Madgwick"><code class="docutils literal notranslate"><span class="pre">Madgwick</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ahrs.mahony">ahrs.mahony module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ahrs.mahony.Mahony"><code class="docutils literal notranslate"><span class="pre">Mahony</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#module-ahrs">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html">mpu9250_driver package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html">utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
 </ul>
 </li>
 </ul>
@@ -98,7 +104,7 @@
 <dt class="sig sig-object py" id="ahrs.madgwick.Madgwick">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ahrs.madgwick.</span></span><span class="sig-name descname"><span class="pre">Madgwick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NED'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ahrs/madgwick.html#Madgwick"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ahrs.madgwick.Madgwick" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Madgwick is one of the AHRS filter applied with gradient descent technique <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+<p>Madgwick is one of the AHRS filter applied with gradient descent technique <a href="#id5"><span class="problematic" id="id1">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -110,7 +116,7 @@
 </dl>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p>‘ahrs &lt;<a class="reference external" href="https://ahrs.readthedocs.io/en/latest/filters/madgwick.html#orientation-from-angular-rate">https://ahrs.readthedocs.io/en/latest/filters/madgwick.html#orientation-from-angular-rate</a>&gt;’</p>
 </aside>
 </aside>
@@ -186,6 +192,131 @@
 <dt class="sig sig-object py" id="ahrs.madgwick.Madgwick.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gyr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ahrs/madgwick.html#Madgwick.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ahrs.madgwick.Madgwick.run" title="Link to this definition"></a></dt>
 <dd><p>Iteration of Madgwick filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>acc</strong> (<em>ndarray</em>) – accelerometer data</p></li>
+<li><p><strong>gyr</strong> (<em>ndarray</em>) – gyroscope data</p></li>
+<li><p><strong>mag</strong> (<em>ndarray</em>) – magnetometer data</p></li>
+<li><p><strong>hz</strong> (<em>int</em>) – IMU frequency</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-ahrs.mahony">
+<span id="ahrs-mahony-module"></span><h2>ahrs.mahony module<a class="headerlink" href="#module-ahrs.mahony" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ahrs.mahony.Mahony">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ahrs.mahony.</span></span><span class="sig-name descname"><span class="pre">Mahony</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ki</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NED'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ahrs/mahony.html#Mahony"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ahrs.mahony.Mahony" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mahony is one of the AHRS filter applied with complementary filter <a href="#id6"><span class="problematic" id="id3">[1]_</span></a>
+Kp refers to</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>int</em>) – axis data for fusion</p></li>
+<li><p><strong>kp</strong> (<em>float</em>) – proportional gain</p></li>
+<li><p><strong>ki</strong> (<em>float</em>) – integral gain</p></li>
+<li><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p></li>
+</ul>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>‘ahrs &lt;<a class="reference external" href="https://ahrs.readthedocs.io/en/latest/filters/mahony.html#ahrs.filters.mahony.Mahony.updateIMU">https://ahrs.readthedocs.io/en/latest/filters/mahony.html#ahrs.filters.mahony.Mahony.updateIMU</a>&gt;’</p>
+</aside>
+</aside>
+<dl class="py method">
+<dt class="sig sig-object py" id="ahrs.mahony.Mahony.algo">
+<span class="sig-name descname"><span class="pre">algo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ahrs/mahony.html#Mahony.algo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ahrs.mahony.Mahony.algo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ahrs.mahony.Mahony.gyro_acc_fusion">
+<span class="sig-name descname"><span class="pre">gyro_acc_fusion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ahrs/mahony.html#Mahony.gyro_acc_fusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ahrs.mahony.Mahony.gyro_acc_fusion" title="Link to this definition"></a></dt>
+<dd><p>Mahony filter 6 axis data fusion</p>
+<p>ENU:</p>
+<p>Gravity is defined as negative when pointing upwards</p>
+<p>Accelerometer in Earth’s reference (m/s^2)</p>
+<p>Gyroscope in right hand coordinates (rad/s)</p>
+<p>NED:</p>
+<p>Gravity is defined as negative when pointing downwards</p>
+<p>Accelerometer in Earth’s reference (m/s^2)</p>
+<p>Gyroscope in right hand coordinates (rad/s)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ahrs.mahony.Mahony.gyro_acc_mag_fusion">
+<span class="sig-name descname"><span class="pre">gyro_acc_mag_fusion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ahrs/mahony.html#Mahony.gyro_acc_mag_fusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ahrs.mahony.Mahony.gyro_acc_mag_fusion" title="Link to this definition"></a></dt>
+<dd><p>Mahony filter 9 axis data fusion</p>
+<p>ENU:</p>
+<p>Gravity is defined as negative when pointing upwards</p>
+<p>Accelerometer in Earth’s reference (m/s^2)</p>
+<p>Gyroscope in right hand coordinates (rad/s)</p>
+<p>Magnetometer data in Earth’s reference (µT)</p>
+<p>NED:</p>
+<p>Gravity is defined as negative when pointing downwards</p>
+<p>Accelerometer in Earth’s reference (m/s^2)</p>
+<p>Gyroscope in right hand coordinates (rad/s)</p>
+<p>Magnetometer data in Earth’s reference (µT)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ahrs.mahony.Mahony.init_quat">
+<span class="sig-name descname"><span class="pre">init_quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ahrs/mahony.html#Mahony.init_quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ahrs.mahony.Mahony.init_quat" title="Link to this definition"></a></dt>
+<dd><p>Mahony filter initial attitude</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float</em>) – Quaternion magnitude</p></li>
+<li><p><strong>x</strong> (<em>float</em>) – Quaternion X axis</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Quaternion Y axis</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Quaternion Z axis</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ahrs.mahony.Mahony.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gyr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ahrs/mahony.html#Mahony.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ahrs.mahony.Mahony.run" title="Link to this definition"></a></dt>
+<dd><p>Iteration of Mahony filter</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

@@ -3,6 +3,7 @@ import smbus
 import math
 import time
 import numpy as np
+import yaml
 from utils.transformation import ENU2NED
 
 SMPLRT_DIV = 0x19
@@ -55,19 +56,48 @@ class MPU6500():
     :param int address: MPU6500 I2C address
     :param str nav_frame: navigation frame
     :param int hz: IMU frequency
+    :param bool calibration: calibrate gyroscope and accelerometer
     """
-    def __init__(self, bus, address, nav_frame="ENU", hz=100):
+    def __init__(self, bus, address, nav_frame="ENU", hz=100, calibration=False):
         # I2C connection parameter
         self.bus = bus
         self.address = address
 
         # Accelerometer and gyroscope parameter
-        self.accel_offset = np.zeros((3,1))
-        self.gyro_offset = np.zeros((3,1))
+        self.accel_bias = np.zeros((3,1))
+        self.accel_scale = np.zeros((3,1))
+        self.accel_misalignment = np.zeros((6,1))
+        self.gyro_bias = np.zeros((3,1))
+        self.gyro_scale = np.zeros((3,1))
+        self.gyro_misalignment = np.zeros((6,1))
+        self.calibration = calibration
 
         # driver parameter
         self.nav_frame = nav_frame # original navigation frame of MPU6500 is ENU
         self.hz = hz
+
+        # Load old config from yaml file
+        if self.calibration == False: 
+            f = open("config.yaml", "r")
+            self.config = yaml.load(f, Loader=yaml.FullLoader)
+            gyro_bias = ["gx_bias","gy_bias","gz_bias"]
+            gyro_scale = ["gx_scale","gy_scale","gz_scale"]
+            # gyro_misalignment = ["gyro_xy_mis","gyro_xz_mis","gyro_yx_mis","gyro_yz_mis","gyro_zx_mis","gyro_zy_mis"]
+            accel_bias = ["ax_bias","ay_bias","az_bias"]
+            accel_scale = ["ax_scale","ay_scale","az_scale"]
+            # accel_misalignment = ["accel_xy_mis","accel_xz_mis","accel_yx_mis","accel_yz_mis","accel_zx_mis","accel_zy_mis"]
+            for i, element in enumerate(gyro_bias):
+                self.gyro_bias[i][0] = self.config[nav_frame][element]
+            for i, element in enumerate(gyro_scale):
+                self.gyro_scale[i][0] = self.config[nav_frame][element]
+            # for i, element in enumerate(gyro_misalignment):
+            #     self.gyro_misalignment[i][0] = self.config[nav_frame][element]
+            for i, element in enumerate(accel_bias):
+                self.accel_bias[i][0] = self.config[nav_frame][element]
+            for i, element in enumerate(accel_scale):
+                self.accel_scale[i][0] = self.config[nav_frame][element]
+            # for i, element in enumerate(accel_misalignment):
+            #     self.accel_misalignment[i][0] = self.config[nav_frame][element]
 
         # Check parameter
         if (self.nav_frame != "ENU") and (self.nav_frame != "NED"):
@@ -118,25 +148,27 @@ class MPU6500():
         :param int accel_parameter: accelerometer configuration register value
         :param int gyro_parameter: gyroscope configuration register value
         """
+        # config accelerometer full scale
         if accel_parameter == ACCEL_FS_SEL_2G:
-            self.accel_scale = 2.0/32768.0
+            self.accel_fs = 2.0/32768.0
         elif accel_parameter == ACCEL_FS_SEL_4G:
-            self.accel_scale = 4.0/32768.0
+            self.accel_fs = 4.0/32768.0
         elif accel_parameter == ACCEL_FS_SEL_8G:
-            self.accel_scale = 8.0/32768.0
+            self.accel_fs = 8.0/32768.0
         elif accel_parameter == ACCEL_FS_SEL_16G:
-            self.accel_scale = 16.0/32768.0
+            self.accel_fs = 16.0/32768.0
         else:
             raise ValueError("Wrong accel config parameter")
 
+        # config gyroscope full scale
         if gyro_parameter == GYRO_FS_SEL_250DPS:
-            self.gyro_scale = 250.0/32768.0
+            self.gyro_fs = 250.0/32768.0
         elif gyro_parameter == GYRO_FS_SEL_500DPS:
-            self.gyro_scale = 500.0/32768.0
+            self.gyro_fs = 500.0/32768.0
         elif gyro_parameter == GYRO_FS_SEL_1000DPS:
-            self.gyro_scale = 1000.0/32768.0
+            self.gyro_fs = 1000.0/32768.0
         elif gyro_parameter == GYRO_FS_SEL_2000DPS:
-            self.gyro_scale = 2000.0/32768.0
+            self.gyro_fs = 2000.0/32768.0
         else:
             raise ValueError("Wrong gyro config parameter")
 
@@ -169,7 +201,7 @@ class MPU6500():
         # 0x05            | 10Hz      | 17.85ms | 1kHz | 
         # 0x06            | 5Hz       | 33.48ms | 1kHz | 
         # 0x07            | 3600Hz    | 0.17ms  | 8kHz | 
-        self.bus.write_byte_data(self.address, ACCEL_CONFIG_2, 0x06) # Set acc digital high-pass filter
+        self.bus.write_byte_data(self.address, ACCEL_CONFIG_2, 0x06) # Set accel digital high-pass filter
         self.bus.write_byte_data(self.address, GYRO_CONFIG_2, 0x06) # Set gyro digital low-pass filter
         self.bus.write_byte_data(self.address, SMPLRT_DIV, 0x00) # Set sample rate to 1 kHz
 
@@ -198,20 +230,94 @@ class MPU6500():
 
     def gyro_calibration(self, s: int):
         """
-        Calculate the gyroscope offset to calibrate the gyroscope
+        Calculate the gyroscope bias to calibrate the gyroscope
 
         :param int s: time for calibration
+        :returns: 
+            - gyro_scale (ndarray) - 3-axis gyroscope scale
+            - gyro_bias (ndarray) - 3-axis gyroscope bias
+            - gyro_misalignment (ndarray) - 3-axis gyroscope misalignment
         """
-        if s > 0:
+        if s > 0 and self.calibration == True:
             print('Start gyroscope calibration - Do not move the IMU for {}s'.format(s))
-            gyro_offset = np.zeros((3,1))
+            gyro_bias = np.zeros((3,1))
 
             for i in range(s*self.hz):
                 gx, gy, gz = self.get_gyro()
-                gyro_offset += np.array([[gx],[gy],[gz]])
+                gyro_bias += np.array([[gx],[gy],[gz]])
                 time.sleep(1/self.hz)
-            self.gyro_offset = gyro_offset/(s*self.hz)
+            
+            # Calculate bias
+            self.gyro_bias = gyro_bias/(s*self.hz)
+
+            # calculate scale
+            self.gyro_scale = np.array([[1],[1],[1]])
+
+            # calculate misalignment
+            self.gyro_misalignment = np.array([[0],[0],[0],[0],[0],[0]])
+
             print("Finish gyroscope calibration")
+        return self.gyro_scale, self.gyro_bias, self.gyro_misalignment
+
+    def accel_calibration(self, s: int):
+        """
+        Calculate the accelerometer bias, scale, misalignment with six calibration measurements
+        Using least square method to solve the error
+
+        :param int s: time for calibration
+        :returns: 
+            - accel_scale (ndarray) - 3-axis accelerometer scale
+            - accel_bias (ndarray) - 3-axis accelerometer bias
+            - accel_misalignment (ndarray) - 3-axis accelerometer misalignment
+        .. Reference
+        .. [1] `Accelerometer calibration <https://zhuanlan.zhihu.com/p/296381805>`
+        .. [2] 'Least square prove <https://zhuanlan.zhihu.com/p/87582571>'
+        """
+        if s > 0 and self.calibration == True:
+            order = ["x","y","z","-x","-y","-z"]
+            calibration = []
+            for i in range(6):
+                input('Place IMU {} axis ({}) pointing downward and do not move the IMU for {}s'.format(order[i], self.nav_frame, s))
+                total_accel = np.zeros((3))
+
+                for j in range(s*self.hz):
+                    ax, ay, az = self.get_accel()
+                    total_accel += np.array([ax, ay, az])
+                    time.sleep(1/self.hz)
+                avg_accel = total_accel/(s*self.hz)
+                calibration.append(avg_accel.tolist())
+            calibration = np.array(calibration)
+            calibration = np.append(calibration,np.ones((6,1))*-1,axis=1)
+            positive = np.diag(np.full(3,g))
+            negative = np.diag(np.full(3,-g))
+            if self.nav_frame == "ENU":
+                target = np.vstack((negative,positive))
+            elif self.nav_frame == "NED":
+                target = np.vstack((positive,negative))
+            error_matrix = np.linalg.inv(calibration.T @ calibration) @ calibration.T @ target
+
+            # calculate bias
+            x_bias = error_matrix[3][0]
+            y_bias = error_matrix[3][1]
+            z_bias = error_matrix[3][2]
+            self.accel_bias = np.array([[x_bias],[y_bias],[z_bias]])
+
+            # calculate scale
+            x_scale = error_matrix[0][0]
+            y_scale = error_matrix[1][1]
+            z_scale = error_matrix[2][2]
+            self.accel_scale = np.array([[x_scale],[y_scale],[z_scale]])
+
+            # calculate misalignment
+            xy_mis = error_matrix[0][1]
+            xz_mis = error_matrix[0][2]
+            yx_mis = error_matrix[1][0]
+            yz_mis = error_matrix[1][2]
+            zx_mis = error_matrix[2][0]
+            zy_mis = error_matrix[2][1]
+            self.accel_misalignment = np.array([[xy_mis],[xz_mis],[yx_mis],[yz_mis],[zx_mis],[zy_mis]])
+            print("Finish accelerometer calibration")
+        return self.accel_scale, self.accel_bias, self.accel_misalignment
 
     def get_accel(self):
         """
@@ -228,7 +334,7 @@ class MPU6500():
         Gravity is defined as negative when pointing downward \n
         ax = +9.80665 m/s^2 when front side pointing downward \n
         ay = +9.80665 m/s^2 when the right hand side pointing downward \n
-        az = +9.80665 m/s^2 when under side pointing upward \n
+        az = +9.80665 m/s^2 when under side pointing downward \n
     
         :returns: 
             - ax (float) - x-axis accelerometer data in m/s^2
@@ -236,25 +342,41 @@ class MPU6500():
             - az (float) - z-axis accelerometer data in m/s^2
         """
         try:
-            ax = self.read_raw_data(ACCEL_XOUT_H, ACCEL_XOUT_L)*self.accel_scale
-            ay = self.read_raw_data(ACCEL_YOUT_H, ACCEL_YOUT_L)*self.accel_scale
-            az = self.read_raw_data(ACCEL_ZOUT_H, ACCEL_ZOUT_L)*self.accel_scale
+            ax = self.read_raw_data(ACCEL_XOUT_H, ACCEL_XOUT_L)*self.accel_fs
+            ay = self.read_raw_data(ACCEL_YOUT_H, ACCEL_YOUT_L)*self.accel_fs
+            az = self.read_raw_data(ACCEL_ZOUT_H, ACCEL_ZOUT_L)*self.accel_fs
         except:
             raise ConnectionError("I2C Connection Failure")
             
-        accel = np.array([[ax],[ay],[az]])
-        accel = accel-self.accel_offset
-
         # convert to m/s^2
-        ax = accel[0][0]*g
-        ay = accel[1][0]*g
-        az = accel[2][0]*g
+        ax = ax*g
+        ay = ay*g
+        az = az*g
 
+        # convert to NED frame
         if self.nav_frame == "NED":
             ax = ax*-1
             ay = ay*-1
             az = az*-1
             ax, ay, az = ENU2NED(ax, ay, az)
+
+        # accelerometer model: calibrated measurement = (matrix)*(raw measurement - bias)
+        x_scale = self.accel_scale[0][0]
+        y_scale = self.accel_scale[1][0]
+        z_scale = self.accel_scale[2][0]
+        x_bias = self.accel_bias[0][0]
+        y_bias = self.accel_bias[1][0]
+        z_bias = self.accel_bias[2][0]
+        xy_mis = self.accel_misalignment[0][0]
+        xz_mis = self.accel_misalignment[1][0]
+        yx_mis = self.accel_misalignment[2][0]
+        yz_mis = self.accel_misalignment[3][0]
+        zx_mis = self.accel_misalignment[4][0]
+        zy_mis = self.accel_misalignment[5][0]
+        if self.calibration == False:
+            ax = (x_scale * ax + xy_mis * ay + xz_mis * az) - x_bias
+            ay = (yx_mis * ax + y_scale * ay + yz_mis * az) - y_bias
+            az = (zx_mis * ax + zy_mis * ay + z_scale * az) - z_bias
         return ax, ay, az
 
     def get_gyro(self):
@@ -277,22 +399,34 @@ class MPU6500():
             - gz (float) - z-axis gyroscope data in rad/s
         """
         try:
-            gx = self.read_raw_data(GYRO_XOUT_H, GYRO_XOUT_L)*self.gyro_scale
-            gy = self.read_raw_data(GYRO_YOUT_H, GYRO_YOUT_L)*self.gyro_scale
-            gz = self.read_raw_data(GYRO_ZOUT_H, GYRO_ZOUT_L)*self.gyro_scale
+            gx = self.read_raw_data(GYRO_XOUT_H, GYRO_XOUT_L)*self.gyro_fs*math.pi/180
+            gy = self.read_raw_data(GYRO_YOUT_H, GYRO_YOUT_L)*self.gyro_fs*math.pi/180
+            gz = self.read_raw_data(GYRO_ZOUT_H, GYRO_ZOUT_L)*self.gyro_fs*math.pi/180
         except:
             raise ConnectionError("I2C Connection Failure")
 
-        gyro = np.array([[gx],[gy],[gz]])
-        gyro = gyro-self.gyro_offset
-
-        # convert to rad/s
-        gx = gyro[0][0]*math.pi/180
-        gy = gyro[1][0]*math.pi/180
-        gz = gyro[2][0]*math.pi/180
-
+        # convert to NED frame
         if self.nav_frame == "NED":
             gx, gy, gz = ENU2NED(gx, gy, gz)
+
+        # gyroscope model: calibrated measurement = (matrix)*(raw measurement - bias)
+        x_scale = self.gyro_scale[0][0]
+        y_scale = self.gyro_scale[1][0]
+        z_scale = self.gyro_scale[2][0]
+        x_bias = self.gyro_bias[0][0]
+        y_bias = self.gyro_bias[1][0]
+        z_bias = self.gyro_bias[2][0]
+        xy_mis = self.gyro_misalignment[0][0]
+        xz_mis = self.gyro_misalignment[1][0]
+        yx_mis = self.gyro_misalignment[2][0]
+        yz_mis = self.gyro_misalignment[3][0]
+        zx_mis = self.gyro_misalignment[4][0]
+        zy_mis = self.gyro_misalignment[5][0]  
+        if self.calibration == False:
+            gx = (x_scale * gx + xy_mis * gy + xz_mis * gz) - x_bias
+            gy = (yx_mis * gx + y_scale * gy + yz_mis * gz) - y_bias
+            gz = (zx_mis * gx + zy_mis * gy + z_scale * gz) - z_bias
+
         return gx, gy, gz
 
     def get_temp(self):
