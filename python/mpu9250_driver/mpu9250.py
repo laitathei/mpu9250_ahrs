@@ -16,13 +16,13 @@ class MPU9250():
     :param str nav_frame: navigation frame
     :param int axis: axis data
     :param float hz: IMU frequency
-    :param float s: calibration time
+    :param bool calibration: calibrate gyroscope and accelerometer
 
     .. Reference
     .. [1] `MPU-9250 Product Specification <https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf>`
     .. [2] `MPU-9250 Register Map and Descriptions <https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf>`
     """
-    def __init__(self, nav_frame, axis, hz, s):
+    def __init__(self, nav_frame, axis, hz, calibration):
         # I2C connection parameter
         self.mpu6500_address = 0x68
         self.ak8963_address = 0x0c
@@ -39,10 +39,10 @@ class MPU9250():
         self.axis = axis
         self.hz = hz
         self.dt = 1/self.hz
-        self.calibration_time = s
         self.queue_size = 20
         self.window_size = 5
         self.gyro_queue = np.empty([1,3])
+        self.calibration = calibration
 
         # Check parameter
         if (self.axis != 6) and (self.axis != 9):
@@ -57,20 +57,15 @@ class MPU9250():
             raise ValueError("Navigation frame should be either ENU or NED")
 
         # Config MPU6500
-        self.mpu6500 = MPU6500(self.bus, self.mpu6500_address, self.nav_frame, self.hz)
+        self.mpu6500 = MPU6500(self.bus, self.mpu6500_address, self.nav_frame, self.hz, self.calibration)
         self.mpu6500.control_accel_gyro()
         self.mpu6500.who_am_i()
         self.mpu6500.config_MPU6500(0, 0)
 
         # Config AK8963
-        self.ak8963 = AK8963(self.bus, self.ak8963_address, self.nav_frame, self.hz)
+        self.ak8963 = AK8963(self.bus, self.ak8963_address, self.nav_frame, self.hz, self.calibration)
         self.ak8963.who_am_i()
         self.ak8963.config_AK8963(16)
-
-        # initialization
-        self.initialization()
-        self.mpu6500.gyro_calibration(self.calibration_time)
-        # self.mpu6500.accel_calibration(self.calibration_time)
 
     def check_i2c_address(self):
         """
@@ -103,7 +98,7 @@ class MPU9250():
         Gravity is defined as negative when pointing downward \n
         ax = +9.80665 m/s^2 when front side pointing downward \n
         ay = +9.80665 m/s^2 when the right hand side pointing downward \n
-        az = +9.80665 m/s^2 when under side pointing upward \n
+        az = +9.80665 m/s^2 when under side pointing downward \n
     
         :returns: 
             - ax (float) - x-axis accelerometer data in m/s^2

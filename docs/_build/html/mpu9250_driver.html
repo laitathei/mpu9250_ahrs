@@ -66,6 +66,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html">utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
 </ul>
 </li>
 </ul>
@@ -104,7 +106,7 @@
 <span id="mpu9250-driver-ak8963-module"></span><h2>mpu9250_driver.ak8963 module<a class="headerlink" href="#module-mpu9250_driver.ak8963" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.ak8963.</span></span><span class="sig-name descname"><span class="pre">AK8963</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.ak8963.</span></span><span class="sig-name descname"><span class="pre">AK8963</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>AK8963 I2C driver for acquire magnetometer data</p>
 <dl class="field-list simple">
@@ -123,7 +125,7 @@
 <dd><p>Config AK8963 magnetometer mode</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>bit</strong> (<em>int</em>) – accelerometer configuration register value</p>
+<dd class="field-odd"><p><strong>bit</strong> (<em>int</em>) – magnetometer configuration register value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -162,6 +164,37 @@
 <dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.get_status">
 <span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.get_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.get_status" title="Link to this definition"></a></dt>
 <dd><p>Check AK8963 magnetometer status</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.mag_calibration">
+<span class="sig-name descname"><span class="pre">mag_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.mag_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.mag_calibration" title="Link to this definition"></a></dt>
+<dd><p>Calculate the magnetometer bias, scale, misalignment, geomagnetic field strength with four element calibration
+Using least square method to solve the error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>int</em>) – time for calibration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>mag_scale (ndarray) - 3-axis magnetometer scale (soft-iron offset)</p></li>
+<li><p>mag_bias (ndarray) - 3-axis magnetometer bias (hard-iron offset)</p></li>
+<li><p>mag_misalignment (ndarray) - 3-axis magnetometer misalignment (soft-iron offset)</p></li>
+<li><p>mag_strength (float) - geomagnetic field strength</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>four element calibration &lt;https://www.nxp.com/docs/en/application-note/AN5019.pdf&gt;</cite></p>
+</aside>
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p><cite>ten element calibration &lt;https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py&gt;</cite></p>
+</aside>
+</aside>
 </dd></dl>
 
 <dl class="py method">
@@ -211,7 +244,7 @@
 <span id="mpu9250-driver-mpu6500-module"></span><h2>mpu9250_driver.mpu6500 module<a class="headerlink" href="#module-mpu9250_driver.mpu6500" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.mpu6500.</span></span><span class="sig-name descname"><span class="pre">MPU6500</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.mpu6500.</span></span><span class="sig-name descname"><span class="pre">MPU6500</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>MPU6500 I2C driver for acquire accelerometer and gyroscope data</p>
 <dl class="field-list simple">
@@ -221,9 +254,40 @@
 <li><p><strong>address</strong> (<em>int</em>) – MPU6500 I2C address</p></li>
 <li><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p></li>
 <li><p><strong>hz</strong> (<em>int</em>) – IMU frequency</p></li>
+<li><p><strong>calibration</strong> (<em>bool</em>) – calibrate gyroscope and accelerometer</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.accel_calibration">
+<span class="sig-name descname"><span class="pre">accel_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.accel_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.accel_calibration" title="Link to this definition"></a></dt>
+<dd><p>Calculate the accelerometer bias, scale, misalignment with six calibration measurements
+Using least square method to solve the error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>int</em>) – time for calibration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>accel_scale (ndarray) - 3-axis accelerometer scale</p></li>
+<li><p>accel_bias (ndarray) - 3-axis accelerometer bias</p></li>
+<li><p>accel_misalignment (ndarray) - 3-axis accelerometer misalignment</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>Accelerometer calibration &lt;https://zhuanlan.zhihu.com/p/296381805&gt;</cite></p>
+</aside>
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>‘Least square prove &lt;<a class="reference external" href="https://zhuanlan.zhihu.com/p/87582571">https://zhuanlan.zhihu.com/p/87582571</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.config_MPU6500">
 <span class="sig-name descname"><span class="pre">config_MPU6500</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accel_parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gyro_parameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.config_MPU6500"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.config_MPU6500" title="Link to this definition"></a></dt>
@@ -270,7 +334,7 @@ Accelerometer channel is negative when pointing up and aligned against gravity</
 Gravity is defined as negative when pointing downward</p>
 <p>ax = +9.80665 m/s^2 when front side pointing downward</p>
 <p>ay = +9.80665 m/s^2 when the right hand side pointing downward</p>
-<p>az = +9.80665 m/s^2 when under side pointing upward</p>
+<p>az = +9.80665 m/s^2 when under side pointing downward</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
@@ -324,10 +388,18 @@ Gravity is defined as negative when pointing downward</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.gyro_calibration">
 <span class="sig-name descname"><span class="pre">gyro_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.gyro_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.gyro_calibration" title="Link to this definition"></a></dt>
-<dd><p>Calculate the gyroscope offset to calibrate the gyroscope</p>
+<dd><p>Calculate the gyroscope bias to calibrate the gyroscope</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>s</strong> (<em>int</em>) – time for calibration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>gyro_scale (ndarray) - 3-axis gyroscope scale</p></li>
+<li><p>gyro_bias (ndarray) - 3-axis gyroscope bias</p></li>
+<li><p>gyro_misalignment (ndarray) - 3-axis gyroscope misalignment</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -365,26 +437,26 @@ Gravity is defined as negative when pointing downward</p>
 <span id="mpu9250-driver-mpu9250-module"></span><h2>mpu9250_driver.mpu9250 module<a class="headerlink" href="#module-mpu9250_driver.mpu9250" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.mpu9250.</span></span><span class="sig-name descname"><span class="pre">MPU9250</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.mpu9250.</span></span><span class="sig-name descname"><span class="pre">MPU9250</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>MPU9250 I2C driver for accessing MPU6500 and AK8963 <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p>
+<p>MPU9250 I2C driver for accessing MPU6500 and AK8963 <a href="#id9"><span class="problematic" id="id5">[1]_</span></a> <a href="#id10"><span class="problematic" id="id6">[2]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p></li>
 <li><p><strong>axis</strong> (<em>int</em>) – axis data</p></li>
 <li><p><strong>hz</strong> (<em>float</em>) – IMU frequency</p></li>
-<li><p><strong>s</strong> (<em>float</em>) – calibration time</p></li>
+<li><p><strong>calibration</strong> (<em>bool</em>) – calibrate gyroscope and accelerometer</p></li>
 </ul>
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id3" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id7" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p><cite>MPU-9250 Product Specification &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf&gt;</cite></p>
 </aside>
-<aside class="footnote brackets" id="id4" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id8" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
 <p><cite>MPU-9250 Register Map and Descriptions &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf&gt;</cite></p>
 </aside>
 </aside>
@@ -416,7 +488,7 @@ Accelerometer channel is negative when pointing up and aligned against gravity</
 <p>Gravity is defined as negative when pointing downward</p>
 <p>ax = +9.80665 m/s^2 when front side pointing downward</p>
 <p>ay = +9.80665 m/s^2 when the right hand side pointing downward</p>
-<p>az = +9.80665 m/s^2 when under side pointing upward</p>
+<p>az = +9.80665 m/s^2 when under side pointing downward</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">

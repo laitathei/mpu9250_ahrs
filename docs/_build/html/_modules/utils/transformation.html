@@ -79,9 +79,9 @@
 <span class="c1"># DCM sequence aims to convert from Body to Navigation frame</span>
 <span class="c1"># Gravity vector is in Navigation frame</span>
 <span class="c1"># The seq in this program refers to DCM sequence</span>
-<span class="c1"># [fx]                [0]</span>
-<span class="c1"># [fy] = [DCM (ZXY)].T[0]</span>
-<span class="c1"># [fz]                [g]</span>
+<span class="c1"># [ax]                [0]</span>
+<span class="c1"># [ay] = [DCM (ZXY)].T[0]</span>
+<span class="c1"># [az]                [g]</span>
 <span class="c1"># body             Navigation</span>
 
 <div class="viewcode-block" id="acc2eul">
@@ -177,7 +177,7 @@
 <a class="viewcode-back" href="../../utils.html#utils.transformation.accmag2eul">[docs]</a>
 <span class="k">def</span> <span class="nf">accmag2eul</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="s2">&quot;ENU&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame [1]_</span>
+<span class="sd">    Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame included tilt compensation[1]_</span>
 
 <span class="sd">    :param float ax: x axis accelerometer</span>
 <span class="sd">    :param float ay: y axis accelerometer</span>

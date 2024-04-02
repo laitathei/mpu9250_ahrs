@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import smbus
+import time
+import yaml
 import numpy as np
 from utils.transformation import NED2ENU
 
@@ -27,17 +29,37 @@ class AK8963():
     :param str nav_frame: navigation frame
     :param int hz: IMU frequency
     """
-    def __init__(self, bus, address, nav_frame="NED", hz=100):
+    def __init__(self, bus, address, nav_frame="NED", hz=100, calibration=False):
         # I2C connection parameter
         self.bus = bus
         self.address = address
 
         # Magnetometer parameter
-        self.mag_offset = np.zeros((3,1))
+        self.mag_bias = np.zeros((3,1))
+        self.mag_scale = np.zeros((3,1))
+        self.mag_misalignment = np.zeros((6,1))
+        self.mag_strength = 0
+        self.calibration = calibration
 
         # driver parameter
         self.nav_frame = nav_frame # original navigation frame of AK8963 is NED
         self.hz = hz
+
+        # Load old config from yaml file
+        if self.calibration == False: 
+            f = open("config.yaml", "r")
+            self.config = yaml.load(f, Loader=yaml.FullLoader)
+            mag_bias = ["mx_bias","my_bias","mz_bias"]
+            mag_scale = ["mx_scale","my_scale","mz_scale"]
+            # mag_misalignment = ["mag_xy_mis","mag_xz_mis","mag_yx_mis","mag_yz_mis","mag_zx_mis","mag_zy_mis"]
+            for i, element in enumerate(mag_bias):
+                self.mag_bias[i][0] = self.config[nav_frame][element]
+            for i, element in enumerate(mag_scale):
+                self.mag_scale[i][0] = self.config[nav_frame][element]
+            # for i, element in enumerate(mag_misalignment):
+            #     self.mag_misalignment[i][0] = self.config[nav_frame][element]
+
+        # Check parameter
         if (self.nav_frame != "ENU") and (self.nav_frame != "NED"):
             raise ValueError("Navigation frame should be either ENU or NED")
             
@@ -57,7 +79,7 @@ class AK8963():
         """
         Config AK8963 magnetometer mode
 
-        :param int bit: accelerometer configuration register value
+        :param int bit: magnetometer configuration register value
         """
         self.set_mode("fuse rom access", 16)
         self.get_adjust_mag()
@@ -99,6 +121,53 @@ class AK8963():
         self.adjustment_y = (((asay-128)*0.5/128)+1)
         self.adjustment_z = (((asaz-128)*0.5/128)+1)
 
+    def mag_calibration(self, s: int):
+        """
+        Calculate the magnetometer bias, scale, misalignment, geomagnetic field strength with four element calibration
+        Using least square method to solve the error
+
+        :param int s: time for calibration
+        :returns: 
+            - mag_scale (ndarray) - 3-axis magnetometer scale (soft-iron offset)
+            - mag_bias (ndarray) - 3-axis magnetometer bias (hard-iron offset)
+            - mag_misalignment (ndarray) - 3-axis magnetometer misalignment (soft-iron offset)
+            - mag_strength (float) - geomagnetic field strength
+
+        .. Reference
+        .. [1] `four element calibration <https://www.nxp.com/docs/en/application-note/AN5019.pdf>`
+        .. [2] `ten element calibration <https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py>`
+        """
+        if s > 0 and self.calibration == True:
+            input("Please move the IMU in slow motion in all possible directions, the calibration process takes {}s".format(s))
+            calibration = []
+            target = []
+            for i in range(s*self.hz):
+                mx, my, mz = self.get_mag()
+                calibration.append([mx, my, mz, 1])
+                target.append([mx**2+my**2+mz**2])
+                time.sleep(1/self.hz)
+            calibration = np.array(calibration)
+            target = np.array(target)
+
+            error_matrix = np.linalg.inv(calibration.T @ calibration) @ calibration.T @ target
+
+            # calculate bias
+            x_bias = 0.5*error_matrix[0][0]
+            y_bias = 0.5*error_matrix[1][0]
+            z_bias = 0.5*error_matrix[2][0]
+            self.mag_bias = np.array([[x_bias],[y_bias],[z_bias]])
+
+            # calculate scale
+            self.mag_scale = np.array([[1],[1],[1]])
+
+            # calculate misalignment
+            self.mag_misalignment = np.array([[0],[0],[0],[0],[0],[0]])
+
+            # calculate strength
+            strength = (error_matrix[3][0]+x_bias**2+y_bias**2+z_bias**2)**0.5
+            self.mag_strength = np.array([[strength]])
+        return self.mag_scale, self.mag_bias, self.mag_misalignment, self.mag_strength
+
     def get_mag(self):
         """
         AK8963 magnetometer data in Earth's reference (µT)
@@ -119,9 +188,9 @@ class AK8963():
             - mz (float) - z-axis magnetometer data in µT
         """
         try:
-            mx = self.read_raw_data(HXH, HXL)*self.mag_scale
-            my = self.read_raw_data(HYH, HYL)*self.mag_scale
-            mz = self.read_raw_data(HZH, HZL)*self.mag_scale
+            mx = self.read_raw_data(HXH, HXL)*self.mag_fs
+            my = self.read_raw_data(HYH, HYL)*self.mag_fs
+            mz = self.read_raw_data(HZH, HZL)*self.mag_fs
             # print("raw mx my mz: ", mx, my, mz)
         except:
             raise ConnectionError("I2C Connection Failure")
@@ -151,6 +220,24 @@ class AK8963():
 
         if self.nav_frame == "ENU":
             mx, my, mz = NED2ENU(mx, my, mz)
+
+        # magnetometer model: calibrated measurement = (matrix)*(raw measurement - bias)
+        x_scale = self.mag_scale[0][0]
+        y_scale = self.mag_scale[1][0]
+        z_scale = self.mag_scale[2][0]
+        x_bias = self.mag_bias[0][0]
+        y_bias = self.mag_bias[1][0]
+        z_bias = self.mag_bias[2][0]
+        xy_mis = self.mag_misalignment[0][0]
+        xz_mis = self.mag_misalignment[1][0]
+        yx_mis = self.mag_misalignment[2][0]
+        yz_mis = self.mag_misalignment[3][0]
+        zx_mis = self.mag_misalignment[4][0]
+        zy_mis = self.mag_misalignment[5][0]
+        if self.calibration == False:
+            mx = (x_scale * mx + xy_mis * my + xz_mis * mz) - x_bias
+            my = (yx_mis * mx + y_scale * my + yz_mis * mz) - y_bias
+            mz = (zx_mis * mx + zy_mis * my + z_scale * mz) - z_bias
         return mx, my, mz
 
     def set_mode(self, mode, bit):
@@ -185,7 +272,7 @@ class AK8963():
         else:
             raise ValueError("Wrong bit coding")
 
-        self.mag_scale = 4912*2/(2**bit)
+        self.mag_fs = 4912*2/(2**bit)
         print("Set AK8963 to {} mode".format(mode))
         self.bus.write_byte_data(self.address, CNTL, value)
         

@@ -1,14 +1,7 @@
 import numpy as np
 import math
 from .orientation import eul2dcm, right_hand_rule
-
-# navigation frame:
-#     ENU               NED
-# y    z                   x
-#  \   |                  /
-#   \  |                 ------- y 
-#    \ |                 |
-#     \|------- x        z
+from .transformation import NED2ENU
 
 # vertice indexs:
 #           5-------7
@@ -53,6 +46,8 @@ class wireframe:
     """
     Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces [1]_ [2]_
 
+    :param str nav_frame: navigation frame
+
     axis color: \n
     Positive of x axis is Red, Negative of x axis is Cyan \n
     Positive of y axis is Green, Negative of y axis is Magenta \n
@@ -66,8 +61,9 @@ class wireframe:
         self.vertices = []
         self.edges = []
         self.faces = []
-        self.rpy = []
         self.nav_frame = nav_frame
+
+        # Check parameter
         if (self.nav_frame != "ENU") and (self.nav_frame != "NED"):
             raise ValueError("Navigation frame should be either ENU or NED")
         if self.nav_frame == "ENU":
@@ -93,10 +89,9 @@ class wireframe:
             cube_faces = [(1, 5, 7, 3), (0, 4, 6, 2), (4, 5, 7, 6), (0, 1, 3, 2), (6, 7, 3, 2), (4, 5, 1, 0)]
             face_colors = [(0, 0, 255), (255, 255, 0), (255, 0, 0), (0, 255, 255), (255, 0, 255), (0, 255, 0)]
         elif self.nav_frame=="NED":
-            cube_faces = [(0, 4, 6, 2), (1, 5, 7, 3), (6, 7, 3, 2), (4, 5, 1, 0), (4, 5, 7, 6), (0, 1, 3, 2)]
-            face_colors = [(0, 0, 255), (255, 255, 0), (0, 255, 255), (255, 0, 0), (0, 255, 0), (255, 0, 255)]
+            cube_faces = [(1, 5, 7, 3), (0, 4, 6, 2), (4, 5, 7, 6), (0, 1, 3, 2), (6, 7, 3, 2), (4, 5, 1, 0)]
+            face_colors = [(0, 0, 255), (255, 255, 0), (0, 255, 0), (255, 0, 255), (0, 255, 255), (255, 0, 0)]
         self.add_faces(cube_faces, face_colors)
-
     def add_vertices(self, vertice_list, color_list):
         """
         Add vertice into IMU model
@@ -121,13 +116,11 @@ class wireframe:
         """
         Update IMU model attitude
 
-        :param ndarray rpy: roll, pitch, yaw angle
+        :param ndarray rpy: roll, pitch, yaw angle in degree
         """
-        roll = math.radians(rpy[0][0])
-        pitch = math.radians(rpy[1][0])
-        yaw = math.radians(rpy[2][0])
-        rpy = np.array([[roll],[pitch],[yaw]])
-        self.rpy = rpy
+        self.roll = math.radians(rpy[0][0])
+        self.pitch = math.radians(rpy[1][0])
+        self.yaw = math.radians(rpy[2][0])
 
     def rotate_point(self, point):
         """
@@ -137,18 +130,14 @@ class wireframe:
         :returns: 
             - new_point (numpy.matrix) - rotated coordinates
         """
+        roll, pitch, yaw = self.roll, self.pitch, self.yaw
         if self.nav_frame == "ENU":
-            maxtrix = right_hand_rule.euler_x_rotation(math.radians(-180))
-            new_rpy = maxtrix @ self.rpy
-            roll = -new_rpy.tolist()[0][0]
-            pitch = -new_rpy.tolist()[1][0]
-            yaw = new_rpy.tolist()[2][0]
+            DCM = eul2dcm(-roll, pitch, -yaw, seq=self.rotation_seq, coordinates="right")
         elif self.nav_frame == "NED":
-            maxtrix = right_hand_rule.euler_z_rotation(math.radians(90))
-            new_rpy = maxtrix @ self.rpy
-            roll = new_rpy.tolist()[0][0]
-            pitch = new_rpy.tolist()[1][0]
-            yaw = new_rpy.tolist()[2][0]
-        DCM = eul2dcm(roll, pitch, yaw, seq=self.rotation_seq, coordinates="right")
+            # When pitch angle pass through 90 degrees threshold
+            # the display of the IMU model pitch angle rotation
+            # reversed sign
+            roll, pitch, yaw = NED2ENU(roll, pitch, yaw)
+            DCM = eul2dcm(-roll, pitch, -yaw, seq=self.rotation_seq, coordinates="right")
         new_point = DCM @ point
         return new_point

@@ -6,9 +6,9 @@ from .orientation import eul2quat
 # DCM sequence aims to convert from Body to Navigation frame
 # Gravity vector is in Navigation frame
 # The seq in this program refers to DCM sequence
-# [fx]                [0]
-# [fy] = [DCM (ZXY)].T[0]
-# [fz]                [g]
+# [ax]                [0]
+# [ay] = [DCM (ZXY)].T[0]
+# [az]                [g]
 # body             Navigation
 
 def acc2eul(ax, ay, az, nav="ENU"):
@@ -96,7 +96,7 @@ def acc2quat(ax, ay, az, nav="ENU"):
 
 def accmag2eul(ax, ay, az, mx, my, mz, nav="ENU"):
     """
-    Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame [1]_
+    Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame included tilt compensation[1]_
 
     :param float ax: x axis accelerometer
     :param float ay: y axis accelerometer

@@ -73,6 +73,8 @@
   <h1>Source code for mpu9250_driver.ak8963</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/python3</span>
 <span class="kn">import</span> <span class="nn">smbus</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">utils.transformation</span> <span class="kn">import</span> <span class="n">NED2ENU</span>
 
@@ -102,17 +104,37 @@
 <span class="sd">    :param str nav_frame: navigation frame</span>
 <span class="sd">    :param int hz: IMU frequency</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;NED&quot;</span><span class="p">,</span> <span class="n">hz</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;NED&quot;</span><span class="p">,</span> <span class="n">hz</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">calibration</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1"># I2C connection parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bus</span> <span class="o">=</span> <span class="n">bus</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>
 
         <span class="c1"># Magnetometer parameter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mag_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_strength</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">=</span> <span class="n">calibration</span>
 
         <span class="c1"># driver parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span> <span class="c1"># original navigation frame of AK8963 is NED</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hz</span> <span class="o">=</span> <span class="n">hz</span>
+
+        <span class="c1"># Load old config from yaml file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> 
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+            <span class="n">mag_bias</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mx_bias&quot;</span><span class="p">,</span><span class="s2">&quot;my_bias&quot;</span><span class="p">,</span><span class="s2">&quot;mz_bias&quot;</span><span class="p">]</span>
+            <span class="n">mag_scale</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mx_scale&quot;</span><span class="p">,</span><span class="s2">&quot;my_scale&quot;</span><span class="p">,</span><span class="s2">&quot;mz_scale&quot;</span><span class="p">]</span>
+            <span class="c1"># mag_misalignment = [&quot;mag_xy_mis&quot;,&quot;mag_xz_mis&quot;,&quot;mag_yx_mis&quot;,&quot;mag_yz_mis&quot;,&quot;mag_zx_mis&quot;,&quot;mag_zy_mis&quot;]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mag_bias</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mag_bias</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">nav_frame</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mag_scale</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">nav_frame</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+            <span class="c1"># for i, element in enumerate(mag_misalignment):</span>
+            <span class="c1">#     self.mag_misalignment[i][0] = self.config[nav_frame][element]</span>
+
+        <span class="c1"># Check parameter</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;ENU&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;NED&quot;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
             
@@ -137,7 +159,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Config AK8963 magnetometer mode</span>
 
-<span class="sd">        :param int bit: accelerometer configuration register value</span>
+<span class="sd">        :param int bit: magnetometer configuration register value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;fuse rom access&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_adjust_mag</span><span class="p">()</span>
@@ -186,6 +208,56 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">adjustment_z</span> <span class="o">=</span> <span class="p">(((</span><span class="n">asaz</span><span class="o">-</span><span class="mi">128</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="o">/</span><span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="AK8963.mag_calibration">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.mag_calibration">[docs]</a>
+    <span class="k">def</span> <span class="nf">mag_calibration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the magnetometer bias, scale, misalignment, geomagnetic field strength with four element calibration</span>
+<span class="sd">        Using least square method to solve the error</span>
+
+<span class="sd">        :param int s: time for calibration</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - mag_scale (ndarray) - 3-axis magnetometer scale (soft-iron offset)</span>
+<span class="sd">            - mag_bias (ndarray) - 3-axis magnetometer bias (hard-iron offset)</span>
+<span class="sd">            - mag_misalignment (ndarray) - 3-axis magnetometer misalignment (soft-iron offset)</span>
+<span class="sd">            - mag_strength (float) - geomagnetic field strength</span>
+
+<span class="sd">        .. Reference</span>
+<span class="sd">        .. [1] `four element calibration &lt;https://www.nxp.com/docs/en/application-note/AN5019.pdf&gt;`</span>
+<span class="sd">        .. [2] `ten element calibration &lt;https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Please move the IMU in slow motion in all possible directions, the calibration process takes </span><span class="si">{}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+            <span class="n">calibration</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
+                <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mag</span><span class="p">()</span>
+                <span class="n">calibration</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">target</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">mx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">my</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">mz</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+            <span class="n">calibration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">calibration</span><span class="p">)</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+            <span class="n">error_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">calibration</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">calibration</span><span class="p">)</span> <span class="o">@</span> <span class="n">calibration</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">target</span>
+
+            <span class="c1"># calculate bias</span>
+            <span class="n">x_bias</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">error_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y_bias</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">error_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">z_bias</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">error_matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mag_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x_bias</span><span class="p">],[</span><span class="n">y_bias</span><span class="p">],[</span><span class="n">z_bias</span><span class="p">]])</span>
+
+            <span class="c1"># calculate scale</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">]])</span>
+
+            <span class="c1"># calculate misalignment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]])</span>
+
+            <span class="c1"># calculate strength</span>
+            <span class="n">strength</span> <span class="o">=</span> <span class="p">(</span><span class="n">error_matrix</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">x_bias</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">y_bias</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">z_bias</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mag_strength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">strength</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_strength</span></div>
+
+
 <div class="viewcode-block" id="AK8963.get_mag">
 <a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_mag">[docs]</a>
     <span class="k">def</span> <span class="nf">get_mag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -208,9 +280,9 @@
 <span class="sd">            - mz (float) - z-axis magnetometer data in µT</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HXH</span><span class="p">,</span> <span class="n">HXL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span>
-            <span class="n">my</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HYH</span><span class="p">,</span> <span class="n">HYL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span>
-            <span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HZH</span><span class="p">,</span> <span class="n">HZL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span>
+            <span class="n">mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HXH</span><span class="p">,</span> <span class="n">HXL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_fs</span>
+            <span class="n">my</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HYH</span><span class="p">,</span> <span class="n">HYL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_fs</span>
+            <span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HZH</span><span class="p">,</span> <span class="n">HZL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_fs</span>
             <span class="c1"># print(&quot;raw mx my mz: &quot;, mx, my, mz)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;I2C Connection Failure&quot;</span><span class="p">)</span>
@@ -240,6 +312,24 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
             <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="n">NED2ENU</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">)</span>
+
+        <span class="c1"># magnetometer model: calibrated measurement = (matrix)*(raw measurement - bias)</span>
+        <span class="n">x_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">z_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_bias</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_bias</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">z_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_bias</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xy_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xz_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">yx_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">yz_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zx_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zy_mis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">mx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_scale</span> <span class="o">*</span> <span class="n">mx</span> <span class="o">+</span> <span class="n">xy_mis</span> <span class="o">*</span> <span class="n">my</span> <span class="o">+</span> <span class="n">xz_mis</span> <span class="o">*</span> <span class="n">mz</span><span class="p">)</span> <span class="o">-</span> <span class="n">x_bias</span>
+            <span class="n">my</span> <span class="o">=</span> <span class="p">(</span><span class="n">yx_mis</span> <span class="o">*</span> <span class="n">mx</span> <span class="o">+</span> <span class="n">y_scale</span> <span class="o">*</span> <span class="n">my</span> <span class="o">+</span> <span class="n">yz_mis</span> <span class="o">*</span> <span class="n">mz</span><span class="p">)</span> <span class="o">-</span> <span class="n">y_bias</span>
+            <span class="n">mz</span> <span class="o">=</span> <span class="p">(</span><span class="n">zx_mis</span> <span class="o">*</span> <span class="n">mx</span> <span class="o">+</span> <span class="n">zy_mis</span> <span class="o">*</span> <span class="n">my</span> <span class="o">+</span> <span class="n">z_scale</span> <span class="o">*</span> <span class="n">mz</span><span class="p">)</span> <span class="o">-</span> <span class="n">z_bias</span>
         <span class="k">return</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span></div>
 
 
@@ -277,7 +367,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong bit coding&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span> <span class="o">=</span> <span class="mi">4912</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">bit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_fs</span> <span class="o">=</span> <span class="mi">4912</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">bit</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Set AK8963 to </span><span class="si">{}</span><span class="s2"> mode&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">CNTL</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
