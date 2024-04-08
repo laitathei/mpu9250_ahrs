@@ -22,7 +22,7 @@ if __name__ == '__main__':
     imu.initialization()
     gyro_scale, gyro_bias, gyro_misalignment = imu.mpu6500.gyro_calibration(gyro_time)
     accel_scale, accel_bias, accel_misalignment = imu.mpu6500.accel_calibration(acc_time)
-    mag_scale, mag_bias, mag_misalignment, mag_geo_strength = imu.ak8963.mag_calibration(mag_time)
+    mag_scale, mag_bias, mag_misalignment, mag_strength = imu.ak8963.mag_calibration(mag_time)
     bias = np.vstack((np.vstack((gyro_bias,accel_bias)),mag_bias))
     scale = np.vstack((np.vstack((gyro_scale,accel_scale)),mag_scale))
     misalignment = np.vstack((np.vstack((gyro_misalignment,accel_misalignment)),mag_misalignment))
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     config = yaml.load(open("config.yaml", "r"), Loader=yaml.FullLoader)
     bias_parameter = ["gx_bias","gy_bias","gz_bias","ax_bias","ay_bias","az_bias","mx_bias","my_bias","mz_bias"]
     scale_parameter = ["gx_scale","gy_scale","gz_scale","ax_scale","ay_scale","az_scale","mx_scale","my_scale","mz_scale"]
-
+    
     bias_scale = {}
     for i, element in enumerate(bias_parameter):
         bias_scale[element] = float(bias[i][0])

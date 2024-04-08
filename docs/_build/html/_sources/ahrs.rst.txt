@@ -20,6 +20,14 @@ ahrs.mahony module
    :undoc-members:
    :show-inheritance:
 
+ahrs.ekf module
+--------------------
+
+.. automodule:: ahrs.ekf
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

@@ -131,7 +131,7 @@ class AK8963():
             - mag_scale (ndarray) - 3-axis magnetometer scale (soft-iron offset)
             - mag_bias (ndarray) - 3-axis magnetometer bias (hard-iron offset)
             - mag_misalignment (ndarray) - 3-axis magnetometer misalignment (soft-iron offset)
-            - mag_strength (float) - geomagnetic field strength
+            - mag_strength (float) - geomagnetic field strength in µT
 
         .. Reference
         .. [1] `four element calibration <https://www.nxp.com/docs/en/application-note/AN5019.pdf>`

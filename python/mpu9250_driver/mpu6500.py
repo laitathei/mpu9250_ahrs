@@ -261,7 +261,7 @@ class MPU6500():
 
     def accel_calibration(self, s: int):
         """
-        Calculate the accelerometer bias, scale, misalignment with six calibration measurements
+        Calculate the accelerometer bias, scale, misalignment with six calibration measurements \n
         Using least square method to solve the error
 
         :param int s: time for calibration
@@ -269,6 +269,7 @@ class MPU6500():
             - accel_scale (ndarray) - 3-axis accelerometer scale
             - accel_bias (ndarray) - 3-axis accelerometer bias
             - accel_misalignment (ndarray) - 3-axis accelerometer misalignment
+
         .. Reference
         .. [1] `Accelerometer calibration <https://zhuanlan.zhihu.com/p/296381805>`
         .. [2] 'Least square prove <https://zhuanlan.zhihu.com/p/87582571>'

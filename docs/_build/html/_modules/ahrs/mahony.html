@@ -80,7 +80,6 @@
 <span class="k">class</span> <span class="nc">Mahony</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mahony is one of the AHRS filter applied with complementary filter [1]_</span>
-<span class="sd">    Kp refers to</span>
 
 <span class="sd">    :param int axis: axis data for fusion</span>
 <span class="sd">    :param float kp: proportional gain</span>
@@ -88,7 +87,7 @@
 <span class="sd">    :param str nav_frame: navigation frame</span>
 
 <span class="sd">    .. Reference</span>
-<span class="sd">    .. [1] &#39;ahrs &lt;https://ahrs.readthedocs.io/en/latest/filters/mahony.html#ahrs.filters.mahony.Mahony.updateIMU&gt;&#39;</span>
+<span class="sd">    .. [1] &#39;Mahony &lt;https://ahrs.readthedocs.io/en/latest/filters/mahony.html#ahrs.filters.mahony.Mahony.updateIMU&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">kp</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">ki</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;NED&quot;</span><span class="p">):</span>
         <span class="c1"># Body frame is front(X)-right(Y)-down(Z), Navigation frame is NED</span>
@@ -155,15 +154,6 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span> <span class="c1"># 9 axis fusion (gyroscope, accelerometer and magnetometer)</span>
             <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_mag_fusion</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
-
-        
-<div class="viewcode-block" id="Mahony.algo">
-<a class="viewcode-back" href="../../ahrs.html#ahrs.mahony.Mahony.algo">[docs]</a>
-    <span class="k">def</span> <span class="nf">algo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span> <span class="c1"># 6 axis fusion (gyroscope and accelerometer)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_fusion</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span> <span class="c1"># 9 axis fusion (gyroscope, accelerometer and magnetometer)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_mag_fusion</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Mahony.gyro_acc_fusion">
@@ -259,8 +249,7 @@
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
                 <span class="n">v_g</span> <span class="o">=</span> <span class="n">DCM</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">])</span> <span class="c1"># convert expected gravity vector from navigation frame to body frame</span>
             <span class="n">acc_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">v_g</span><span class="p">)</span> <span class="c1"># error of accelerometer (gravity vector in body frame cross prodcut with accelerometer vector)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;acc_error:&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">acc_error</span><span class="p">)</span>
+
             <span class="c1"># magnetometer part</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">mag</span><span class="o">/</span><span class="n">m_norm</span> <span class="c1"># normalize magnetometer vector</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>

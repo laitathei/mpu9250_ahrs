@@ -317,6 +317,24 @@
     <span class="n">U</span> <span class="o">=</span> <span class="n">ENU</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span></div>
 
+
+<div class="viewcode-block" id="skew_symmetric">
+<a class="viewcode-back" href="../../utils.html#utils.transformation.skew_symmetric">[docs]</a>
+<span class="k">def</span> <span class="nf">skew_symmetric</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create skew symmetric matrix by vector</span>
+
+<span class="sd">    :param float x: 1st element of vector</span>
+<span class="sd">    :param float y: 2nd element of vector</span>
+<span class="sd">    :param float z: 3rd element of vector</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - matrix (ndarray) - skew-symmetric matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span>
+                       <span class="p">[</span><span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">],</span>
+                       <span class="p">[</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">matrix</span></div>
+
 </pre></div>
 
            </div>

@@ -226,3 +226,18 @@ def NED2ENU(N, E, D):
     N = ENU[1][0]
     U = ENU[2][0]
     return E, N, U
+
+def skew_symmetric(x, y, z):
+    """
+    Create skew symmetric matrix by vector
+
+    :param float x: 1st element of vector
+    :param float y: 2nd element of vector
+    :param float z: 3rd element of vector
+    :returns: 
+        - matrix (ndarray) - skew-symmetric matrix
+    """
+    matrix = np.array([[0, -z, y],
+                       [z, 0, -x],
+                       [-y, x, 0.0]])
+    return matrix

@@ -79,6 +79,7 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
@@ -109,13 +110,20 @@
 </li>
       <li><a href="utils.html#utils.wireframe.wireframe.add_vertices">add_vertices() (utils.wireframe.wireframe method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     ahrs
 
       <ul>
         <li><a href="ahrs.html#module-ahrs">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    ahrs.ekf
+
+      <ul>
+        <li><a href="ahrs.html#module-ahrs.ekf">module</a>
 </li>
       </ul></li>
       <li>
@@ -133,8 +141,6 @@
 </li>
       </ul></li>
       <li><a href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963">AK8963 (class in mpu9250_driver.ak8963)</a>
-</li>
-      <li><a href="ahrs.html#ahrs.mahony.Mahony.algo">algo() (ahrs.mahony.Mahony method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -172,6 +178,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ahrs.html#ahrs.ekf.EKF">EKF (class in ahrs.ekf)</a>
+</li>
       <li><a href="utils.html#utils.transformation.ENU2NED">ENU2NED() (in module utils.transformation)</a>
 </li>
       <li><a href="utils.html#utils.orientation.eul2dcm">eul2dcm() (in module utils.orientation)</a>
@@ -204,6 +212,12 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.F">F() (ahrs.ekf.EKF method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.f">f() (ahrs.ekf.EKF method)</a>
+</li>
       <li><a href="utils.html#utils.wireframe.Face">Face (class in utils.wireframe)</a>
 </li>
   </ul></td>
@@ -250,19 +264,35 @@
         <li><a href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_temp">(mpu9250_driver.mpu9250.MPU9250 method)</a>
 </li>
       </ul></li>
-      <li><a href="ahrs.html#ahrs.madgwick.Madgwick.gyro_acc_fusion">gyro_acc_fusion() (ahrs.madgwick.Madgwick method)</a>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.gyro_acc_fusion">gyro_acc_fusion() (ahrs.ekf.EKF method)</a>
 
       <ul>
+        <li><a href="ahrs.html#ahrs.madgwick.Madgwick.gyro_acc_fusion">(ahrs.madgwick.Madgwick method)</a>
+</li>
         <li><a href="ahrs.html#ahrs.mahony.Mahony.gyro_acc_fusion">(ahrs.mahony.Mahony method)</a>
 </li>
       </ul></li>
-      <li><a href="ahrs.html#ahrs.madgwick.Madgwick.gyro_acc_mag_fusion">gyro_acc_mag_fusion() (ahrs.madgwick.Madgwick method)</a>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.gyro_acc_mag_fusion">gyro_acc_mag_fusion() (ahrs.ekf.EKF method)</a>
 
       <ul>
+        <li><a href="ahrs.html#ahrs.madgwick.Madgwick.gyro_acc_mag_fusion">(ahrs.madgwick.Madgwick method)</a>
+</li>
         <li><a href="ahrs.html#ahrs.mahony.Mahony.gyro_acc_mag_fusion">(ahrs.mahony.Mahony method)</a>
 </li>
       </ul></li>
       <li><a href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.gyro_calibration">gyro_calibration() (mpu9250_driver.mpu6500.MPU6500 method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.H">H() (ahrs.ekf.EKF method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.h">h() (ahrs.ekf.EKF method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -272,9 +302,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="visualization.html#visualization.imu_viewer">imu_viewer (class in visualization)</a>
 </li>
-      <li><a href="ahrs.html#ahrs.madgwick.Madgwick.init_quat">init_quat() (ahrs.madgwick.Madgwick method)</a>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.init_quat">init_quat() (ahrs.ekf.EKF method)</a>
 
       <ul>
+        <li><a href="ahrs.html#ahrs.madgwick.Madgwick.init_quat">(ahrs.madgwick.Madgwick method)</a>
+</li>
         <li><a href="ahrs.html#ahrs.mahony.Mahony.init_quat">(ahrs.mahony.Mahony method)</a>
 </li>
       </ul></li>
@@ -318,6 +350,8 @@
 
       <ul>
         <li><a href="ahrs.html#module-ahrs">ahrs</a>
+</li>
+        <li><a href="ahrs.html#module-ahrs.ekf">ahrs.ekf</a>
 </li>
         <li><a href="ahrs.html#module-ahrs.madgwick">ahrs.madgwick</a>
 </li>
@@ -408,6 +442,8 @@
 </li>
       <li><a href="utils.html#utils.orientation.quat_conjugate">quat_conjugate() (in module utils.orientation)</a>
 </li>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.quat_differential">quat_differential() (ahrs.ekf.EKF method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#utils.orientation.quat_multi">quat_multi() (in module utils.orientation)</a>
@@ -436,9 +472,11 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ahrs.html#ahrs.madgwick.Madgwick.run">run() (ahrs.madgwick.Madgwick method)</a>
+      <li><a href="ahrs.html#ahrs.ekf.EKF.run">run() (ahrs.ekf.EKF method)</a>
 
       <ul>
+        <li><a href="ahrs.html#ahrs.madgwick.Madgwick.run">(ahrs.madgwick.Madgwick method)</a>
+</li>
         <li><a href="ahrs.html#ahrs.mahony.Mahony.run">(ahrs.mahony.Mahony method)</a>
 </li>
         <li><a href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.run">(mpu9250_driver.mpu9250.MPU9250 method)</a>
@@ -453,6 +491,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.set_mode">set_mode() (mpu9250_driver.ak8963.AK8963 method)</a>
+</li>
+      <li><a href="utils.html#utils.transformation.skew_symmetric">skew_symmetric() (in module utils.transformation)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>

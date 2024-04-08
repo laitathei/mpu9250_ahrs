@@ -76,7 +76,7 @@
 <span class="kn">from</span> <span class="nn">utils.wireframe</span> <span class="kn">import</span> <span class="n">wireframe</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
 <span class="kn">from</span> <span class="nn">mpu9250_driver.mpu9250</span> <span class="kn">import</span> <span class="n">MPU9250</span>
-<span class="kn">from</span> <span class="nn">ahrs</span> <span class="kn">import</span> <span class="n">madgwick</span><span class="p">,</span> <span class="n">mahony</span>
+<span class="kn">from</span> <span class="nn">ahrs</span> <span class="kn">import</span> <span class="n">madgwick</span><span class="p">,</span> <span class="n">mahony</span><span class="p">,</span> <span class="n">ekf</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
 <div class="viewcode-block" id="imu_viewer">
@@ -283,7 +283,8 @@
     <span class="n">axis</span> <span class="o">=</span> <span class="mi">9</span>
     <span class="n">calibration</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># ahrs = madgwick.Madgwick(axis, 1, nav_frame)</span>
-    <span class="n">ahrs</span> <span class="o">=</span> <span class="n">mahony</span><span class="o">.</span><span class="n">Mahony</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nav_frame</span><span class="p">)</span>
+    <span class="c1"># ahrs = mahony.Mahony(axis, 0.1, 0, nav_frame)</span>
+    <span class="n">ahrs</span> <span class="o">=</span> <span class="n">ekf</span><span class="o">.</span><span class="n">EKF</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.3</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.8</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> <span class="n">nav_frame</span><span class="p">)</span>
     <span class="n">imu</span> <span class="o">=</span> <span class="n">MPU9250</span><span class="p">(</span><span class="n">nav_frame</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">window_hz</span><span class="p">,</span> <span class="n">calibration</span><span class="p">)</span>
     <span class="n">imu</span><span class="o">.</span><span class="n">initialization</span><span class="p">()</span>
     <span class="n">imu</span><span class="o">.</span><span class="n">start_thread</span><span class="p">(</span><span class="n">ahrs</span><span class="p">)</span>
