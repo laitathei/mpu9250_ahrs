@@ -5,7 +5,6 @@ from utils.orientation import quat2dcm, quat_multi, quat2eul
 class Mahony():
     """
     Mahony is one of the AHRS filter applied with complementary filter [1]_
-    Kp refers to
 
     :param int axis: axis data for fusion
     :param float kp: proportional gain
@@ -13,7 +12,7 @@ class Mahony():
     :param str nav_frame: navigation frame
 
     .. Reference
-    .. [1] 'ahrs <https://ahrs.readthedocs.io/en/latest/filters/mahony.html#ahrs.filters.mahony.Mahony.updateIMU>'
+    .. [1] 'Mahony <https://ahrs.readthedocs.io/en/latest/filters/mahony.html#ahrs.filters.mahony.Mahony.updateIMU>'
     """
     def __init__(self, axis, kp=0.1, ki=0.1, nav_frame="NED"):
         # Body frame is front(X)-right(Y)-down(Z), Navigation frame is NED
@@ -75,12 +74,6 @@ class Mahony():
         elif self.axis == 9: # 9 axis fusion (gyroscope, accelerometer and magnetometer)
             w, x, y, z = self.gyro_acc_mag_fusion()
         return w, x, y, z
-        
-    def algo(self):
-        if self.axis == 6: # 6 axis fusion (gyroscope and accelerometer)
-            self.gyro_acc_fusion()
-        elif self.axis == 9: # 9 axis fusion (gyroscope, accelerometer and magnetometer)
-            self.gyro_acc_mag_fusion()
 
     def gyro_acc_fusion(self):
         """
@@ -170,8 +163,7 @@ class Mahony():
             elif self.nav_frame == "NED":
                 v_g = DCM.T @ np.array([0.0, 0.0, -1.0]) # convert expected gravity vector from navigation frame to body frame
             acc_error = np.cross(a, v_g) # error of accelerometer (gravity vector in body frame cross prodcut with accelerometer vector)
-            print("acc_error:")
-            print(acc_error)
+
             # magnetometer part
             m = mag/m_norm # normalize magnetometer vector
             m = np.squeeze(m.T)

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ahrs.ekf &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">python</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ahrs.ekf</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ahrs.ekf</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python3</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">utils.orientation</span> <span class="kn">import</span> <span class="n">quat2dcm</span><span class="p">,</span> <span class="n">quat2eul</span>
+<span class="kn">from</span> <span class="nn">utils.transformation</span> <span class="kn">import</span> <span class="n">skew_symmetric</span>
+
+<div class="viewcode-block" id="EKF">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF">[docs]</a>
+<span class="k">class</span> <span class="nc">EKF</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extended Kalman filter is one of the AHRS filter dealing with sensor gaussian noise [1]_</span>
+
+<span class="sd">    :param int axis: axis data for fusion</span>
+<span class="sd">    :param list noise: gyroscope, accelerometer, magnetometer gaussian noise</span>
+<span class="sd">    :param str nav_frame: navigation frame</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] &#39;EKF &lt;https://ahrs.readthedocs.io/en/latest/filters/ekf.html&gt;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.8</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;NED&quot;</span><span class="p">):</span>
+        <span class="c1"># Body frame is front(X)-right(Y)-down(Z), Navigation frame is NED</span>
+        <span class="c1"># Body frame is front(Y)-right(X)-down(Z), Navigation frame is ENU</span>
+
+        <span class="c1"># algorithm parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span> <span class="c1"># 6 or 9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span> <span class="c1"># ENU or NED</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_noise</span> <span class="o">=</span> <span class="n">noise</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># increase noise means gyroscope measurement not accurate, decrease noise means gyroscope measurement accurate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accel_noise</span> <span class="o">=</span> <span class="n">noise</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># increae noise means accelerometer measurement not accurate, decrease noise means accelerometer measurement accurate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_noise</span> <span class="o">=</span> <span class="n">noise</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># increase noise means magnetometer measurement not accurate, decrease noise means magnetometer measurement accurate</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_noise</span><span class="p">]])</span> <span class="c1"># measurement noise vector</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_noise</span><span class="p">],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_noise</span><span class="p">]])</span> <span class="c1"># measurement noise vector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="c1"># measurement noise covariance matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1"># identity matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1"># initial state covariance</span>
+
+        <span class="c1"># Hong Kong geomagnetic field parameter</span>
+        <span class="c1"># http://www.geomag.bgs.ac.uk/data_service/models_compass/wmm_calc.html</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">declination</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.404</span> <span class="c1"># declination angle (degree)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inclination</span> <span class="o">=</span> <span class="mf">33.739</span> <span class="c1"># inclination angle (degree)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">north_intensity</span> <span class="o">=</span> <span class="mi">37794</span> <span class="c1"># north intensity (nT)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">east_intensity</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2248</span> <span class="c1"># east intensity (nT)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertical_intensity</span> <span class="o">=</span> <span class="mi">25287</span> <span class="c1"># vertical intensity (nT)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontal_intensity</span> <span class="o">=</span> <span class="mi">37861</span> <span class="c1"># horizontal intensity (nT)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_intensity</span> <span class="o">=</span> <span class="mi">45529</span> <span class="c1"># total intensity (nT)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">]])</span> <span class="c1"># Gravitational Reference Vector</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclination</span><span class="p">))],[</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclination</span><span class="p">))]])</span><span class="c1"># Magnetic Reference Vector</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclination</span><span class="p">))],[</span><span class="mi">0</span><span class="p">],[</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclination</span><span class="p">))]])</span><span class="c1"># Magnetic Reference Vector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;ENU&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame must be ENU or NED&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">!=</span> <span class="mi">6</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Axis must be 6 or 9&quot;</span><span class="p">)</span>
+            
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Extended Kalman filter in use&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EKF.init_quat">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.init_quat">[docs]</a>
+    <span class="k">def</span> <span class="nf">init_quat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extended Kalman filter initial attitude</span>
+
+<span class="sd">        :param float w: Quaternion magnitude</span>
+<span class="sd">        :param float x: Quaternion X axis</span>
+<span class="sd">        :param float y: Quaternion Y axis</span>
+<span class="sd">        :param float z: Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">w</span><span class="p">],[</span><span class="n">x</span><span class="p">],[</span><span class="n">y</span><span class="p">],[</span><span class="n">z</span><span class="p">]])</span></div>
+
+        
+<div class="viewcode-block" id="EKF.run">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">gyr</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">hz</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iteration of Extended Kalman filter</span>
+
+<span class="sd">        :param ndarray acc: accelerometer data</span>
+<span class="sd">        :param ndarray gyr: gyroscope data</span>
+<span class="sd">        :param ndarray mag: magnetometer data</span>
+<span class="sd">        :param int hz: IMU frequency</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - w (float) - Quaternion magnitude</span>
+<span class="sd">            - x (float) - Quaternion X axis</span>
+<span class="sd">            - y (float) - Quaternion Y axis</span>
+<span class="sd">            - z (float) - Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">acc</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;acc shape must be (3,1)&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">gyr</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;gyr shape must be (3,1)&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mag</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mag shape must be (3,1)&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">imu_hz</span> <span class="o">=</span> <span class="n">hz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">imu_hz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">acc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyr</span> <span class="o">=</span> <span class="n">gyr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag</span> <span class="o">=</span> <span class="n">mag</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_fusion</span><span class="p">()</span> <span class="c1"># 6 axis fusion (gyroscope, accelerometer)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_acc_mag_fusion</span><span class="p">()</span> <span class="c1"># 9 axis fusion (gyroscope, accelerometer and magnetometer)</span>
+        <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="EKF.gyro_acc_fusion">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.gyro_acc_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">gyro_acc_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extended Kalman filter 6 axis data fusion</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing upwards \n</span>
+<span class="sd">        Accelerometer in Earth&#39;s reference (m/s^2) \n</span>
+<span class="sd">        Gyroscope in right hand coordinates (rad/s) \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing downwards \n</span>
+<span class="sd">        Accelerometer in Earth&#39;s reference (m/s^2) \n</span>
+<span class="sd">        Gyroscope in right hand coordinates (rad/s) \n</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - w (float) - Quaternion magnitude</span>
+<span class="sd">            - x (float) - Quaternion X axis</span>
+<span class="sd">            - y (float) - Quaternion Y axis</span>
+<span class="sd">            - z (float) - Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">gyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gyr</span><span class="p">)</span>
+        <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mag</span><span class="p">)</span>
+        <span class="n">a_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">m_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span>
+        <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">a_norm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">acc</span><span class="o">/</span><span class="n">a_norm</span> <span class="c1"># normalize acceleration vector</span>
+            <span class="c1"># ----- Prediction -----</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">gyr</span><span class="p">)</span> <span class="c1"># Predicted State</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">(</span><span class="n">gyr</span><span class="p">)</span> <span class="c1"># Discreted State Transition Matrix</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">qx</span><span class="p">,</span><span class="o">-</span><span class="n">qy</span><span class="p">,</span><span class="o">-</span><span class="n">qz</span><span class="p">],</span> <span class="c1"># Jacobian W = df/dω</span>
+                                          <span class="p">[</span><span class="n">qw</span><span class="p">,</span><span class="o">-</span><span class="n">qz</span><span class="p">,</span><span class="n">qy</span><span class="p">],</span>
+                                          <span class="p">[</span><span class="n">qz</span><span class="p">,</span><span class="n">qw</span><span class="p">,</span><span class="o">-</span><span class="n">qx</span><span class="p">],</span>
+                                          <span class="p">[</span><span class="o">-</span><span class="n">qy</span><span class="p">,</span><span class="n">qx</span><span class="p">,</span><span class="n">qw</span><span class="p">]])</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_noise</span> <span class="o">*</span> <span class="n">W</span> <span class="o">@</span> <span class="n">W</span><span class="o">.</span><span class="n">T</span> <span class="c1"># Process Noise Covariance Matrix</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">F</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">@</span> <span class="n">F</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">Q</span> <span class="c1"># Predicted Covariance Matrix</span>
+            <span class="c1"># ----- Correction -----</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="n">y</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="c1"># Expected Measurement Function</span>
+            <span class="n">v</span>   <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">y</span> <span class="c1"># Innovation (Measurement Residual)</span>
+            <span class="n">H</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="c1"># Discreted Measurement Matrix</span>
+            <span class="n">S</span>   <span class="o">=</span> <span class="n">H</span> <span class="o">@</span> <span class="n">P</span> <span class="o">@</span> <span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="c1"># Measurement Prediction Covariance</span>
+            <span class="c1"># Replace np.linalg.inv by sp.linalg.inv for accelerating matrix calculation</span>
+            <span class="n">K</span>   <span class="o">=</span> <span class="n">P</span> <span class="o">@</span> <span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">sp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="c1"># Kalman Gain </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">-</span> <span class="n">K</span> <span class="o">@</span> <span class="n">H</span><span class="p">)</span> <span class="o">@</span> <span class="n">P</span> <span class="c1"># Updated Covariance Matrix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">K</span> <span class="o">@</span> <span class="n">v</span> <span class="c1"># Corrected State</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">)</span>
+            <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span></div>
+
+
+<div class="viewcode-block" id="EKF.gyro_acc_mag_fusion">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.gyro_acc_mag_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">gyro_acc_mag_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extended Kalman filter 9 axis data fusion</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing upwards \n</span>
+<span class="sd">        Accelerometer in Earth&#39;s reference (m/s^2) \n</span>
+<span class="sd">        Gyroscope in right hand coordinates (rad/s) \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing downwards \n</span>
+<span class="sd">        Accelerometer in Earth&#39;s reference (m/s^2) \n</span>
+<span class="sd">        Gyroscope in right hand coordinates (rad/s) \n</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - w (float) - Quaternion magnitude</span>
+<span class="sd">            - x (float) - Quaternion X axis</span>
+<span class="sd">            - y (float) - Quaternion Y axis</span>
+<span class="sd">            - z (float) - Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">gyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gyr</span><span class="p">)</span>
+        <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mag</span><span class="p">)</span>
+        <span class="n">a_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">m_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span>
+        <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">a_norm</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">m_norm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">acc</span><span class="o">/</span><span class="n">a_norm</span> <span class="c1"># normalize acceleration vector</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">mag</span><span class="o">/</span><span class="n">m_norm</span> <span class="c1"># normalize magnetometer vector</span>
+            <span class="c1"># ----- Prediction -----</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">gyr</span><span class="p">)</span> <span class="c1"># Predicted State</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">(</span><span class="n">gyr</span><span class="p">)</span> <span class="c1"># Discreted State Transition Matrix</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">qx</span><span class="p">,</span><span class="o">-</span><span class="n">qy</span><span class="p">,</span><span class="o">-</span><span class="n">qz</span><span class="p">],</span> <span class="c1"># Jacobian W = df/dω</span>
+                                          <span class="p">[</span><span class="n">qw</span><span class="p">,</span><span class="o">-</span><span class="n">qz</span><span class="p">,</span><span class="n">qy</span><span class="p">],</span>
+                                          <span class="p">[</span><span class="n">qz</span><span class="p">,</span><span class="n">qw</span><span class="p">,</span><span class="o">-</span><span class="n">qx</span><span class="p">],</span>
+                                          <span class="p">[</span><span class="o">-</span><span class="n">qy</span><span class="p">,</span><span class="n">qx</span><span class="p">,</span><span class="n">qw</span><span class="p">]])</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyro_noise</span> <span class="o">*</span> <span class="n">W</span> <span class="o">@</span> <span class="n">W</span><span class="o">.</span><span class="n">T</span> <span class="c1"># Process Noise Covariance Matrix</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">F</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">@</span> <span class="n">F</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">Q</span> <span class="c1"># Predicted Covariance Matrix</span>
+            <span class="c1"># ----- Correction -----</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+            <span class="n">y</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="c1"># Expected Measurement Function</span>
+            <span class="n">v</span>   <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">y</span> <span class="c1"># Innovation (Measurement Residual)</span>
+            <span class="n">H</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="c1"># Discreted Measurement Matrix</span>
+            <span class="n">S</span>   <span class="o">=</span> <span class="n">H</span> <span class="o">@</span> <span class="n">P</span> <span class="o">@</span> <span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="c1"># Measurement Prediction Covariance</span>
+            <span class="c1"># Replace np.linalg.inv by sp.linalg.inv for accelerating matrix calculation</span>
+            <span class="n">K</span>   <span class="o">=</span> <span class="n">P</span> <span class="o">@</span> <span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">sp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="c1"># Kalman Gain </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">-</span> <span class="n">K</span> <span class="o">@</span> <span class="n">H</span><span class="p">)</span> <span class="o">@</span> <span class="n">P</span> <span class="c1"># Updated Covariance Matrix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">K</span> <span class="o">@</span> <span class="n">v</span> <span class="c1"># Corrected State</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">)</span>
+            <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span></div>
+
+
+<div class="viewcode-block" id="EKF.quat_differential">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.quat_differential">[docs]</a>
+    <span class="k">def</span> <span class="nf">quat_differential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gyro</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate differential equation for quaternion</span>
+
+<span class="sd">        :param ndarray gyro: gyroscope data in rad/s</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - matrix (ndarray) - differential equation for quaternion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#          [0 , -wx, -wy, -wz]</span>
+        <span class="c1"># matrix = [wx,  0 ,  wz, -wy]</span>
+        <span class="c1">#          [wy, -wz,  0 ,  wx]</span>
+        <span class="c1">#          [wz,  wy, -wx,  0 ]</span>
+        <span class="n">wx</span><span class="p">,</span> <span class="n">wy</span><span class="p">,</span> <span class="n">wz</span> <span class="o">=</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gyro</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">skew</span> <span class="o">=</span> <span class="n">skew_symmetric</span><span class="p">(</span><span class="n">wx</span><span class="p">,</span> <span class="n">wy</span><span class="p">,</span> <span class="n">wz</span><span class="p">)</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">wx</span><span class="p">,</span><span class="n">wy</span><span class="p">,</span><span class="n">wz</span><span class="p">])</span>
+        <span class="n">matrix</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vector</span>
+        <span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">vector</span>
+        <span class="n">matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">skew</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">matrix</span></div>
+
+
+<div class="viewcode-block" id="EKF.f">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.f">[docs]</a>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gyro</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process model - linearized dynamic model function (predicted state)</span>
+
+<span class="sd">        :param ndarray gyro: gyroscope data in rad/s</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - f (ndarray) - predicted quaternion for next time step</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#     [qw - wx*qx*dt/2 - wy*qy*dt/2 - wz*qz*dt/2]</span>
+        <span class="c1"># f = [qx + wx*qw*dt/2 - wy*qz*dt/2 + wz*qy*dt/2]</span>
+        <span class="c1">#     [qy + wx*qz*dt/2 + wy*qw*dt/2 - wz*qx*dt/2]</span>
+        <span class="c1">#     [qz - wx*qy*dt/2 + wy*qx*dt/2 + wz*qw*dt/2]</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">quat_differential</span><span class="p">(</span><span class="n">gyro</span><span class="p">))</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">matrix</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_quat</span>
+        <span class="k">return</span> <span class="n">f</span></div>
+
+
+<div class="viewcode-block" id="EKF.F">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.F">[docs]</a>
+    <span class="k">def</span> <span class="nf">F</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gyro</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process model - Jacobian of linearized dynamic model function (predicted state)</span>
+
+<span class="sd">        :param ndarray gyro: gyroscope data in rad/s</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - F (ndarray) - Discrete time state transition matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#     [1      , -wx*dt/2, -wy*dt/2, -wz*dt/2]</span>
+        <span class="c1"># F = [wx*dt/2,     1   , wz*dt/2,  -wy*dt/2]</span>
+        <span class="c1">#     [wy*dt/2, -wz*dt/2, 1,        wx*dt/2 ]</span>
+        <span class="c1">#     [wz*dt/2, wy*dt/2 , -wx*dt/2,     1   ]</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">imu_dt</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">quat_differential</span><span class="p">(</span><span class="n">gyro</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">F</span></div>
+
+
+<div class="viewcode-block" id="EKF.h">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.h">[docs]</a>
+    <span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quat</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measurement model - linearized measurement model function</span>
+
+<span class="sd">        :param ndarray quat: predicted quaternion for next time step</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - h (ndarray) - expected quaternion for next time step</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dcm</span> <span class="o">=</span> <span class="n">quat2dcm</span><span class="p">(</span><span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">dcm</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ref</span> <span class="c1"># expected accelerometer measurement</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">dcm</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span> <span class="c1"># expected magnetometer measurement</span>
+        <span class="c1"># when choose 6 axis fusion, only accelerometer data considered</span>
+        <span class="c1">#       [ax*(0.5-qy**2-qz**2) + ay*(qw*qz+qx*qy)     + az*(qx*qz-qw*qy)    ]</span>
+        <span class="c1"># H = 2*[ax*(qx*qy-qw*qz)     + ay*(0.5-qx**2-qz**2) + az*(qw*qx+qy*qz)    ]</span>
+        <span class="c1">#       [ax*(qw*qy+qx*qz)     + ay*(qy*qz-qw*qx)     + az*(0.5-qx**2-qy**2)]</span>
+
+        <span class="c1"># when choose 6 axis fusion, both accelerometer and magnetometer data considered</span>
+        <span class="c1">#       [ax*(0.5-qy**2-qz**2) + ay*(qw*qz+qx*qy)     + az*(qx*qz-qw*qy)    ]</span>
+        <span class="c1">#       [ax*(qx*qy-qw*qz)     + ay*(0.5-qx**2-qz**2) + az*(qw*qx+qy*qz)    ]</span>
+        <span class="c1"># H = 2*[ax*(qw*qy+qx*qz)     + ay*(qy*qz-qw*qx)     + az*(0.5-qx**2-qy**2)]</span>
+        <span class="c1">#       [mx*(0.5-qy**2-qz**2) + my*(qw*qz+qx*qy)     + mz*(qx*qz-qw*qy)    ]</span>
+        <span class="c1">#       [mx*(qx*qy-qw*qz)     + my*(0.5-qx**2-qz**2) + mz*(qw*qx+qy*qz)    ]</span>
+        <span class="c1">#       [mx*(qw*qy+qx*qz)     + my*(qy*qz-qw*qx)     + mz*(0.5-qx**2-qy**2)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">a</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="n">m</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">h</span></div>
+
+
+<div class="viewcode-block" id="EKF.H">
+<a class="viewcode-back" href="../../ahrs.html#ahrs.ekf.EKF.H">[docs]</a>
+    <span class="k">def</span> <span class="nf">H</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quat</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Measurement model - Jacobian of linearized measurement model function</span>
+
+<span class="sd">        :param ndarray quat: predicted quaternion for next time step</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - H (ndarray) - Discrete time measurement matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ref</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ref</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ref</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_ref</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">qw</span><span class="p">,</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># when choose 6 axis fusion, only accelerometer data considered</span>
+        <span class="c1">#       [ ax*qw + ay*qz - az*qy, ax*qx + ay*qy + az*qz, -ax*qy + ay*qx - az*qw, -ax*qz + ay*qw + az*qx],</span>
+        <span class="c1"># H = 2*[-ax*qz + ay*qw + az*qx, ax*qy - ay*qx + az*qw,  ax*qx + ay*qy + az*qz, -ax*qw - ay*qz + az*qy],</span>
+        <span class="c1">#       [ ax*qy - ay*qx + az*qw, ax*qz - ay*qw - az*qx,  ax*qw + ay*qz - az*qy,  ax*qx + ay*qy + az*qz]])</span>
+
+        <span class="c1"># when choose 6 axis fusion, both accelerometer and magnetometer data considered</span>
+        <span class="c1">#       [ ax*qw + ay*qz - az*qy, ax*qx + ay*qy + az*qz, -ax*qy + ay*qx - az*qw, -ax*qz + ay*qw + az*qx],</span>
+        <span class="c1">#       [-ax*qz + ay*qw + az*qx, ax*qy - ay*qx + az*qw,  ax*qx + ay*qy + az*qz, -ax*qw - ay*qz + az*qy],</span>
+        <span class="c1"># H = 2*[ ax*qy - ay*qx + az*qw, ax*qz - ay*qw - az*qx,  ax*qw + ay*qz - az*qy,  ax*qx + ay*qy + az*qz],</span>
+        <span class="c1">#       [ mx*qw + my*qz - mz*qy, mx*qx + my*qy + mz*qz, -mx*qy + my*qx - mz*qw, -mx*qz + my*qw + mz*qx],</span>
+        <span class="c1">#       [-mx*qz + my*qw + mz*qx, mx*qy - my*qx + mz*qw,  mx*qx + my*qy + mz*qz, -mx*qw - my*qz + mz*qy],</span>
+        <span class="c1">#       [ mx*qy - my*qx + mz*qw, mx*qz - my*qw - mz*qx,  mx*qw + my*qz - mz*qy,  mx*qx + my*qy + mz*qz]])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">H</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="n">ax</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">az</span><span class="o">*</span><span class="n">qy</span><span class="p">,</span> <span class="n">ax</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qz</span><span class="p">,</span> <span class="o">-</span><span class="n">ax</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qx</span> <span class="o">-</span> <span class="n">az</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span> <span class="o">-</span><span class="n">ax</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qx</span><span class="p">],</span>
+                            <span class="p">[</span><span class="o">-</span><span class="n">ax</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qx</span><span class="p">,</span> <span class="n">ax</span><span class="o">*</span><span class="n">qy</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span>  <span class="n">ax</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qz</span><span class="p">,</span> <span class="o">-</span><span class="n">ax</span><span class="o">*</span><span class="n">qw</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qy</span><span class="p">],</span>
+                            <span class="p">[</span> <span class="n">ax</span><span class="o">*</span><span class="n">qy</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span> <span class="n">ax</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">qw</span> <span class="o">-</span> <span class="n">az</span><span class="o">*</span><span class="n">qx</span><span class="p">,</span>  <span class="n">ax</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">az</span><span class="o">*</span><span class="n">qy</span><span class="p">,</span>  <span class="n">ax</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qz</span><span class="p">]])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="n">H</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span> <span class="n">ax</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">az</span><span class="o">*</span><span class="n">qy</span><span class="p">,</span> <span class="n">ax</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qz</span><span class="p">,</span> <span class="o">-</span><span class="n">ax</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qx</span> <span class="o">-</span> <span class="n">az</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span> <span class="o">-</span><span class="n">ax</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qx</span><span class="p">],</span>
+                            <span class="p">[</span><span class="o">-</span><span class="n">ax</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qx</span><span class="p">,</span> <span class="n">ax</span><span class="o">*</span><span class="n">qy</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span>  <span class="n">ax</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qz</span><span class="p">,</span> <span class="o">-</span><span class="n">ax</span><span class="o">*</span><span class="n">qw</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qy</span><span class="p">],</span>
+                            <span class="p">[</span> <span class="n">ax</span><span class="o">*</span><span class="n">qy</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span> <span class="n">ax</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">qw</span> <span class="o">-</span> <span class="n">az</span><span class="o">*</span><span class="n">qx</span><span class="p">,</span>  <span class="n">ax</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">az</span><span class="o">*</span><span class="n">qy</span><span class="p">,</span>  <span class="n">ax</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">ay</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">az</span><span class="o">*</span><span class="n">qz</span><span class="p">],</span>
+                            <span class="p">[</span> <span class="n">mx</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">mz</span><span class="o">*</span><span class="n">qy</span><span class="p">,</span> <span class="n">mx</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">qz</span><span class="p">,</span> <span class="o">-</span><span class="n">mx</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">qx</span> <span class="o">-</span> <span class="n">mz</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span> <span class="o">-</span><span class="n">mx</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">qx</span><span class="p">],</span>
+                            <span class="p">[</span><span class="o">-</span><span class="n">mx</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">qx</span><span class="p">,</span> <span class="n">mx</span><span class="o">*</span><span class="n">qy</span> <span class="o">-</span> <span class="n">my</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span>  <span class="n">mx</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">qz</span><span class="p">,</span> <span class="o">-</span><span class="n">mx</span><span class="o">*</span><span class="n">qw</span> <span class="o">-</span> <span class="n">my</span><span class="o">*</span><span class="n">qz</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">qy</span><span class="p">],</span>
+                            <span class="p">[</span> <span class="n">mx</span><span class="o">*</span><span class="n">qy</span> <span class="o">-</span> <span class="n">my</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">qw</span><span class="p">,</span> <span class="n">mx</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">my</span><span class="o">*</span><span class="n">qw</span> <span class="o">-</span> <span class="n">mz</span><span class="o">*</span><span class="n">qx</span><span class="p">,</span>  <span class="n">mx</span><span class="o">*</span><span class="n">qw</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">qz</span> <span class="o">-</span> <span class="n">mz</span><span class="o">*</span><span class="n">qy</span><span class="p">,</span>  <span class="n">mx</span><span class="o">*</span><span class="n">qx</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">qy</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">qz</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">H</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

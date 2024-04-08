@@ -3,7 +3,7 @@ import numpy as np
 from utils.wireframe import wireframe
 from operator import itemgetter
 from mpu9250_driver.mpu9250 import MPU9250
-from ahrs import madgwick, mahony
+from ahrs import madgwick, mahony, ekf
 import time
 
 class imu_viewer():
@@ -195,7 +195,8 @@ if __name__ == '__main__':
     axis = 9
     calibration = False
     # ahrs = madgwick.Madgwick(axis, 1, nav_frame)
-    ahrs = mahony.Mahony(axis, 0.1, 0, nav_frame)
+    # ahrs = mahony.Mahony(axis, 0.1, 0, nav_frame)
+    ahrs = ekf.EKF(axis, [0.3**2, 0.5**2, 0.8**2], nav_frame)
     imu = MPU9250(nav_frame, axis, window_hz, calibration)
     imu.initialization()
     imu.start_thread(ahrs)

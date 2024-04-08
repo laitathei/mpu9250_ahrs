@@ -11,7 +11,7 @@ class Madgwick():
     :param str nav_frame: navigation frame
 
     .. Reference
-    .. [1] 'ahrs <https://ahrs.readthedocs.io/en/latest/filters/madgwick.html#orientation-from-angular-rate>'
+    .. [1] 'Madgwick <https://ahrs.readthedocs.io/en/latest/filters/madgwick.html#orientation-from-angular-rate>'
     """
     def __init__(self, axis, gain, nav_frame="NED"):
         # Body frame is front(X)-right(Y)-down(Z), Navigation frame is NED
@@ -21,6 +21,7 @@ class Madgwick():
         self.axis = axis # 6 or 9
         # Increasing the gain makes the filter respond quickly to changes, but it also causes the filter to become sensitive to noise.
         # Reducing the gain makes the filter take more time to converge, which means a delay in calculating the attitude
+        # increase gain means trust more accelerometers and magnetometers, decreasing means trust more gyroscopes
         self.gain = gain # 6 axis default gain 0.033, 9 axis default gain 0.041
 
         self.nav_frame = nav_frame # ENU or NED

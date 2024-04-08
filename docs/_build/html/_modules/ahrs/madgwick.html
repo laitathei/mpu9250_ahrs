@@ -86,7 +86,7 @@
 <span class="sd">    :param str nav_frame: navigation frame</span>
 
 <span class="sd">    .. Reference</span>
-<span class="sd">    .. [1] &#39;ahrs &lt;https://ahrs.readthedocs.io/en/latest/filters/madgwick.html#orientation-from-angular-rate&gt;&#39;</span>
+<span class="sd">    .. [1] &#39;Madgwick &lt;https://ahrs.readthedocs.io/en/latest/filters/madgwick.html#orientation-from-angular-rate&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">gain</span><span class="p">,</span> <span class="n">nav_frame</span><span class="o">=</span><span class="s2">&quot;NED&quot;</span><span class="p">):</span>
         <span class="c1"># Body frame is front(X)-right(Y)-down(Z), Navigation frame is NED</span>
@@ -96,6 +96,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span> <span class="c1"># 6 or 9</span>
         <span class="c1"># Increasing the gain makes the filter respond quickly to changes, but it also causes the filter to become sensitive to noise.</span>
         <span class="c1"># Reducing the gain makes the filter take more time to converge, which means a delay in calculating the attitude</span>
+        <span class="c1"># increase gain means trust more accelerometers and magnetometers, decreasing means trust more gyroscopes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="n">gain</span> <span class="c1"># 6 axis default gain 0.033, 9 axis default gain 0.041</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span> <span class="c1"># ENU or NED</span>

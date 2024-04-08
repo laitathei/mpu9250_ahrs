@@ -180,7 +180,7 @@ Using least square method to solve the error</p>
 <li><p>mag_scale (ndarray) - 3-axis magnetometer scale (soft-iron offset)</p></li>
 <li><p>mag_bias (ndarray) - 3-axis magnetometer bias (hard-iron offset)</p></li>
 <li><p>mag_misalignment (ndarray) - 3-axis magnetometer misalignment (soft-iron offset)</p></li>
-<li><p>mag_strength (float) - geomagnetic field strength</p></li>
+<li><p>mag_strength (float) - geomagnetic field strength in µT</p></li>
 </ul>
 </p>
 </dd>
@@ -261,8 +261,8 @@ Using least square method to solve the error</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.accel_calibration">
 <span class="sig-name descname"><span class="pre">accel_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.accel_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.accel_calibration" title="Link to this definition"></a></dt>
-<dd><p>Calculate the accelerometer bias, scale, misalignment with six calibration measurements
-Using least square method to solve the error</p>
+<dd><p>Calculate the accelerometer bias, scale, misalignment with six calibration measurements</p>
+<p>Using least square method to solve the error</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>s</strong> (<em>int</em>) – time for calibration</p>
