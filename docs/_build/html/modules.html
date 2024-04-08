@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>python &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ahrs package" href="ahrs.html" />
+    <link rel="prev" title="Welcome to mpu9250_ahrs’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">python</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ahrs.html">ahrs package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html">mpu9250_driver package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">python</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="python">
+<h1>python<a class="headerlink" href="#python" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ahrs.html">ahrs package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ahrs.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ahrs.html#module-ahrs.madgwick">ahrs.madgwick module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ahrs.html#ahrs.madgwick.Madgwick"><code class="docutils literal notranslate"><span class="pre">Madgwick</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.madgwick.Madgwick.gyro_acc_fusion"><code class="docutils literal notranslate"><span class="pre">Madgwick.gyro_acc_fusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.madgwick.Madgwick.gyro_acc_mag_fusion"><code class="docutils literal notranslate"><span class="pre">Madgwick.gyro_acc_mag_fusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.madgwick.Madgwick.init_quat"><code class="docutils literal notranslate"><span class="pre">Madgwick.init_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.madgwick.Madgwick.run"><code class="docutils literal notranslate"><span class="pre">Madgwick.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ahrs.html#module-ahrs.mahony">ahrs.mahony module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ahrs.html#ahrs.mahony.Mahony"><code class="docutils literal notranslate"><span class="pre">Mahony</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.mahony.Mahony.gyro_acc_fusion"><code class="docutils literal notranslate"><span class="pre">Mahony.gyro_acc_fusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.mahony.Mahony.gyro_acc_mag_fusion"><code class="docutils literal notranslate"><span class="pre">Mahony.gyro_acc_mag_fusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.mahony.Mahony.init_quat"><code class="docutils literal notranslate"><span class="pre">Mahony.init_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.mahony.Mahony.run"><code class="docutils literal notranslate"><span class="pre">Mahony.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ahrs.html#module-ahrs.ekf">ahrs.ekf module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF"><code class="docutils literal notranslate"><span class="pre">EKF</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.F"><code class="docutils literal notranslate"><span class="pre">EKF.F()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.H"><code class="docutils literal notranslate"><span class="pre">EKF.H()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.f"><code class="docutils literal notranslate"><span class="pre">EKF.f()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.gyro_acc_fusion"><code class="docutils literal notranslate"><span class="pre">EKF.gyro_acc_fusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.gyro_acc_mag_fusion"><code class="docutils literal notranslate"><span class="pre">EKF.gyro_acc_mag_fusion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.h"><code class="docutils literal notranslate"><span class="pre">EKF.h()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.init_quat"><code class="docutils literal notranslate"><span class="pre">EKF.init_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.quat_differential"><code class="docutils literal notranslate"><span class="pre">EKF.quat_differential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ahrs.html#ahrs.ekf.EKF.run"><code class="docutils literal notranslate"><span class="pre">EKF.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ahrs.html#module-ahrs">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mpu9250_driver.html">mpu9250_driver package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html#module-mpu9250_driver.ak8963">mpu9250_driver.ak8963 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963"><code class="docutils literal notranslate"><span class="pre">AK8963</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.config_AK8963"><code class="docutils literal notranslate"><span class="pre">AK8963.config_AK8963()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_adjust_mag"><code class="docutils literal notranslate"><span class="pre">AK8963.get_adjust_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_mag"><code class="docutils literal notranslate"><span class="pre">AK8963.get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_status"><code class="docutils literal notranslate"><span class="pre">AK8963.get_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.mag_calibration"><code class="docutils literal notranslate"><span class="pre">AK8963.mag_calibration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.read_raw_data"><code class="docutils literal notranslate"><span class="pre">AK8963.read_raw_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.set_mode"><code class="docutils literal notranslate"><span class="pre">AK8963.set_mode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.who_am_i"><code class="docutils literal notranslate"><span class="pre">AK8963.who_am_i()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html#module-mpu9250_driver.mpu6500">mpu9250_driver.mpu6500 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500"><code class="docutils literal notranslate"><span class="pre">MPU6500</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.accel_calibration"><code class="docutils literal notranslate"><span class="pre">MPU6500.accel_calibration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.config_MPU6500"><code class="docutils literal notranslate"><span class="pre">MPU6500.config_MPU6500()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.control_accel_gyro"><code class="docutils literal notranslate"><span class="pre">MPU6500.control_accel_gyro()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.get_accel"><code class="docutils literal notranslate"><span class="pre">MPU6500.get_accel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.get_gyro"><code class="docutils literal notranslate"><span class="pre">MPU6500.get_gyro()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.get_temp"><code class="docutils literal notranslate"><span class="pre">MPU6500.get_temp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.gyro_calibration"><code class="docutils literal notranslate"><span class="pre">MPU6500.gyro_calibration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.read_raw_data"><code class="docutils literal notranslate"><span class="pre">MPU6500.read_raw_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.who_am_i"><code class="docutils literal notranslate"><span class="pre">MPU6500.who_am_i()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html#module-mpu9250_driver.mpu9250">mpu9250_driver.mpu9250 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250"><code class="docutils literal notranslate"><span class="pre">MPU9250</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.check_i2c_address"><code class="docutils literal notranslate"><span class="pre">MPU9250.check_i2c_address()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_accel"><code class="docutils literal notranslate"><span class="pre">MPU9250.get_accel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_ahrs_euler"><code class="docutils literal notranslate"><span class="pre">MPU9250.get_ahrs_euler()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_ahrs_quaternion"><code class="docutils literal notranslate"><span class="pre">MPU9250.get_ahrs_quaternion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_euler"><code class="docutils literal notranslate"><span class="pre">MPU9250.get_euler()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_gyro"><code class="docutils literal notranslate"><span class="pre">MPU9250.get_gyro()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_mag"><code class="docutils literal notranslate"><span class="pre">MPU9250.get_mag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_quaternion"><code class="docutils literal notranslate"><span class="pre">MPU9250.get_quaternion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_temp"><code class="docutils literal notranslate"><span class="pre">MPU9250.get_temp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.initialization"><code class="docutils literal notranslate"><span class="pre">MPU9250.initialization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.run"><code class="docutils literal notranslate"><span class="pre">MPU9250.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.start_thread"><code class="docutils literal notranslate"><span class="pre">MPU9250.start_thread()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html#module-mpu9250_driver">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-utils.filter">utils.filter module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.filter.sliding_window"><code class="docutils literal notranslate"><span class="pre">sliding_window()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-utils.orientation">utils.orientation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.dcm2eul"><code class="docutils literal notranslate"><span class="pre">dcm2eul()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.dcm2quat"><code class="docutils literal notranslate"><span class="pre">dcm2quat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.eul2dcm"><code class="docutils literal notranslate"><span class="pre">eul2dcm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.eul2quat"><code class="docutils literal notranslate"><span class="pre">eul2quat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.left_hand_rule"><code class="docutils literal notranslate"><span class="pre">left_hand_rule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.orientation.left_hand_rule.euler_x_rotation"><code class="docutils literal notranslate"><span class="pre">left_hand_rule.euler_x_rotation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.orientation.left_hand_rule.euler_y_rotation"><code class="docutils literal notranslate"><span class="pre">left_hand_rule.euler_y_rotation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.orientation.left_hand_rule.euler_z_rotation"><code class="docutils literal notranslate"><span class="pre">left_hand_rule.euler_z_rotation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.quat2dcm"><code class="docutils literal notranslate"><span class="pre">quat2dcm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.quat2eul"><code class="docutils literal notranslate"><span class="pre">quat2eul()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.quat_conjugate"><code class="docutils literal notranslate"><span class="pre">quat_conjugate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.quat_multi"><code class="docutils literal notranslate"><span class="pre">quat_multi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.quat_x_rotation"><code class="docutils literal notranslate"><span class="pre">quat_x_rotation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.quat_y_rotation"><code class="docutils literal notranslate"><span class="pre">quat_y_rotation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.quat_z_rotation"><code class="docutils literal notranslate"><span class="pre">quat_z_rotation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.orientation.right_hand_rule"><code class="docutils literal notranslate"><span class="pre">right_hand_rule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.orientation.right_hand_rule.euler_x_rotation"><code class="docutils literal notranslate"><span class="pre">right_hand_rule.euler_x_rotation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.orientation.right_hand_rule.euler_y_rotation"><code class="docutils literal notranslate"><span class="pre">right_hand_rule.euler_y_rotation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.orientation.right_hand_rule.euler_z_rotation"><code class="docutils literal notranslate"><span class="pre">right_hand_rule.euler_z_rotation()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-utils.transformation">utils.transformation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.transformation.ENU2NED"><code class="docutils literal notranslate"><span class="pre">ENU2NED()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.transformation.NED2ENU"><code class="docutils literal notranslate"><span class="pre">NED2ENU()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.transformation.acc2eul"><code class="docutils literal notranslate"><span class="pre">acc2eul()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.transformation.acc2quat"><code class="docutils literal notranslate"><span class="pre">acc2quat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.transformation.accmag2eul"><code class="docutils literal notranslate"><span class="pre">accmag2eul()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.transformation.accmag2quat"><code class="docutils literal notranslate"><span class="pre">accmag2quat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.transformation.skew_symmetric"><code class="docutils literal notranslate"><span class="pre">skew_symmetric()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-utils.wireframe">utils.wireframe module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.wireframe.Face"><code class="docutils literal notranslate"><span class="pre">Face</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.wireframe.Vertice"><code class="docutils literal notranslate"><span class="pre">Vertice</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.wireframe.wireframe"><code class="docutils literal notranslate"><span class="pre">wireframe</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.wireframe.wireframe.add_faces"><code class="docutils literal notranslate"><span class="pre">wireframe.add_faces()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.wireframe.wireframe.add_vertices"><code class="docutils literal notranslate"><span class="pre">wireframe.add_vertices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.wireframe.wireframe.initialize_cube"><code class="docutils literal notranslate"><span class="pre">wireframe.initialize_cube()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.wireframe.wireframe.rotate_point"><code class="docutils literal notranslate"><span class="pre">wireframe.rotate_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#utils.wireframe.wireframe.update_attitude"><code class="docutils literal notranslate"><span class="pre">wireframe.update_attitude()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#module-utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">visualization module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html#visualization.imu_viewer"><code class="docutils literal notranslate"><span class="pre">imu_viewer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#visualization.imu_viewer.display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.display()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#visualization.imu_viewer.message_display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.message_display()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#visualization.imu_viewer.project2window"><code class="docutils literal notranslate"><span class="pre">imu_viewer.project2window()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#visualization.imu_viewer.run"><code class="docutils literal notranslate"><span class="pre">imu_viewer.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to mpu9250_ahrs’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ahrs.html" class="btn btn-neutral float-right" title="ahrs package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

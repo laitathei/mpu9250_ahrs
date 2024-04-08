@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utils.transformation &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">python</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">utils.transformation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for utils.transformation</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python3</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">.orientation</span> <span class="kn">import</span> <span class="n">eul2quat</span>
+
+<span class="c1"># Accelerometer measure 3 axes acceleration of its Body frame</span>
+<span class="c1"># DCM sequence aims to convert from Body to Navigation frame</span>
+<span class="c1"># Gravity vector is in Navigation frame</span>
+<span class="c1"># The seq in this program refers to DCM sequence</span>
+<span class="c1"># [ax]                [0]</span>
+<span class="c1"># [ay] = [DCM (ZXY)].T[0]</span>
+<span class="c1"># [az]                [g]</span>
+<span class="c1"># body             Navigation</span>
+
+<div class="viewcode-block" id="acc2eul">
+<a class="viewcode-back" href="../../utils.html#utils.transformation.acc2eul">[docs]</a>
+<span class="k">def</span> <span class="nf">acc2eul</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="s2">&quot;ENU&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert acceleration vector with gravity to Euler angle in ENU or NED frame [1]_ [2]_</span>
+
+<span class="sd">    :param float ax: x axis accelerometer</span>
+<span class="sd">    :param float ay: y axis accelerometer</span>
+<span class="sd">    :param float az: z axis accelerometer</span>
+<span class="sd">    :param str nav: navigation frame</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - roll (float) - x-axis Euler angle in radians</span>
+<span class="sd">        - pitch (float) - y-axis Euler angle in radians</span>
+<span class="sd">        - yaw (float) - z-axis Euler angle in radians</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013 </span>
+<span class="sd">    .. [2] `Gimbal Lock explaination &lt;https://www.nxp.com/docs/en/application-note/AN5017.pdf&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">roll</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">pitch</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">yaw</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">ax</span><span class="p">,</span><span class="n">ay</span><span class="p">,</span><span class="n">az</span><span class="p">]])</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">acc_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">/</span><span class="n">acc_norm</span>
+        <span class="n">ay</span> <span class="o">=</span> <span class="n">ay</span><span class="o">/</span><span class="n">acc_norm</span>
+        <span class="n">az</span> <span class="o">=</span> <span class="n">az</span><span class="o">/</span><span class="n">acc_norm</span>
+        <span class="k">if</span> <span class="n">nav</span><span class="o">==</span><span class="s2">&quot;ENU&quot;</span><span class="p">:</span> <span class="c1"># ZXY (yaw - roll - pitch)</span>
+            <span class="c1"># roll limited between +- 90 degrees as Gimbal Lock problem (Singularity)</span>
+            <span class="c1"># [ax (E)] = [-sin_y*sin_p*sin_r+cos_y*cos_p   cos_y*sin_p*sin_r+sin_y*cos_p    -sin_p*cos_r][0]</span>
+            <span class="c1"># [ay (N)] = [-sin_y*cos_r                     cos_y*cos_r                      sin_r       ][0]</span>
+            <span class="c1"># [az (U)] = [sin_y*cos_p*sin_r+cos_y*sin_p    -cos_y*cos_p*sin_r+sin_y*sin_p   cos_p*cos_r ][g]</span>
+            <span class="c1"># [ax (E)] = [-gsin_p*cos_r]</span>
+            <span class="c1"># [ay (N)] = [gsin_r      ]</span>
+            <span class="c1"># [az (U)] = [gcos_p*cos_r]</span>
+            <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">ay</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ax</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">az</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="c1"># or np.arcsin(ay)</span>
+            <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="o">-</span><span class="n">ax</span><span class="p">,</span> <span class="n">az</span><span class="p">)</span>
+            <span class="n">yaw</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">elif</span> <span class="n">nav</span><span class="o">==</span><span class="s2">&quot;NED&quot;</span><span class="p">:</span> <span class="c1"># ZYX (yaw - pitch - roll)</span>
+            <span class="c1"># pitch limited between +- 90 degrees as Gimbal Lock problem (Singularity)</span>
+            <span class="c1"># [ax (N)] = [cos_y*cos_p                     sin_y*cos_p                     -sin_p     ][0]</span>
+            <span class="c1"># [ay (E)] = [cos_y*sin_p*sin_r-sin_y*cos_r   sin_y*sin_p*sin_r+cos_y*cos_r   cos_p*sin_r][0]</span>
+            <span class="c1"># [az (D)] = [cos_y*sin_p*cos_r+sin_y*sin_r   sin_y*sin_p*cos_r-cos_y*sin_r   cos_p*cos_r][g]</span>
+            <span class="c1"># [ax (N)] = [-gsin_p      ]</span>
+            <span class="c1"># [ay (E)] = [ gcos_p*sin_r]</span>
+            <span class="c1"># [az (D)] = [ gcos_p*cos_r]</span>
+            <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">)</span>
+            <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="o">-</span><span class="n">ax</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ay</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">az</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="c1"># or np.arcsin(-ax) </span>
+            <span class="n">yaw</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span></div>
+
+
+<div class="viewcode-block" id="acc2quat">
+<a class="viewcode-back" href="../../utils.html#utils.transformation.acc2quat">[docs]</a>
+<span class="k">def</span> <span class="nf">acc2quat</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="s2">&quot;ENU&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert acceleration vector with gravity to Quaternion in ENU or NED frame</span>
+
+<span class="sd">    :param float ax: x axis accelerometer</span>
+<span class="sd">    :param float ay: y axis accelerometer</span>
+<span class="sd">    :param float az: z axis accelerometer</span>
+<span class="sd">    :param str nav: navigation frame</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - w (float) - Quaternion magnitude</span>
+<span class="sd">        - x (float) - Quaternion X axis</span>
+<span class="sd">        - y (float) - Quaternion Y axis</span>
+<span class="sd">        - z (float) - Quaternion Z axis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span> <span class="o">=</span> <span class="n">acc2eul</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">nav</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nav</span><span class="o">==</span><span class="s2">&quot;ENU&quot;</span><span class="p">:</span> <span class="c1"># ZXY (yaw - pitch - roll)</span>
+        <span class="c1"># w = -np.sin(yaw/2)*np.sin(pitch/2)*np.sin(roll/2)+np.cos(yaw/2)*np.cos(pitch/2)*np.cos(roll/2)</span>
+        <span class="c1"># x = -np.sin(yaw/2)*np.sin(pitch/2)*np.cos(roll/2)+np.cos(yaw/2)*np.cos(pitch/2)*np.sin(roll/2)</span>
+        <span class="c1"># y = np.sin(yaw/2)*np.cos(pitch/2)*np.sin(roll/2)+np.cos(yaw/2)*np.sin(pitch/2)*np.cos(roll/2)</span>
+        <span class="c1"># z = np.sin(yaw/2)*np.cos(pitch/2)*np.cos(roll/2)+np.cos(yaw/2)*np.sin(pitch/2)*np.sin(roll/2)</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">eul2quat</span><span class="p">(</span><span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="s2">&quot;zxy&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nav</span><span class="o">==</span><span class="s2">&quot;NED&quot;</span><span class="p">:</span> <span class="c1"># ZYX (yaw - pitch - roll)</span>
+        <span class="c1"># w = np.sin(yaw/2)*np.sin(pitch/2)*np.sin(roll/2)+np.cos(yaw/2)*np.cos(pitch/2)*np.cos(roll/2)</span>
+        <span class="c1"># x = -np.sin(yaw/2)*np.sin(pitch/2)*np.cos(roll/2)+np.cos(yaw/2)*np.cos(pitch/2)*np.sin(roll/2)</span>
+        <span class="c1"># y = np.sin(yaw/2)*np.cos(pitch/2)*np.sin(roll/2)+np.cos(yaw/2)*np.sin(pitch/2)*np.cos(roll/2)</span>
+        <span class="c1"># z = np.sin(yaw/2)*np.cos(pitch/2)*np.cos(roll/2)-np.cos(yaw/2)*np.sin(pitch/2)*np.sin(roll/2)</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">eul2quat</span><span class="p">(</span><span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="s2">&quot;zyx&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="accmag2eul">
+<a class="viewcode-back" href="../../utils.html#utils.transformation.accmag2eul">[docs]</a>
+<span class="k">def</span> <span class="nf">accmag2eul</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="s2">&quot;ENU&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame included tilt compensation[1]_</span>
+
+<span class="sd">    :param float ax: x axis accelerometer</span>
+<span class="sd">    :param float ay: y axis accelerometer</span>
+<span class="sd">    :param float az: z axis accelerometer</span>
+<span class="sd">    :param float mx: x axis gyroscope</span>
+<span class="sd">    :param float my: y axis gyroscope</span>
+<span class="sd">    :param float mz: z axis gyroscope</span>
+<span class="sd">    :param str nav: navigation frame</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - roll (float) - x-axis Euler angle in radians</span>
+<span class="sd">        - pitch (float) - y-axis Euler angle in radians</span>
+<span class="sd">        - yaw (float) - z-axis Euler angle in radians</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013 </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span> <span class="o">=</span> <span class="n">acc2eul</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">nav</span><span class="p">)</span> <span class="c1"># accelerometer provide roll and pitch angle</span>
+    <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">mx</span><span class="p">],[</span><span class="n">my</span><span class="p">],[</span><span class="n">mz</span><span class="p">]])</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mag_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="n">mx</span><span class="o">/</span><span class="n">mag_norm</span>
+        <span class="n">my</span> <span class="o">=</span> <span class="n">my</span><span class="o">/</span><span class="n">mag_norm</span>
+        <span class="n">mz</span> <span class="o">=</span> <span class="n">mz</span><span class="o">/</span><span class="n">mag_norm</span>
+        <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">mx</span><span class="p">],[</span><span class="n">my</span><span class="p">],[</span><span class="n">mz</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">nav</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+            <span class="c1"># mx, my, mz in body frame</span>
+            <span class="c1"># bx, by, bz in navigation frame</span>
+            <span class="c1"># bx (E) = mx*(-sin_y*sin_p*sin_r+cos_y*cos_p) + my*(-sin_y*cos_r) + mz*(sin_y*cos_p*sin_r+cos_y*sin_p)</span>
+            <span class="c1"># by (N) = mx*(cos_y*sin_p*sin_r+sin_y*cos_p)  + my*(cos_y*cos_r)  + mz*(-cos_y*cos_p*sin_r+sin_y*sin_p)</span>
+            <span class="c1"># bz (U) = mx*(-sin_p*cos_r)                   + my*(sin_r)        + mz*(cos_p*cos_r)</span>
+
+            <span class="c1"># magnetometer reading in East axis will become 0, when body frame overlap with navigation frame</span>
+            <span class="c1"># 0 = mx*(-sin_y*sin_p*sin_r+cos_y*cos_p) + my*(-sin_y*cos_r) + mz*(sin_y*cos_p*sin_r+cos_y*sin_p)</span>
+            <span class="n">yaw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">mx</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">),</span> <span class="n">mx</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span> <span class="o">-</span> <span class="n">mz</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">nav</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="c1"># mx, my, mz in body frame</span>
+            <span class="c1"># bx, by, bz in navigation frame</span>
+            <span class="c1"># bx (N) = mx*(cos_y*cos_p) + my*(cos_y*sin_p*sin_r-sin_y*cos_r)  + mz*(cos_y*sin_p*cos_r+sin_y*sin_r)</span>
+            <span class="c1"># by (E) = mx*(sin_y*cos_p) + my*(sin_y*sin_p*sin_r+cos_y*cos_r)  + mz*(sin_y*sin_p*cos_r-cos_y*sin_r)</span>
+            <span class="c1"># bz (D) = mx*(-sin_p)      + my*(cos_p*sin_r)                    + mz*(cos_p*cos_r)</span>
+
+            <span class="c1"># magnetometer reading in East axis will become 0, when body frame overlap with navigation frame</span>
+            <span class="c1"># 0 = mx*(sin_y*cos_p) + my*(sin_y*sin_p*sin_r+cos_y*cos_r)  + mz*(sin_y*sin_p*cos_r-cos_y*sin_r)</span>
+            <span class="n">yaw</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">my</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span> <span class="o">-</span> <span class="n">mz</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">),</span> <span class="n">mx</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span> <span class="o">+</span> <span class="n">my</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span> <span class="o">+</span> <span class="n">mz</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">roll</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span></div>
+
+
+<div class="viewcode-block" id="accmag2quat">
+<a class="viewcode-back" href="../../utils.html#utils.transformation.accmag2quat">[docs]</a>
+<span class="k">def</span> <span class="nf">accmag2quat</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="s2">&quot;ENU&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert acceleration vector with gravity and magnetometer value to Quaternion in ENU or NED frame</span>
+
+<span class="sd">    :param float ax: x axis accelerometer</span>
+<span class="sd">    :param float ay: y axis accelerometer</span>
+<span class="sd">    :param float az: z axis accelerometer</span>
+<span class="sd">    :param float mx: x axis magnetometer</span>
+<span class="sd">    :param float my: y axis magnetometer</span>
+<span class="sd">    :param float mz: z axis magnetometer</span>
+<span class="sd">    :param str nav: navigation frame</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - w (float) - Quaternion magnitude</span>
+<span class="sd">        - x (float) - Quaternion X axis</span>
+<span class="sd">        - y (float) - Quaternion Y axis</span>
+<span class="sd">        - z (float) - Quaternion Z axis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span> <span class="o">=</span> <span class="n">accmag2eul</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="n">nav</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nav</span><span class="o">==</span><span class="s2">&quot;ENU&quot;</span><span class="p">:</span> <span class="c1"># ZXY (yaw - pitch - roll)</span>
+        <span class="c1"># w = -np.sin(yaw/2)*np.sin(pitch/2)*np.sin(roll/2)+np.cos(yaw/2)*np.cos(pitch/2)*np.cos(roll/2)</span>
+        <span class="c1"># x = -np.sin(yaw/2)*np.sin(pitch/2)*np.cos(roll/2)+np.cos(yaw/2)*np.cos(pitch/2)*np.sin(roll/2)</span>
+        <span class="c1"># y = np.sin(yaw/2)*np.cos(pitch/2)*np.sin(roll/2)+np.cos(yaw/2)*np.sin(pitch/2)*np.cos(roll/2)</span>
+        <span class="c1"># z = np.sin(yaw/2)*np.cos(pitch/2)*np.cos(roll/2)+np.cos(yaw/2)*np.sin(pitch/2)*np.sin(roll/2)</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">eul2quat</span><span class="p">(</span><span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="s2">&quot;zxy&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nav</span><span class="o">==</span><span class="s2">&quot;NED&quot;</span><span class="p">:</span> <span class="c1"># ZYX (yaw - pitch - roll)</span>
+        <span class="c1"># w = np.sin(yaw/2)*np.sin(pitch/2)*np.sin(roll/2)+np.cos(yaw/2)*np.cos(pitch/2)*np.cos(roll/2)</span>
+        <span class="c1"># x = -np.sin(yaw/2)*np.sin(pitch/2)*np.cos(roll/2)+np.cos(yaw/2)*np.cos(pitch/2)*np.sin(roll/2)</span>
+        <span class="c1"># y = np.sin(yaw/2)*np.cos(pitch/2)*np.sin(roll/2)+np.cos(yaw/2)*np.sin(pitch/2)*np.cos(roll/2)</span>
+        <span class="c1"># z = np.sin(yaw/2)*np.cos(pitch/2)*np.cos(roll/2)-np.cos(yaw/2)*np.sin(pitch/2)*np.sin(roll/2)</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">eul2quat</span><span class="p">(</span><span class="n">roll</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="s2">&quot;zyx&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="ENU2NED">
+<a class="viewcode-back" href="../../utils.html#utils.transformation.ENU2NED">[docs]</a>
+<span class="k">def</span> <span class="nf">ENU2NED</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert data from ENU frame to NED frame</span>
+
+<span class="sd">    :param float E: East axis value</span>
+<span class="sd">    :param float N: North axis value</span>
+<span class="sd">    :param float U: Upward value</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - N (float) - North axis value</span>
+<span class="sd">        - E (float) - East axis value</span>
+<span class="sd">        - D (float) - Downward value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ENU</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">E</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">N</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">U</span><span class="p">]])</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">NED</span> <span class="o">=</span> <span class="n">matrix</span> <span class="o">@</span> <span class="n">ENU</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">NED</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">NED</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">NED</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span></div>
+
+
+<div class="viewcode-block" id="NED2ENU">
+<a class="viewcode-back" href="../../utils.html#utils.transformation.NED2ENU">[docs]</a>
+<span class="k">def</span> <span class="nf">NED2ENU</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert data from NED frame to ENU frame</span>
+
+<span class="sd">    :param float N: North axis value</span>
+<span class="sd">    :param float E: East axis value</span>
+<span class="sd">    :param float D: Downward value</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - E (float) - East axis value</span>
+<span class="sd">        - N (float) - North axis value</span>
+<span class="sd">        - U (float) - Upward value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NED</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">N</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">E</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">D</span><span class="p">]])</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">ENU</span> <span class="o">=</span> <span class="n">matrix</span> <span class="o">@</span> <span class="n">NED</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">ENU</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ENU</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">ENU</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span></div>
+
+
+<div class="viewcode-block" id="skew_symmetric">
+<a class="viewcode-back" href="../../utils.html#utils.transformation.skew_symmetric">[docs]</a>
+<span class="k">def</span> <span class="nf">skew_symmetric</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create skew symmetric matrix by vector</span>
+
+<span class="sd">    :param float x: 1st element of vector</span>
+<span class="sd">    :param float y: 2nd element of vector</span>
+<span class="sd">    :param float z: 3rd element of vector</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - matrix (ndarray) - skew-symmetric matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span>
+                       <span class="p">[</span><span class="n">z</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">],</span>
+                       <span class="p">[</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">matrix</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mpu9250_driver.mpu9250 &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">python</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mpu9250_driver.mpu9250</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mpu9250_driver.mpu9250</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python3</span>
+<span class="kn">from</span> <span class="nn">.mpu6500</span> <span class="kn">import</span> <span class="n">MPU6500</span>
+<span class="kn">from</span> <span class="nn">.ak8963</span> <span class="kn">import</span> <span class="n">AK8963</span>
+<span class="kn">from</span> <span class="nn">utils.transformation</span> <span class="kn">import</span> <span class="n">acc2eul</span><span class="p">,</span> <span class="n">acc2quat</span><span class="p">,</span> <span class="n">accmag2eul</span><span class="p">,</span> <span class="n">accmag2quat</span>
+<span class="kn">from</span> <span class="nn">utils.orientation</span> <span class="kn">import</span> <span class="n">quat2eul</span>
+<span class="kn">from</span> <span class="nn">utils.filter</span> <span class="kn">import</span> <span class="n">sliding_window</span>
+<span class="kn">import</span> <span class="nn">smbus</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+
+<div class="viewcode-block" id="MPU9250">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250">[docs]</a>
+<span class="k">class</span> <span class="nc">MPU9250</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MPU9250 I2C driver for accessing MPU6500 and AK8963 [1]_ [2]_</span>
+
+<span class="sd">    :param str nav_frame: navigation frame</span>
+<span class="sd">    :param int axis: axis data</span>
+<span class="sd">    :param float hz: IMU frequency</span>
+<span class="sd">    :param bool calibration: calibrate gyroscope and accelerometer</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] `MPU-9250 Product Specification &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf&gt;`</span>
+<span class="sd">    .. [2] `MPU-9250 Register Map and Descriptions &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nav_frame</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">hz</span><span class="p">,</span> <span class="n">calibration</span><span class="p">):</span>
+        <span class="c1"># I2C connection parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500_address</span> <span class="o">=</span> <span class="mh">0x68</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ak8963_address</span> <span class="o">=</span> <span class="mh">0x0c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span> <span class="o">=</span> <span class="n">smbus</span><span class="o">.</span><span class="n">SMBus</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">address_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_i2c_address</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">address_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No i2c address found&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Default MPU6500 address is 0x68&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Default AK8963 address is 0x0c&quot;</span><span class="p">)</span>
+
+        <span class="c1"># driver parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hz</span> <span class="o">=</span> <span class="n">hz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue_size</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_queue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">=</span> <span class="n">calibration</span>
+
+        <span class="c1"># Check parameter</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Axis must be 6 or 9&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="o">==</span><span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body_frame</span> <span class="o">=</span> <span class="s2">&quot;FRD&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span> <span class="o">=</span> <span class="s2">&quot;zyx&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="o">==</span><span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body_frame</span> <span class="o">=</span> <span class="s2">&quot;RFU&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span> <span class="o">=</span> <span class="s2">&quot;zxy&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Config MPU6500</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span> <span class="o">=</span> <span class="n">MPU6500</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">control_accel_gyro</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">config_MPU6500</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Config AK8963</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ak8963</span> <span class="o">=</span> <span class="n">AK8963</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ak8963_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ak8963</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ak8963</span><span class="o">.</span><span class="n">config_AK8963</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MPU9250.check_i2c_address">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.check_i2c_address">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_i2c_address</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Search all I2C addresses and record accessible addresses</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - address_list (list) - stores a list of all accessible I2C addresses</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">address_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">address_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">address_list</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.get_accel">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_accel">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_accel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 accelerometer data in Earth&#39;s reference (m/s^2)</span>
+<span class="sd">        Accelerometer channel is negative when pointing up and aligned against gravity</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing upward \n</span>
+<span class="sd">        ax = +9.80665 m/s^2 when the right hand side pointing upward \n</span>
+<span class="sd">        ay = +9.80665 m/s^2 when front side pointing upward \n</span>
+<span class="sd">        az = +9.80665 m/s^2 when upper side pointing upward \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        Gravity is defined as negative when pointing downward \n</span>
+<span class="sd">        ax = +9.80665 m/s^2 when front side pointing downward \n</span>
+<span class="sd">        ay = +9.80665 m/s^2 when the right hand side pointing downward \n</span>
+<span class="sd">        az = +9.80665 m/s^2 when under side pointing downward \n</span>
+<span class="sd">    </span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - ax (float) - x-axis accelerometer data in m/s^2</span>
+<span class="sd">            - ay (float) - y-axis accelerometer data in m/s^2</span>
+<span class="sd">            - az (float) - z-axis accelerometer data in m/s^2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">get_accel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">az</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">az</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.get_gyro">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_gyro">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_gyro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 gyroscope data in right hand coordinates (rad/s)</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        gx is positive when rotate clockwise along x-axis \n</span>
+<span class="sd">        gy is positive when rotate clockwise along y-axis \n</span>
+<span class="sd">        gz is positive when rotate anti-clockwise along z-axis \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        gx is positive when rotate clockwise along x-axis \n</span>
+<span class="sd">        gy is positive when rotate clockwise along y-axis \n</span>
+<span class="sd">        gz is positive when rotate clockwise along z-axis \n</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - gx (float) - x-axis gyroscope data in rad/s</span>
+<span class="sd">            - gy (float) - y-axis gyroscope data in rad/s</span>
+<span class="sd">            - gz (float) - z-axis gyroscope data in rad/s</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">get_gyro</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">gx</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">gy</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">gz</span><span class="p">]])</span>
+
+        <span class="c1"># # Sliding window </span>
+        <span class="c1"># if len(self.gyro_queue) &lt; self.queue_size:</span>
+        <span class="c1">#     # append to the last</span>
+        <span class="c1">#     self.gyro_queue = np.append(self.gyro_queue, self.gyr.T, axis = 0)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     # remove first element</span>
+        <span class="c1">#     self.gyro_queue = np.delete(self.gyro_queue, 0, 0)</span>
+        <span class="c1">#     # append to the last</span>
+        <span class="c1">#     self.gyro_queue = np.append(self.gyro_queue, self.gyr.T, axis = 0)</span>
+
+        <span class="c1"># if len(self.gyro_queue) &gt; self.window_size:</span>
+        <span class="c1">#     sliding_window(self.gyro_queue, self.window_size)</span>
+        <span class="c1">#     self.gx, self.gy, self.gz = self.gyro_queue[0][0], self.gyro_queue[0][1], self.gyro_queue[0][2]</span>
+        <span class="c1">#     self.gyr = np.array([[self.gx],[self.gy],[self.gz]])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gz</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.get_mag">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_mag">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_mag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 magnetometer data in Earth&#39;s reference (µT)</span>
+
+<span class="sd">        ENU: \n</span>
+<span class="sd">        mx is positive when the right hand side pointing to north \n</span>
+<span class="sd">        my is positive when the front side pointing to north \n</span>
+<span class="sd">        mz is positive when the upper side pointing to north \n</span>
+
+<span class="sd">        NED: \n</span>
+<span class="sd">        mx is positive when the front side pointing to north \n</span>
+<span class="sd">        my is positive when the right hand side pointing to north \n</span>
+<span class="sd">        mz is positive when the under side pointing to north \n</span>
+<span class="sd">    </span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - mx (float) - x-axis magnetometer data in µT</span>
+<span class="sd">            - my (float) - y-axis magnetometer data in µT</span>
+<span class="sd">            - mz (float) - z-axis magnetometer data in µT</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">my</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ak8963</span><span class="o">.</span><span class="n">get_mag</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">mx</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">my</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">mz</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">my</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mz</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.get_temp">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_temp">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 temperature data</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - temp (float) - temperature data in °C</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpu6500</span><span class="o">.</span><span class="n">get_temp</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">temp</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.get_euler">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_euler">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_euler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 Euler angle</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - roll (float) - x-axis Euler angle in degree</span>
+<span class="sd">            - pitch (float) - y-axis Euler angle in degree</span>
+<span class="sd">            - yaw (float) - z-axis Euler angle in degree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="n">acc2eul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">az</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="n">accmag2eul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">az</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">my</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mz</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yaw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">euler</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">yaw</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.get_ahrs_euler">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_ahrs_euler">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_ahrs_euler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 Euler angle processed by AHRS</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - roll (float) - x-axis Euler angle in degree</span>
+<span class="sd">            - pitch (float) - y-axis Euler angle in degree</span>
+<span class="sd">            - yaw (float) - z-axis Euler angle in degree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ahrs</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="n">quat2eul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yaw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yaw</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">euler</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">yaw</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.get_quaternion">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_quaternion">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_quaternion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 Quaternion</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - w (float) - Quaternion magnitude</span>
+<span class="sd">            - x (float) - Quaternion X axis</span>
+<span class="sd">            - y (float) - Quaternion Y axis</span>
+<span class="sd">            - z (float) - Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">acc2quat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">az</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">accmag2quat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">az</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">my</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mz</span><span class="p">,</span> <span class="n">nav</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.get_ahrs_quaternion">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.get_ahrs_quaternion">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_ahrs_quaternion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 quaternion processed by AHRS</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - w (float) - Quaternion magnitude</span>
+<span class="sd">            - x (float) - Quaternion X axis</span>
+<span class="sd">            - y (float) - Quaternion Y axis</span>
+<span class="sd">            - z (float) - Quaternion Z axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ahrs</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gyr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quaternion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">],[</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.initialization">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.initialization">[docs]</a>
+    <span class="k">def</span> <span class="nf">initialization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 initialization for accelerometer, gyroscope, magnetometer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_accel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gyro</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">my</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mag</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_euler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_quaternion</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.start_thread">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.start_thread">[docs]</a>
+    <span class="k">def</span> <span class="nf">start_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ahrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MPU9250 thread to continuously acquire accelerometer, gyroscope, magnetometer, attitudes, and temperature data</span>
+
+<span class="sd">        :param ahrs: ahrs object (Madgwick, Mahony, EKF, etc.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ahrs</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ahrs</span> <span class="o">=</span> <span class="n">ahrs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ahrs</span><span class="o">.</span><span class="n">init_quat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ahrs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MPU9250.run">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu9250.MPU9250.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Acquire accelerometer, gyroscope, magnetometer, attitudes, and temperature data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_accel</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gyro</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">my</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mag</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ahrs</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ahrs_euler</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ahrs_quaternion</span><span class="p">()</span>
+                    <span class="c1"># print(&quot;ahrs roll pitch yaw: &quot;, self.roll, self.pitch, self.yaw)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_euler</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_quaternion</span><span class="p">()</span>
+                    <span class="c1"># print(&quot;raw roll pitch yaw: &quot;, round(self.roll,2), round(self.pitch,2), round(self.yaw,2))</span>
+                <span class="c1"># print(&quot;ax ay az: &quot;, round(self.ax,2), round(self.ay,2), round(self.az,2))</span>
+                <span class="c1"># print(&quot;gx gy gz: &quot;, round(self.gx,2), round(self.gy,2), round(self.gz,2))</span>
+                <span class="c1"># print(&quot;mx my mz: &quot;, round(self.mx,2), round(self.my,2), round(self.mz,2))</span>
+                <span class="c1"># print(&quot;w x y z: &quot;, round(self.w,2), round(self.x,2), round(self.y,2), round(self.z,2))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_temp</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;interrupted!&#39;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mpu9250_driver package &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="utils package" href="utils.html" />
+    <link rel="prev" title="ahrs package" href="ahrs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">python</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ahrs.html">ahrs package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">mpu9250_driver package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mpu9250_driver.ak8963">mpu9250_driver.ak8963 module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mpu9250_driver.ak8963.AK8963"><code class="docutils literal notranslate"><span class="pre">AK8963</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mpu9250_driver.mpu6500">mpu9250_driver.mpu6500 module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mpu9250_driver.mpu6500.MPU6500"><code class="docutils literal notranslate"><span class="pre">MPU6500</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mpu9250_driver.mpu9250">mpu9250_driver.mpu9250 module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mpu9250_driver.mpu9250.MPU9250"><code class="docutils literal notranslate"><span class="pre">MPU9250</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-mpu9250_driver">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">python</a></li>
+      <li class="breadcrumb-item active">mpu9250_driver package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mpu9250_driver.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mpu9250-driver-package">
+<h1>mpu9250_driver package<a class="headerlink" href="#mpu9250-driver-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-mpu9250_driver.ak8963">
+<span id="mpu9250-driver-ak8963-module"></span><h2>mpu9250_driver.ak8963 module<a class="headerlink" href="#module-mpu9250_driver.ak8963" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.ak8963.</span></span><span class="sig-name descname"><span class="pre">AK8963</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>AK8963 I2C driver for acquire magnetometer data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bus</strong> (<em>SMBus</em>) – device I2C port</p></li>
+<li><p><strong>address</strong> (<em>int</em>) – AK8963 I2C address</p></li>
+<li><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p></li>
+<li><p><strong>hz</strong> (<em>int</em>) – IMU frequency</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.config_AK8963">
+<span class="sig-name descname"><span class="pre">config_AK8963</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.config_AK8963"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.config_AK8963" title="Link to this definition"></a></dt>
+<dd><p>Config AK8963 magnetometer mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bit</strong> (<em>int</em>) – magnetometer configuration register value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.get_adjust_mag">
+<span class="sig-name descname"><span class="pre">get_adjust_mag</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.get_adjust_mag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.get_adjust_mag" title="Link to this definition"></a></dt>
+<dd><p>AK8963 sensitivity adjustment value for xyz axis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.get_mag">
+<span class="sig-name descname"><span class="pre">get_mag</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.get_mag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.get_mag" title="Link to this definition"></a></dt>
+<dd><p>AK8963 magnetometer data in Earth’s reference (µT)</p>
+<p>ENU:</p>
+<p>mx is positive when the right hand side pointing to north</p>
+<p>my is positive when the front side pointing to north</p>
+<p>mz is positive when the upper side pointing to north</p>
+<p>NED:</p>
+<p>mx is positive when the front side pointing to north</p>
+<p>my is positive when the right hand side pointing to north</p>
+<p>mz is positive when the under side pointing to north</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>mx (float) - x-axis magnetometer data in µT</p></li>
+<li><p>my (float) - y-axis magnetometer data in µT</p></li>
+<li><p>mz (float) - z-axis magnetometer data in µT</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.get_status">
+<span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.get_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.get_status" title="Link to this definition"></a></dt>
+<dd><p>Check AK8963 magnetometer status</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.mag_calibration">
+<span class="sig-name descname"><span class="pre">mag_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.mag_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.mag_calibration" title="Link to this definition"></a></dt>
+<dd><p>Calculate the magnetometer bias, scale, misalignment, geomagnetic field strength with four element calibration
+Using least square method to solve the error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>int</em>) – time for calibration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>mag_scale (ndarray) - 3-axis magnetometer scale (soft-iron offset)</p></li>
+<li><p>mag_bias (ndarray) - 3-axis magnetometer bias (hard-iron offset)</p></li>
+<li><p>mag_misalignment (ndarray) - 3-axis magnetometer misalignment (soft-iron offset)</p></li>
+<li><p>mag_strength (float) - geomagnetic field strength in µT</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>four element calibration &lt;https://www.nxp.com/docs/en/application-note/AN5019.pdf&gt;</cite></p>
+</aside>
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p><cite>ten element calibration &lt;https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py&gt;</cite></p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.read_raw_data">
+<span class="sig-name descname"><span class="pre">read_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">high_register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_register</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.read_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.read_raw_data" title="Link to this definition"></a></dt>
+<dd><p>Access the high and low registers of the magnetometer to calculate their values into int16 format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>high_register</strong> (<em>int</em>) – high registers of the magnetometer</p></li>
+<li><p><strong>low_register</strong> (<em>int</em>) – low registers of the magnetometer</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>signed_value (int) - sensor value in int16 format</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.set_mode">
+<span class="sig-name descname"><span class="pre">set_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.set_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.set_mode" title="Link to this definition"></a></dt>
+<dd><p>AK8963 CNTL1 register configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<em>bool</em>) – operation mode setting</p></li>
+<li><p><strong>bit</strong> (<em>int</em>) – output bit setting</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.who_am_i">
+<span class="sig-name descname"><span class="pre">who_am_i</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.who_am_i"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.who_am_i" title="Link to this definition"></a></dt>
+<dd><p>Check AK8963 WHOAMI register value</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mpu9250_driver.mpu6500">
+<span id="mpu9250-driver-mpu6500-module"></span><h2>mpu9250_driver.mpu6500 module<a class="headerlink" href="#module-mpu9250_driver.mpu6500" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.mpu6500.</span></span><span class="sig-name descname"><span class="pre">MPU6500</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>MPU6500 I2C driver for acquire accelerometer and gyroscope data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bus</strong> (<em>SMBus</em>) – device I2C port</p></li>
+<li><p><strong>address</strong> (<em>int</em>) – MPU6500 I2C address</p></li>
+<li><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p></li>
+<li><p><strong>hz</strong> (<em>int</em>) – IMU frequency</p></li>
+<li><p><strong>calibration</strong> (<em>bool</em>) – calibrate gyroscope and accelerometer</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.accel_calibration">
+<span class="sig-name descname"><span class="pre">accel_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.accel_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.accel_calibration" title="Link to this definition"></a></dt>
+<dd><p>Calculate the accelerometer bias, scale, misalignment with six calibration measurements</p>
+<p>Using least square method to solve the error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>int</em>) – time for calibration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>accel_scale (ndarray) - 3-axis accelerometer scale</p></li>
+<li><p>accel_bias (ndarray) - 3-axis accelerometer bias</p></li>
+<li><p>accel_misalignment (ndarray) - 3-axis accelerometer misalignment</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>Accelerometer calibration &lt;https://zhuanlan.zhihu.com/p/296381805&gt;</cite></p>
+</aside>
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>‘Least square prove &lt;<a class="reference external" href="https://zhuanlan.zhihu.com/p/87582571">https://zhuanlan.zhihu.com/p/87582571</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.config_MPU6500">
+<span class="sig-name descname"><span class="pre">config_MPU6500</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accel_parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gyro_parameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.config_MPU6500"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.config_MPU6500" title="Link to this definition"></a></dt>
+<dd><p>Config MPU6500 accelerometer and gyroscope scale with internal DMP</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>accel_parameter</strong> (<em>int</em>) – accelerometer configuration register value</p></li>
+<li><p><strong>gyro_parameter</strong> (<em>int</em>) – gyroscope configuration register value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.control_accel_gyro">
+<span class="sig-name descname"><span class="pre">control_accel_gyro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.control_accel_gyro"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.control_accel_gyro" title="Link to this definition"></a></dt>
+<dd><p>Whether to enable accelerometer and gyroscope xyz axis data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>bool</em>) – enable x axis accelerometer data</p></li>
+<li><p><strong>ay</strong> (<em>bool</em>) – enable y axis accelerometer data</p></li>
+<li><p><strong>az</strong> (<em>bool</em>) – enable z axis accelerometer data</p></li>
+<li><p><strong>gx</strong> (<em>bool</em>) – enable x axis gyroscope data</p></li>
+<li><p><strong>gy</strong> (<em>bool</em>) – enable y axis gyroscope data</p></li>
+<li><p><strong>gz</strong> (<em>bool</em>) – enable z axis gyroscope data</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.get_accel">
+<span class="sig-name descname"><span class="pre">get_accel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.get_accel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.get_accel" title="Link to this definition"></a></dt>
+<dd><p>MPU6500 accelerometer data in Earth’s reference (m/s^2)
+Accelerometer channel is negative when pointing up and aligned against gravity</p>
+<p>ENU:</p>
+<p>Gravity is defined as negative when pointing upward</p>
+<p>ax = +9.80665 m/s^2 when the right hand side pointing upward</p>
+<p>ay = +9.80665 m/s^2 when front side pointing upward</p>
+<p>az = +9.80665 m/s^2 when upper side pointing upward</p>
+<p>NED:
+Gravity is defined as negative when pointing downward</p>
+<p>ax = +9.80665 m/s^2 when front side pointing downward</p>
+<p>ay = +9.80665 m/s^2 when the right hand side pointing downward</p>
+<p>az = +9.80665 m/s^2 when under side pointing downward</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>ax (float) - x-axis accelerometer data in m/s^2</p></li>
+<li><p>ay (float) - y-axis accelerometer data in m/s^2</p></li>
+<li><p>az (float) - z-axis accelerometer data in m/s^2</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.get_gyro">
+<span class="sig-name descname"><span class="pre">get_gyro</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.get_gyro"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.get_gyro" title="Link to this definition"></a></dt>
+<dd><p>MPU6500 gyroscope data in right hand coordinates (rad/s)</p>
+<p>ENU:</p>
+<p>gx is positive when rotate clockwise along x-axis</p>
+<p>gy is positive when rotate clockwise along y-axis</p>
+<p>gz is positive when rotate anti-clockwise along z-axis</p>
+<p>NED:</p>
+<p>gx is positive when rotate clockwise along x-axis</p>
+<p>gy is positive when rotate clockwise along y-axis</p>
+<p>gz is positive when rotate clockwise along z-axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>gx (float) - x-axis gyroscope data in rad/s</p></li>
+<li><p>gy (float) - y-axis gyroscope data in rad/s</p></li>
+<li><p>gz (float) - z-axis gyroscope data in rad/s</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.get_temp">
+<span class="sig-name descname"><span class="pre">get_temp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.get_temp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.get_temp" title="Link to this definition"></a></dt>
+<dd><p>MPU6500 temperature data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>temp (float) - temperature data in °C</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.gyro_calibration">
+<span class="sig-name descname"><span class="pre">gyro_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.gyro_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.gyro_calibration" title="Link to this definition"></a></dt>
+<dd><p>Calculate the gyroscope bias to calibrate the gyroscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>int</em>) – time for calibration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>gyro_scale (ndarray) - 3-axis gyroscope scale</p></li>
+<li><p>gyro_bias (ndarray) - 3-axis gyroscope bias</p></li>
+<li><p>gyro_misalignment (ndarray) - 3-axis gyroscope misalignment</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.read_raw_data">
+<span class="sig-name descname"><span class="pre">read_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">high_register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_register</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.read_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.read_raw_data" title="Link to this definition"></a></dt>
+<dd><p>Access the high and low registers of the accelerometer and gyroscope to calculate their values into int16 format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>high_register</strong> (<em>int</em>) – high registers of the accelerometer or gyroscope</p></li>
+<li><p><strong>low_register</strong> (<em>int</em>) – low registers of the accelerometer or gyroscope</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>signed_value (int) - sensor value in int16 format</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.who_am_i">
+<span class="sig-name descname"><span class="pre">who_am_i</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.who_am_i"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.who_am_i" title="Link to this definition"></a></dt>
+<dd><p>Check MPU6500 WHOAMI register value</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mpu9250_driver.mpu9250">
+<span id="mpu9250-driver-mpu9250-module"></span><h2>mpu9250_driver.mpu9250 module<a class="headerlink" href="#module-mpu9250_driver.mpu9250" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpu9250_driver.mpu9250.</span></span><span class="sig-name descname"><span class="pre">MPU9250</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>MPU9250 I2C driver for accessing MPU6500 and AK8963 <a href="#id9"><span class="problematic" id="id5">[1]_</span></a> <a href="#id10"><span class="problematic" id="id6">[2]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – axis data</p></li>
+<li><p><strong>hz</strong> (<em>float</em>) – IMU frequency</p></li>
+<li><p><strong>calibration</strong> (<em>bool</em>) – calibrate gyroscope and accelerometer</p></li>
+</ul>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id7" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>MPU-9250 Product Specification &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf&gt;</cite></p>
+</aside>
+<aside class="footnote brackets" id="id8" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p><cite>MPU-9250 Register Map and Descriptions &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf&gt;</cite></p>
+</aside>
+</aside>
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.check_i2c_address">
+<span class="sig-name descname"><span class="pre">check_i2c_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.check_i2c_address"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.check_i2c_address" title="Link to this definition"></a></dt>
+<dd><p>Search all I2C addresses and record accessible addresses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>address_list (list) - stores a list of all accessible I2C addresses</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.get_accel">
+<span class="sig-name descname"><span class="pre">get_accel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.get_accel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.get_accel" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 accelerometer data in Earth’s reference (m/s^2)
+Accelerometer channel is negative when pointing up and aligned against gravity</p>
+<p>ENU:</p>
+<p>Gravity is defined as negative when pointing upward</p>
+<p>ax = +9.80665 m/s^2 when the right hand side pointing upward</p>
+<p>ay = +9.80665 m/s^2 when front side pointing upward</p>
+<p>az = +9.80665 m/s^2 when upper side pointing upward</p>
+<p>NED:</p>
+<p>Gravity is defined as negative when pointing downward</p>
+<p>ax = +9.80665 m/s^2 when front side pointing downward</p>
+<p>ay = +9.80665 m/s^2 when the right hand side pointing downward</p>
+<p>az = +9.80665 m/s^2 when under side pointing downward</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>ax (float) - x-axis accelerometer data in m/s^2</p></li>
+<li><p>ay (float) - y-axis accelerometer data in m/s^2</p></li>
+<li><p>az (float) - z-axis accelerometer data in m/s^2</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.get_ahrs_euler">
+<span class="sig-name descname"><span class="pre">get_ahrs_euler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.get_ahrs_euler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.get_ahrs_euler" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 Euler angle processed by AHRS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>roll (float) - x-axis Euler angle in degree</p></li>
+<li><p>pitch (float) - y-axis Euler angle in degree</p></li>
+<li><p>yaw (float) - z-axis Euler angle in degree</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.get_ahrs_quaternion">
+<span class="sig-name descname"><span class="pre">get_ahrs_quaternion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.get_ahrs_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.get_ahrs_quaternion" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 quaternion processed by AHRS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.get_euler">
+<span class="sig-name descname"><span class="pre">get_euler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.get_euler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.get_euler" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 Euler angle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>roll (float) - x-axis Euler angle in degree</p></li>
+<li><p>pitch (float) - y-axis Euler angle in degree</p></li>
+<li><p>yaw (float) - z-axis Euler angle in degree</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.get_gyro">
+<span class="sig-name descname"><span class="pre">get_gyro</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.get_gyro"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.get_gyro" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 gyroscope data in right hand coordinates (rad/s)</p>
+<p>ENU:</p>
+<p>gx is positive when rotate clockwise along x-axis</p>
+<p>gy is positive when rotate clockwise along y-axis</p>
+<p>gz is positive when rotate anti-clockwise along z-axis</p>
+<p>NED:</p>
+<p>gx is positive when rotate clockwise along x-axis</p>
+<p>gy is positive when rotate clockwise along y-axis</p>
+<p>gz is positive when rotate clockwise along z-axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>gx (float) - x-axis gyroscope data in rad/s</p></li>
+<li><p>gy (float) - y-axis gyroscope data in rad/s</p></li>
+<li><p>gz (float) - z-axis gyroscope data in rad/s</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.get_mag">
+<span class="sig-name descname"><span class="pre">get_mag</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.get_mag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.get_mag" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 magnetometer data in Earth’s reference (µT)</p>
+<p>ENU:</p>
+<p>mx is positive when the right hand side pointing to north</p>
+<p>my is positive when the front side pointing to north</p>
+<p>mz is positive when the upper side pointing to north</p>
+<p>NED:</p>
+<p>mx is positive when the front side pointing to north</p>
+<p>my is positive when the right hand side pointing to north</p>
+<p>mz is positive when the under side pointing to north</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>mx (float) - x-axis magnetometer data in µT</p></li>
+<li><p>my (float) - y-axis magnetometer data in µT</p></li>
+<li><p>mz (float) - z-axis magnetometer data in µT</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.get_quaternion">
+<span class="sig-name descname"><span class="pre">get_quaternion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.get_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.get_quaternion" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 Quaternion</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.get_temp">
+<span class="sig-name descname"><span class="pre">get_temp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.get_temp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.get_temp" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 temperature data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>temp (float) - temperature data in °C</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.initialization">
+<span class="sig-name descname"><span class="pre">initialization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.initialization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.initialization" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 initialization for accelerometer, gyroscope, magnetometer</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.run" title="Link to this definition"></a></dt>
+<dd><p>Acquire accelerometer, gyroscope, magnetometer, attitudes, and temperature data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu9250.MPU9250.start_thread">
+<span class="sig-name descname"><span class="pre">start_thread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ahrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu9250.html#MPU9250.start_thread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu9250.MPU9250.start_thread" title="Link to this definition"></a></dt>
+<dd><p>MPU9250 thread to continuously acquire accelerometer, gyroscope, magnetometer, attitudes, and temperature data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ahrs</strong> – ahrs object (Madgwick, Mahony, EKF, etc.)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-mpu9250_driver">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mpu9250_driver" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ahrs.html" class="btn btn-neutral float-left" title="ahrs package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.html" class="btn btn-neutral float-right" title="utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

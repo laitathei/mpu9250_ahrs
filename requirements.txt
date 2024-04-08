@@ -1,0 +1,11 @@
+numpy==1.26.3
+numpy-quaternion==2023.0.2
+progress==1.6
+progressbar2==4.3.2
+tqdm==4.66.1
+alive-progress==3.1.5
+pygame==2.5.2
+pip3 install pyyaml
+sphinx==7.2.6
+sphinx_rtd_theme==2.0.0
+scipy==1.8.0

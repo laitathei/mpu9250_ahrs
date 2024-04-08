@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utils package &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="visualization module" href="visualization.html" />
+    <link rel="prev" title="mpu9250_driver package" href="mpu9250_driver.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">python</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ahrs.html">ahrs package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html">mpu9250_driver package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">utils package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.filter">utils.filter module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#utils.filter.sliding_window"><code class="docutils literal notranslate"><span class="pre">sliding_window()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.orientation">utils.orientation module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.dcm2eul"><code class="docutils literal notranslate"><span class="pre">dcm2eul()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.dcm2quat"><code class="docutils literal notranslate"><span class="pre">dcm2quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.eul2dcm"><code class="docutils literal notranslate"><span class="pre">eul2dcm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.eul2quat"><code class="docutils literal notranslate"><span class="pre">eul2quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.left_hand_rule"><code class="docutils literal notranslate"><span class="pre">left_hand_rule</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.quat2dcm"><code class="docutils literal notranslate"><span class="pre">quat2dcm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.quat2eul"><code class="docutils literal notranslate"><span class="pre">quat2eul()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.quat_conjugate"><code class="docutils literal notranslate"><span class="pre">quat_conjugate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.quat_multi"><code class="docutils literal notranslate"><span class="pre">quat_multi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.quat_x_rotation"><code class="docutils literal notranslate"><span class="pre">quat_x_rotation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.quat_y_rotation"><code class="docutils literal notranslate"><span class="pre">quat_y_rotation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.quat_z_rotation"><code class="docutils literal notranslate"><span class="pre">quat_z_rotation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.orientation.right_hand_rule"><code class="docutils literal notranslate"><span class="pre">right_hand_rule</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.transformation">utils.transformation module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#utils.transformation.ENU2NED"><code class="docutils literal notranslate"><span class="pre">ENU2NED()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.transformation.NED2ENU"><code class="docutils literal notranslate"><span class="pre">NED2ENU()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.transformation.acc2eul"><code class="docutils literal notranslate"><span class="pre">acc2eul()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.transformation.acc2quat"><code class="docutils literal notranslate"><span class="pre">acc2quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.transformation.accmag2eul"><code class="docutils literal notranslate"><span class="pre">accmag2eul()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.transformation.accmag2quat"><code class="docutils literal notranslate"><span class="pre">accmag2quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.transformation.skew_symmetric"><code class="docutils literal notranslate"><span class="pre">skew_symmetric()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.wireframe">utils.wireframe module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#utils.wireframe.Face"><code class="docutils literal notranslate"><span class="pre">Face</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.wireframe.Vertice"><code class="docutils literal notranslate"><span class="pre">Vertice</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.wireframe.wireframe"><code class="docutils literal notranslate"><span class="pre">wireframe</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">python</a></li>
+      <li class="breadcrumb-item active">utils package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="utils-package">
+<h1>utils package<a class="headerlink" href="#utils-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-utils.filter">
+<span id="utils-filter-module"></span><h2>utils.filter module<a class="headerlink" href="#module-utils.filter" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.filter.sliding_window">
+<span class="sig-prename descclassname"><span class="pre">utils.filter.</span></span><span class="sig-name descname"><span class="pre">sliding_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/filter.html#sliding_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.filter.sliding_window" title="Link to this definition"></a></dt>
+<dd><p>Sliding window algorithm <a href="#id28"><span class="problematic" id="id1">[1]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>list</em>) – data list</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – sliding window size</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>result (list) - smoothed data</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>algorithm explanations &lt;https://blog.csdn.net/u012611644/article/details/126153999&gt;</cite></p>
+</aside>
+</aside>
+</dd></dl>
+
+</section>
+<section id="module-utils.orientation">
+<span id="utils-orientation-module"></span><h2>utils.orientation module<a class="headerlink" href="#module-utils.orientation" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.dcm2eul">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">dcm2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dcm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#dcm2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.dcm2eul" title="Link to this definition"></a></dt>
+<dd><p>Convert Direction Cosine Matrix with specific order to Euler angle <a href="#id29"><span class="problematic" id="id3">[1]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dcm</strong> (<em>np.matrix</em>) – rotation matrix</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – rotation sequence</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>roll (float) - x-axis Euler angle in radians</p></li>
+<li><p>pitch (float) - y-axis Euler angle in radians</p></li>
+<li><p>yaw (float) - z-axis Euler angle in radians</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>Wiki &lt;https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles&gt;</cite></p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.dcm2quat">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">dcm2quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dcm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#dcm2quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.dcm2quat" title="Link to this definition"></a></dt>
+<dd><p>Convert Direction Cosine Matrix with specific order to Quaternion</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dcm</strong> (<em>np.matrix</em>) – rotation matrix</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – rotation sequence</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.eul2dcm">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">eul2dcm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'right'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#eul2dcm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.eul2dcm" title="Link to this definition"></a></dt>
+<dd><p>Convert Euler angle to Direction Cosine Matrix <a href="#id30"><span class="problematic" id="id5">[1]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>roll</strong> (<em>float</em>) – x-axis Euler angle in radians</p></li>
+<li><p><strong>pitch</strong> (<em>float</em>) – y-axis Euler angle in radians</p></li>
+<li><p><strong>yaw</strong> (<em>float</em>) – z-axis Euler angle in radians</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – rotation sequence</p></li>
+<li><p><strong>coordinates</strong> (<em>str</em>) – right-handed or left-handed coordinates system</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>DCM (numpy.matrix) - rotation matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id6" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>Wiki &lt;https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles&gt;</cite></p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.eul2quat">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">eul2quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#eul2quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.eul2quat" title="Link to this definition"></a></dt>
+<dd><p>Convert Euler angle to Quaternion <a href="#id31"><span class="problematic" id="id7">[1]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>roll</strong> (<em>float</em>) – x-axis Euler angle in radians</p></li>
+<li><p><strong>pitch</strong> (<em>float</em>) – y-axis Euler angle in radians</p></li>
+<li><p><strong>yaw</strong> (<em>float</em>) – z-axis Euler angle in radians</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – rotation sequence</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id8" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>zhihu &lt;https://zhuanlan.zhihu.com/p/45404840&gt;</cite></p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.orientation.left_hand_rule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">left_hand_rule</span></span><a class="reference internal" href="_modules/utils/orientation.html#left_hand_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.left_hand_rule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Left-handed coordinates system rotation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.orientation.left_hand_rule.euler_x_rotation">
+<span class="sig-name descname"><span class="pre">euler_x_rotation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#left_hand_rule.euler_x_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.left_hand_rule.euler_x_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Roll angle to Direction Cosine Matrix in left-handed coordinates system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roll</strong> (<em>float</em>) – x-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Rx (ndarray) - x axis rotation matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.orientation.left_hand_rule.euler_y_rotation">
+<span class="sig-name descname"><span class="pre">euler_y_rotation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#left_hand_rule.euler_y_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.left_hand_rule.euler_y_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Pitch angle to Direction Cosine Matrix in left-handed coordinates system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch</strong> (<em>float</em>) – y-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Ry (ndarray) - y axis rotation matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.orientation.left_hand_rule.euler_z_rotation">
+<span class="sig-name descname"><span class="pre">euler_z_rotation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#left_hand_rule.euler_z_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.left_hand_rule.euler_z_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Yaw angle to Direction Cosine Matrix in left-handed coordinates system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>yaw</strong> (<em>float</em>) – z-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Rz (ndarray) - z axis rotation matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.quat2dcm">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat2dcm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat2dcm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat2dcm" title="Link to this definition"></a></dt>
+<dd><p>Convert Quaternion to Direction Cosine Matrix <a href="#id32"><span class="problematic" id="id9">[1]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float</em>) – Quaternion magnitude</p></li>
+<li><p><strong>x</strong> (<em>float</em>) – Quaternion X axis</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Quaternion Y axis</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Quaternion Z axis</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>DCM (numpy.matrix) - rotation matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id10" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>Wiki &lt;https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion&gt;</cite></p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.quat2eul">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat2eul" title="Link to this definition"></a></dt>
+<dd><p>Convert Quaternion to Euler angle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float</em>) – Quaternion magnitude</p></li>
+<li><p><strong>x</strong> (<em>float</em>) – Quaternion X axis</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Quaternion Y axis</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Quaternion Z axis</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – rotation sequence</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>roll (float) - x-axis Euler angle in radians</p></li>
+<li><p>pitch (float) - y-axis Euler angle in radians</p></li>
+<li><p>yaw (float) - z-axis Euler angle in radians</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.quat_conjugate">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_conjugate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_conjugate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_conjugate" title="Link to this definition"></a></dt>
+<dd><p>Calculate the conjugate of Quaternion <a href="#id33"><span class="problematic" id="id11">[1]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em>) – quaternion</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>q (ndarray) - the conjugate of quaternion multiplication</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id12" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><a href="#id13"><span class="problematic" id="id14">`</span></a>Wiki &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal">https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.quat_multi">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_multi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_multi" title="Link to this definition"></a></dt>
+<dd><p>Calculate the product of two quaternion multiplication <a href="#id34"><span class="problematic" id="id15">[1]_</span></a> <a href="#id35"><span class="problematic" id="id16">[2]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q1</strong> (<em>ndarray</em>) – quaternion</p></li>
+<li><p><strong>q2</strong> (<em>ndarray</em>) – quaternion</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>q (ndarray) - product of two quaternion multiplication</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p>Mathematical expression:</p>
+<p>q1 = (s1, v1)</p>
+<p>q2 = (s2, v2)</p>
+<p>q1q2 = q1 x q2 - q1 · q2 (Cross product minus Dot product)</p>
+<blockquote>
+<div><p>= (s1 + v1)(s2 + v2)</p>
+<p>= s1s2 + s1v2 + s2v1 + v1v2</p>
+<p>= s1s2 + s1v2 + s2v1 + (v1 x v2 - v1 · v2)</p>
+<p>= (s1s2 - v1 · v2) + (s1v2 + s2v1 + v1 x v2)</p>
+<p>= scalar part + vector part</p>
+</div></blockquote>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id17" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>‘&lt;<a class="reference external" href="https://slideplayer.com/slide/16243043/">https://slideplayer.com/slide/16243043/</a>&gt;’</p>
+</aside>
+<aside class="footnote brackets" id="id18" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>‘&lt;<a class="reference external" href="https://personal.utdallas.edu/~sxb027100/dock/quaternion.html">https://personal.utdallas.edu/~sxb027100/dock/quaternion.html</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.quat_x_rotation">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_x_rotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_x_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_x_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Roll angle to Quaternion in right-handed coordinates system (Hamilton)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roll</strong> (<em>float</em>) – x-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Q (quaternion.quaternion) - quaternion in w,x,y,z sequence</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.quat_y_rotation">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_y_rotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_y_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_y_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Pitch angle to Quaternion in right-handed coordinates system (Hamilton)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch</strong> (<em>float</em>) – y-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Q (quaternion.quaternion) - quaternion in w,x,y,z sequence</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.orientation.quat_z_rotation">
+<span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_z_rotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_z_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_z_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Yaw angle to Quaternion in right-handed coordinates system (Hamilton)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>yaw</strong> (<em>float</em>) – z-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Q (quaternion.quaternion) - quaternion in w,x,y,z sequence</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.orientation.right_hand_rule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">right_hand_rule</span></span><a class="reference internal" href="_modules/utils/orientation.html#right_hand_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.right_hand_rule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Right-handed coordinates system rotation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.orientation.right_hand_rule.euler_x_rotation">
+<span class="sig-name descname"><span class="pre">euler_x_rotation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#right_hand_rule.euler_x_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.right_hand_rule.euler_x_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Roll angle to Direction Cosine Matrix in right-handed coordinates system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roll</strong> (<em>float</em>) – x-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Rx (ndarray) - x axis rotation matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.orientation.right_hand_rule.euler_y_rotation">
+<span class="sig-name descname"><span class="pre">euler_y_rotation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#right_hand_rule.euler_y_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.right_hand_rule.euler_y_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Pitch angle to Direction Cosine Matrix in right-handed coordinates system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch</strong> (<em>float</em>) – y-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Ry (ndarray) - y axis rotation matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.orientation.right_hand_rule.euler_z_rotation">
+<span class="sig-name descname"><span class="pre">euler_z_rotation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#right_hand_rule.euler_z_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.right_hand_rule.euler_z_rotation" title="Link to this definition"></a></dt>
+<dd><p>Convert Yaw angle to Direction Cosine Matrix in right-handed coordinates system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>yaw</strong> (<em>float</em>) – z-axis Euler angle in radians</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Rz (ndarray) - z axis rotation matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-utils.transformation">
+<span id="utils-transformation-module"></span><h2>utils.transformation module<a class="headerlink" href="#module-utils.transformation" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.transformation.ENU2NED">
+<span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">ENU2NED</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#ENU2NED"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.ENU2NED" title="Link to this definition"></a></dt>
+<dd><p>Convert data from ENU frame to NED frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>E</strong> (<em>float</em>) – East axis value</p></li>
+<li><p><strong>N</strong> (<em>float</em>) – North axis value</p></li>
+<li><p><strong>U</strong> (<em>float</em>) – Upward value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>N (float) - North axis value</p></li>
+<li><p>E (float) - East axis value</p></li>
+<li><p>D (float) - Downward value</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.transformation.NED2ENU">
+<span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">NED2ENU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#NED2ENU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.NED2ENU" title="Link to this definition"></a></dt>
+<dd><p>Convert data from NED frame to ENU frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N</strong> (<em>float</em>) – North axis value</p></li>
+<li><p><strong>E</strong> (<em>float</em>) – East axis value</p></li>
+<li><p><strong>D</strong> (<em>float</em>) – Downward value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>E (float) - East axis value</p></li>
+<li><p>N (float) - North axis value</p></li>
+<li><p>U (float) - Upward value</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.transformation.acc2eul">
+<span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">acc2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#acc2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.acc2eul" title="Link to this definition"></a></dt>
+<dd><p>Convert acceleration vector with gravity to Euler angle in ENU or NED frame <a href="#id36"><span class="problematic" id="id19">[1]_</span></a> <a href="#id37"><span class="problematic" id="id20">[2]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>float</em>) – x axis accelerometer</p></li>
+<li><p><strong>ay</strong> (<em>float</em>) – y axis accelerometer</p></li>
+<li><p><strong>az</strong> (<em>float</em>) – z axis accelerometer</p></li>
+<li><p><strong>nav</strong> (<em>str</em>) – navigation frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>roll (float) - x-axis Euler angle in radians</p></li>
+<li><p>pitch (float) - y-axis Euler angle in radians</p></li>
+<li><p>yaw (float) - z-axis Euler angle in radians</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id21" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013</p>
+</aside>
+<aside class="footnote brackets" id="id22" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p><cite>Gimbal Lock explaination &lt;https://www.nxp.com/docs/en/application-note/AN5017.pdf&gt;</cite></p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.transformation.acc2quat">
+<span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">acc2quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#acc2quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.acc2quat" title="Link to this definition"></a></dt>
+<dd><p>Convert acceleration vector with gravity to Quaternion in ENU or NED frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>float</em>) – x axis accelerometer</p></li>
+<li><p><strong>ay</strong> (<em>float</em>) – y axis accelerometer</p></li>
+<li><p><strong>az</strong> (<em>float</em>) – z axis accelerometer</p></li>
+<li><p><strong>nav</strong> (<em>str</em>) – navigation frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.transformation.accmag2eul">
+<span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">accmag2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">my</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#accmag2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.accmag2eul" title="Link to this definition"></a></dt>
+<dd><p>Convert acceleration vector with gravity and magnetometer value to Euler angle in ENU or NED frame included tilt compensation[1]_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>float</em>) – x axis accelerometer</p></li>
+<li><p><strong>ay</strong> (<em>float</em>) – y axis accelerometer</p></li>
+<li><p><strong>az</strong> (<em>float</em>) – z axis accelerometer</p></li>
+<li><p><strong>mx</strong> (<em>float</em>) – x axis gyroscope</p></li>
+<li><p><strong>my</strong> (<em>float</em>) – y axis gyroscope</p></li>
+<li><p><strong>mz</strong> (<em>float</em>) – z axis gyroscope</p></li>
+<li><p><strong>nav</strong> (<em>str</em>) – navigation frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>roll (float) - x-axis Euler angle in radians</p></li>
+<li><p>pitch (float) - y-axis Euler angle in radians</p></li>
+<li><p>yaw (float) - z-axis Euler angle in radians</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id23" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.transformation.accmag2quat">
+<span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">accmag2quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">my</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#accmag2quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.accmag2quat" title="Link to this definition"></a></dt>
+<dd><p>Convert acceleration vector with gravity and magnetometer value to Quaternion in ENU or NED frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>float</em>) – x axis accelerometer</p></li>
+<li><p><strong>ay</strong> (<em>float</em>) – y axis accelerometer</p></li>
+<li><p><strong>az</strong> (<em>float</em>) – z axis accelerometer</p></li>
+<li><p><strong>mx</strong> (<em>float</em>) – x axis magnetometer</p></li>
+<li><p><strong>my</strong> (<em>float</em>) – y axis magnetometer</p></li>
+<li><p><strong>mz</strong> (<em>float</em>) – z axis magnetometer</p></li>
+<li><p><strong>nav</strong> (<em>str</em>) – navigation frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>w (float) - Quaternion magnitude</p></li>
+<li><p>x (float) - Quaternion X axis</p></li>
+<li><p>y (float) - Quaternion Y axis</p></li>
+<li><p>z (float) - Quaternion Z axis</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.transformation.skew_symmetric">
+<span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">skew_symmetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#skew_symmetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.skew_symmetric" title="Link to this definition"></a></dt>
+<dd><p>Create skew symmetric matrix by vector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – 1st element of vector</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – 2nd element of vector</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – 3rd element of vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>matrix (ndarray) - skew-symmetric matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-utils.wireframe">
+<span id="utils-wireframe-module"></span><h2>utils.wireframe module<a class="headerlink" href="#module-utils.wireframe" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.wireframe.Face">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.wireframe.</span></span><span class="sig-name descname"><span class="pre">Face</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#Face"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.Face" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Face of Cube</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> (<em>tuple</em>) – vertice index combined into face</p></li>
+<li><p><strong>color</strong> (<em>tuple</em>) – color</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.wireframe.Vertice">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.wireframe.</span></span><span class="sig-name descname"><span class="pre">Vertice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#Vertice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.Vertice" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Vertice of Cube</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> (<em>tuple</em>) – xyz axis vertice coordinates</p></li>
+<li><p><strong>color</strong> (<em>tuple</em>) – color</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.wireframe.wireframe">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.wireframe.</span></span><span class="sig-name descname"><span class="pre">wireframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#wireframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.wireframe" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces <a href="#id38"><span class="problematic" id="id24">[1]_</span></a> <a href="#id39"><span class="problematic" id="id25">[2]_</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p>
+</dd>
+</dl>
+<p>axis color:</p>
+<p>Positive of x axis is Red, Negative of x axis is Cyan</p>
+<p>Positive of y axis is Green, Negative of y axis is Magenta</p>
+<p>Positive of z axis is Blue, Negative of z axis is Yellow</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id26" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><cite>Cube property references &lt;https://en.wikipedia.org/wiki/Cube&gt;</cite></p>
+</aside>
+<aside class="footnote brackets" id="id27" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p><cite>Github references &lt;https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master&gt;</cite></p>
+</aside>
+</aside>
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.wireframe.wireframe.add_faces">
+<span class="sig-name descname"><span class="pre">add_faces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">face_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#wireframe.add_faces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.wireframe.add_faces" title="Link to this definition"></a></dt>
+<dd><p>Add face into IMU model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>face_list</strong> (<em>list</em>) – IMU model face index</p></li>
+<li><p><strong>color_list</strong> (<em>list</em>) – list stored each face color</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.wireframe.wireframe.add_vertices">
+<span class="sig-name descname"><span class="pre">add_vertices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertice_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#wireframe.add_vertices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.wireframe.add_vertices" title="Link to this definition"></a></dt>
+<dd><p>Add vertice into IMU model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertice_list</strong> (<em>list</em>) – IMU model vertice coordinates</p></li>
+<li><p><strong>color_list</strong> (<em>list</em>) – list stored each vertice color</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.wireframe.wireframe.initialize_cube">
+<span class="sig-name descname"><span class="pre">initialize_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#wireframe.initialize_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.wireframe.initialize_cube" title="Link to this definition"></a></dt>
+<dd><p>Initialize the IMU model of the specified size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_x</strong> (<em>int</em>) – maximum x axis cube coordinates</p></li>
+<li><p><strong>min_x</strong> (<em>int</em>) – minimum x axis cube coordinates</p></li>
+<li><p><strong>max_y</strong> (<em>int</em>) – maximum y axis cube coordinates</p></li>
+<li><p><strong>min_y</strong> (<em>int</em>) – minimum y axis cube coordinates</p></li>
+<li><p><strong>max_z</strong> (<em>int</em>) – maximum z axis cube coordinates</p></li>
+<li><p><strong>min_z</strong> (<em>int</em>) – minimum z axis cube coordinates</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.wireframe.wireframe.rotate_point">
+<span class="sig-name descname"><span class="pre">rotate_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#wireframe.rotate_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.wireframe.rotate_point" title="Link to this definition"></a></dt>
+<dd><p>Rotate the IMU vertice coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>point</strong> (<em>ndarray</em>) – xyz position</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>new_point (numpy.matrix) - rotated coordinates</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utils.wireframe.wireframe.update_attitude">
+<span class="sig-name descname"><span class="pre">update_attitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rpy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#wireframe.update_attitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.wireframe.update_attitude" title="Link to this definition"></a></dt>
+<dd><p>Update IMU model attitude</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rpy</strong> (<em>ndarray</em>) – roll, pitch, yaw angle in degree</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-utils" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mpu9250_driver.html" class="btn btn-neutral float-left" title="mpu9250_driver package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="visualization.html" class="btn btn-neutral float-right" title="visualization module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
