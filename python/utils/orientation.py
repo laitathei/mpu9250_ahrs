@@ -159,7 +159,7 @@ def eul2dcm(roll, pitch, yaw, seq="xyz", coordinates="right"):
         - DCM (numpy.matrix) - rotation matrix
 
     .. Reference
-    .. [1] `Wiki <https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles>`
+    .. [1] 'Wiki <https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles>'
     """
     if coordinates == "right":
         Rx = right_hand_rule.euler_x_rotation(roll)
@@ -190,7 +190,7 @@ def eul2quat(roll, pitch, yaw, seq="xyz"):
         - z (float) - Quaternion Z axis
 
     .. Reference
-    .. [1] `zhihu <https://zhuanlan.zhihu.com/p/45404840>`
+    .. [1] 'zhihu <https://zhuanlan.zhihu.com/p/45404840>'
     """
     Qx = quat_x_rotation(roll)
     Qy = quat_y_rotation(pitch)
@@ -212,7 +212,7 @@ def dcm2eul(dcm: np.matrix, seq="xyz"):
         - yaw (float) - z-axis Euler angle in radians
 
     .. Reference
-    .. [1] `Wiki <https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles>`
+    .. [1] 'Wiki <https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles>'
     """
     if round(np.linalg.det(dcm),2) != 1:
         raise ValueError("Wrong rotation matrix")
@@ -274,7 +274,7 @@ def quat2dcm(w, x, y, z):
         - DCM (numpy.matrix) - rotation matrix
 
     .. Reference
-    .. [1] `Wiki <https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion>`
+    .. [1] 'Wiki <https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion>'
     """
     n = w*w + x*x + y*y + z*z
     if n == 0:
@@ -358,7 +358,7 @@ def quat_conjugate(q):
         - q (ndarray) - the conjugate of quaternion multiplication
 
     .. Reference
-    .. [1] `Wiki <https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal>'
+    .. [1] 'Wiki <https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal>'
     """
     w = q[0][0]
     x = q[1][0] * -1

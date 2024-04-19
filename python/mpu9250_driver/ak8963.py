@@ -134,8 +134,8 @@ class AK8963():
             - mag_strength (float) - geomagnetic field strength in µT
 
         .. Reference
-        .. [1] `four element calibration <https://www.nxp.com/docs/en/application-note/AN5019.pdf>`
-        .. [2] `ten element calibration <https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py>`
+        .. [1] 'four element calibration <https://www.nxp.com/docs/en/application-note/AN5019.pdf>'
+        .. [2] 'ten element calibration <https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py>'
         """
         if s > 0 and self.calibration == True:
             input("Please move the IMU in slow motion in all possible directions, the calibration process takes {}s".format(s))
