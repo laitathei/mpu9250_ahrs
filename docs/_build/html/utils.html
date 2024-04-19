@@ -52,6 +52,11 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">utils package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-utils.filter">utils.filter module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#utils.filter.butterworth_coefficient"><code class="docutils literal notranslate"><span class="pre">butterworth_coefficient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.filter.high_pass_filter_1st"><code class="docutils literal notranslate"><span class="pre">high_pass_filter_1st()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.filter.high_pass_filter_2nd"><code class="docutils literal notranslate"><span class="pre">high_pass_filter_2nd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.filter.low_pass_filter_1st"><code class="docutils literal notranslate"><span class="pre">low_pass_filter_1st()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.filter.low_pass_filter_2nd"><code class="docutils literal notranslate"><span class="pre">low_pass_filter_2nd()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#utils.filter.sliding_window"><code class="docutils literal notranslate"><span class="pre">sliding_window()</span></code></a></li>
 </ul>
 </li>
@@ -129,9 +134,148 @@
 <section id="module-utils.filter">
 <span id="utils-filter-module"></span><h2>utils.filter module<a class="headerlink" href="#module-utils.filter" title="Link to this heading"></a></h2>
 <dl class="py function">
+<dt class="sig sig-object py" id="utils.filter.butterworth_coefficient">
+<span class="sig-prename descclassname"><span class="pre">utils.filter.</span></span><span class="sig-name descname"><span class="pre">butterworth_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'low-pass'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/filter.html#butterworth_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.filter.butterworth_coefficient" title="Link to this definition"></a></dt>
+<dd><p>Calculate butterworth filter coefficient according to the desired order</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float</em>) – cut-off frequency in rad/s</p></li>
+<li><p><strong>n</strong> (<em>float</em>) – order of butterworth filter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>a (ndarray) - butterworth filter coefficient</p></li>
+<li><p>b (ndarray) - butterworth filter coefficient with cut-off frequency</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>‘Low pass filter explanations &lt;<a class="reference external" href="https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb">https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb</a>&gt;’</p>
+</aside>
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>‘High pass filter explanations &lt;<a class="reference external" href="https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb">https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.filter.high_pass_filter_1st">
+<span class="sig-prename descclassname"><span class="pre">utils.filter.</span></span><span class="sig-name descname"><span class="pre">high_pass_filter_1st</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/filter.html#high_pass_filter_1st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.filter.high_pass_filter_1st" title="Link to this definition"></a></dt>
+<dd><p>Create 1st order high pass filter by Bilinear (Tustin) transform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float</em>) – cut-off frequency in rad/s</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – sampling frequency in hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>X (list) - denominator coefficient (X)</p></li>
+<li><p>Y (list) - numerator coefficient (Y)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>‘High pass filter explanations &lt;<a class="reference external" href="https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb">https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.filter.high_pass_filter_2nd">
+<span class="sig-prename descclassname"><span class="pre">utils.filter.</span></span><span class="sig-name descname"><span class="pre">high_pass_filter_2nd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/filter.html#high_pass_filter_2nd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.filter.high_pass_filter_2nd" title="Link to this definition"></a></dt>
+<dd><p>Create 2nd order high pass filter by Bilinear (Tustin) transform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float</em>) – cut-off frequency in rad/s</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – sampling frequency in hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>X (list) - denominator coefficient (X)</p></li>
+<li><p>Y (list) - numerator coefficient (Y)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>‘High pass filter explanations &lt;<a class="reference external" href="https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb">https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.filter.low_pass_filter_1st">
+<span class="sig-prename descclassname"><span class="pre">utils.filter.</span></span><span class="sig-name descname"><span class="pre">low_pass_filter_1st</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/filter.html#low_pass_filter_1st"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.filter.low_pass_filter_1st" title="Link to this definition"></a></dt>
+<dd><p>Create 1st order low pass filter by Bilinear (Tustin) transform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float</em>) – cut-off frequency in rad/s</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – sampling frequency in hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>X (list) - denominator coefficient (X)</p></li>
+<li><p>Y (list) - numerator coefficient (Y)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>‘Low pass filter explanations &lt;<a class="reference external" href="https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb">https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.filter.low_pass_filter_2nd">
+<span class="sig-prename descclassname"><span class="pre">utils.filter.</span></span><span class="sig-name descname"><span class="pre">low_pass_filter_2nd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/filter.html#low_pass_filter_2nd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.filter.low_pass_filter_2nd" title="Link to this definition"></a></dt>
+<dd><p>Create 2nd order low pass filter by Bilinear (Tustin) transform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float</em>) – cut-off frequency in rad/s</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – sampling frequency in hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>X (list) - denominator coefficient (X)</p></li>
+<li><p>Y (list) - numerator coefficient (Y)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id6" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>‘Low pass filter explanations &lt;<a class="reference external" href="https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb">https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb</a>&gt;’</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="utils.filter.sliding_window">
 <span class="sig-prename descclassname"><span class="pre">utils.filter.</span></span><span class="sig-name descname"><span class="pre">sliding_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/filter.html#sliding_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.filter.sliding_window" title="Link to this definition"></a></dt>
-<dd><p>Sliding window algorithm <a href="#id28"><span class="problematic" id="id1">[1]_</span></a></p>
+<dd><p>Sliding window algorithm <a href="#id32"><span class="problematic" id="id7">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -147,9 +291,9 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id2" role="doc-footnote">
+<aside class="footnote brackets" id="id8" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>algorithm explanations &lt;https://blog.csdn.net/u012611644/article/details/126153999&gt;</cite></p>
+<p>‘algorithm explanations &lt;<a class="reference external" href="https://blog.csdn.net/u012611644/article/details/126153999">https://blog.csdn.net/u012611644/article/details/126153999</a>&gt;’</p>
 </aside>
 </aside>
 </dd></dl>
@@ -160,7 +304,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.dcm2eul">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">dcm2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dcm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#dcm2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.dcm2eul" title="Link to this definition"></a></dt>
-<dd><p>Convert Direction Cosine Matrix with specific order to Euler angle <a href="#id29"><span class="problematic" id="id3">[1]_</span></a></p>
+<dd><p>Convert Direction Cosine Matrix with specific order to Euler angle <a href="#id33"><span class="problematic" id="id9">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -178,9 +322,9 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id4" role="doc-footnote">
+<aside class="footnote brackets" id="id10" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>Wiki &lt;https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles&gt;</cite></p>
+<p>‘Wiki &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles">https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles</a>&gt;’</p>
 </aside>
 </aside>
 </dd></dl>
@@ -211,7 +355,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.eul2dcm">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">eul2dcm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'right'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#eul2dcm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.eul2dcm" title="Link to this definition"></a></dt>
-<dd><p>Convert Euler angle to Direction Cosine Matrix <a href="#id30"><span class="problematic" id="id5">[1]_</span></a></p>
+<dd><p>Convert Euler angle to Direction Cosine Matrix <a href="#id34"><span class="problematic" id="id11">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -230,9 +374,9 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id6" role="doc-footnote">
+<aside class="footnote brackets" id="id12" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>Wiki &lt;https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles&gt;</cite></p>
+<p>‘Wiki &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles">https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles</a>&gt;’</p>
 </aside>
 </aside>
 </dd></dl>
@@ -240,7 +384,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.eul2quat">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">eul2quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#eul2quat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.eul2quat" title="Link to this definition"></a></dt>
-<dd><p>Convert Euler angle to Quaternion <a href="#id31"><span class="problematic" id="id7">[1]_</span></a></p>
+<dd><p>Convert Euler angle to Quaternion <a href="#id35"><span class="problematic" id="id13">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -261,9 +405,9 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id8" role="doc-footnote">
+<aside class="footnote brackets" id="id14" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>zhihu &lt;https://zhuanlan.zhihu.com/p/45404840&gt;</cite></p>
+<p>‘zhihu &lt;<a class="reference external" href="https://zhuanlan.zhihu.com/p/45404840">https://zhuanlan.zhihu.com/p/45404840</a>&gt;’</p>
 </aside>
 </aside>
 </dd></dl>
@@ -329,7 +473,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.quat2dcm">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat2dcm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat2dcm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat2dcm" title="Link to this definition"></a></dt>
-<dd><p>Convert Quaternion to Direction Cosine Matrix <a href="#id32"><span class="problematic" id="id9">[1]_</span></a></p>
+<dd><p>Convert Quaternion to Direction Cosine Matrix <a href="#id36"><span class="problematic" id="id15">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -347,9 +491,9 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id10" role="doc-footnote">
+<aside class="footnote brackets" id="id16" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>Wiki &lt;https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion&gt;</cite></p>
+<p>‘Wiki &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion">https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion</a>&gt;’</p>
 </aside>
 </aside>
 </dd></dl>
@@ -382,7 +526,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.quat_conjugate">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_conjugate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_conjugate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_conjugate" title="Link to this definition"></a></dt>
-<dd><p>Calculate the conjugate of Quaternion <a href="#id33"><span class="problematic" id="id11">[1]_</span></a></p>
+<dd><p>Calculate the conjugate of Quaternion <a href="#id37"><span class="problematic" id="id17">[1]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em>) – quaternion</p>
@@ -395,9 +539,9 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id12" role="doc-footnote">
+<aside class="footnote brackets" id="id18" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><a href="#id13"><span class="problematic" id="id14">`</span></a>Wiki &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal">https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal</a>&gt;’</p>
+<p>‘Wiki &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal">https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal</a>&gt;’</p>
 </aside>
 </aside>
 </dd></dl>
@@ -405,7 +549,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.orientation.quat_multi">
 <span class="sig-prename descclassname"><span class="pre">utils.orientation.</span></span><span class="sig-name descname"><span class="pre">quat_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/orientation.html#quat_multi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.orientation.quat_multi" title="Link to this definition"></a></dt>
-<dd><p>Calculate the product of two quaternion multiplication <a href="#id34"><span class="problematic" id="id15">[1]_</span></a> <a href="#id35"><span class="problematic" id="id16">[2]_</span></a></p>
+<dd><p>Calculate the product of two quaternion multiplication <a href="#id38"><span class="problematic" id="id19">[1]_</span></a> <a href="#id39"><span class="problematic" id="id20">[2]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -432,11 +576,11 @@
 <p>= scalar part + vector part</p>
 </div></blockquote>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id17" role="doc-footnote">
+<aside class="footnote brackets" id="id21" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p>‘&lt;<a class="reference external" href="https://slideplayer.com/slide/16243043/">https://slideplayer.com/slide/16243043/</a>&gt;’</p>
 </aside>
-<aside class="footnote brackets" id="id18" role="doc-footnote">
+<aside class="footnote brackets" id="id22" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
 <p>‘&lt;<a class="reference external" href="https://personal.utdallas.edu/~sxb027100/dock/quaternion.html">https://personal.utdallas.edu/~sxb027100/dock/quaternion.html</a>&gt;’</p>
 </aside>
@@ -604,7 +748,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.transformation.acc2eul">
 <span class="sig-prename descclassname"><span class="pre">utils.transformation.</span></span><span class="sig-name descname"><span class="pre">acc2eul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ENU'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/transformation.html#acc2eul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.transformation.acc2eul" title="Link to this definition"></a></dt>
-<dd><p>Convert acceleration vector with gravity to Euler angle in ENU or NED frame <a href="#id36"><span class="problematic" id="id19">[1]_</span></a> <a href="#id37"><span class="problematic" id="id20">[2]_</span></a></p>
+<dd><p>Convert acceleration vector with gravity to Euler angle in ENU or NED frame <a href="#id40"><span class="problematic" id="id23">[1]_</span></a> <a href="#id41"><span class="problematic" id="id24">[2]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -624,13 +768,13 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id21" role="doc-footnote">
+<aside class="footnote brackets" id="id25" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p>Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013</p>
 </aside>
-<aside class="footnote brackets" id="id22" role="doc-footnote">
+<aside class="footnote brackets" id="id26" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
-<p><cite>Gimbal Lock explaination &lt;https://www.nxp.com/docs/en/application-note/AN5017.pdf&gt;</cite></p>
+<p>‘Gimbal Lock explaination &lt;<a class="reference external" href="https://www.nxp.com/docs/en/application-note/AN5017.pdf">https://www.nxp.com/docs/en/application-note/AN5017.pdf</a>&gt;’</p>
 </aside>
 </aside>
 </dd></dl>
@@ -686,7 +830,7 @@
 </dd>
 </dl>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id23" role="doc-footnote">
+<aside class="footnote brackets" id="id27" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p>Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013</p>
 </aside>
@@ -779,7 +923,7 @@
 <dt class="sig sig-object py" id="utils.wireframe.wireframe">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.wireframe.</span></span><span class="sig-name descname"><span class="pre">wireframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/wireframe.html#wireframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.wireframe.wireframe" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces <a href="#id38"><span class="problematic" id="id24">[1]_</span></a> <a href="#id39"><span class="problematic" id="id25">[2]_</span></a></p>
+<p>Generate wireframe as IMU model included 8 vertices, 12 edges, and 6 faces <a href="#id42"><span class="problematic" id="id28">[1]_</span></a> <a href="#id43"><span class="problematic" id="id29">[2]_</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>nav_frame</strong> (<em>str</em>) – navigation frame</p>
@@ -790,13 +934,13 @@
 <p>Positive of y axis is Green, Negative of y axis is Magenta</p>
 <p>Positive of z axis is Blue, Negative of z axis is Yellow</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id26" role="doc-footnote">
+<aside class="footnote brackets" id="id30" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>Cube property references &lt;https://en.wikipedia.org/wiki/Cube&gt;</cite></p>
+<p>‘Cube property references &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/Cube">https://en.wikipedia.org/wiki/Cube</a>&gt;’</p>
 </aside>
-<aside class="footnote brackets" id="id27" role="doc-footnote">
+<aside class="footnote brackets" id="id31" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
-<p><cite>Github references &lt;https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master&gt;</cite></p>
+<p>‘Github references &lt;<a class="reference external" href="https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master">https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master</a>&gt;’</p>
 </aside>
 </aside>
 <dl class="py method">

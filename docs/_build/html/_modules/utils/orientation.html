@@ -267,7 +267,7 @@
 <span class="sd">        - DCM (numpy.matrix) - rotation matrix</span>
 
 <span class="sd">    .. Reference</span>
-<span class="sd">    .. [1] `Wiki &lt;https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles&gt;`</span>
+<span class="sd">    .. [1] &#39;Wiki &lt;https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">coordinates</span> <span class="o">==</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span>
         <span class="n">Rx</span> <span class="o">=</span> <span class="n">right_hand_rule</span><span class="o">.</span><span class="n">euler_x_rotation</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span>
@@ -301,7 +301,7 @@
 <span class="sd">        - z (float) - Quaternion Z axis</span>
 
 <span class="sd">    .. Reference</span>
-<span class="sd">    .. [1] `zhihu &lt;https://zhuanlan.zhihu.com/p/45404840&gt;`</span>
+<span class="sd">    .. [1] &#39;zhihu &lt;https://zhuanlan.zhihu.com/p/45404840&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Qx</span> <span class="o">=</span> <span class="n">quat_x_rotation</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span>
     <span class="n">Qy</span> <span class="o">=</span> <span class="n">quat_y_rotation</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span>
@@ -326,7 +326,7 @@
 <span class="sd">        - yaw (float) - z-axis Euler angle in radians</span>
 
 <span class="sd">    .. Reference</span>
-<span class="sd">    .. [1] `Wiki &lt;https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles&gt;`</span>
+<span class="sd">    .. [1] &#39;Wiki &lt;https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">dcm</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong rotation matrix&quot;</span><span class="p">)</span>
@@ -394,7 +394,7 @@
 <span class="sd">        - DCM (numpy.matrix) - rotation matrix</span>
 
 <span class="sd">    .. Reference</span>
-<span class="sd">    .. [1] `Wiki &lt;https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion&gt;`</span>
+<span class="sd">    .. [1] &#39;Wiki &lt;https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">w</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">z</span>
     <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -487,7 +487,7 @@
 <span class="sd">        - q (ndarray) - the conjugate of quaternion multiplication</span>
 
 <span class="sd">    .. Reference</span>
-<span class="sd">    .. [1] `Wiki &lt;https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal&gt;&#39;</span>
+<span class="sd">    .. [1] &#39;Wiki &lt;https://en.wikipedia.org/wiki/Quaternion#Conjugation,_the_norm,_and_reciprocal&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>

@@ -54,8 +54,8 @@ class wireframe:
     Positive of z axis is Blue, Negative of z axis is Yellow \n
 
     .. Reference
-    .. [1] `Cube property references <https://en.wikipedia.org/wiki/Cube>`
-    .. [2] `Github references <https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master>`
+    .. [1] 'Cube property references <https://en.wikipedia.org/wiki/Cube>'
+    .. [2] 'Github references <https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master>'
     """
     def __init__(self, nav_frame):
         self.vertices = []

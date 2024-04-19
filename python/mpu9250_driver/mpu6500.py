@@ -271,7 +271,7 @@ class MPU6500():
             - accel_misalignment (ndarray) - 3-axis accelerometer misalignment
 
         .. Reference
-        .. [1] `Accelerometer calibration <https://zhuanlan.zhihu.com/p/296381805>`
+        .. [1] 'Accelerometer calibration <https://zhuanlan.zhihu.com/p/296381805>'
         .. [2] 'Least square prove <https://zhuanlan.zhihu.com/p/87582571>'
         """
         if s > 0 and self.calibration == True:
