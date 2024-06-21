@@ -36,7 +36,7 @@ class AK8963():
 
         # Magnetometer parameter
         self.mag_bias = np.zeros((3,1))
-        self.mag_scale = np.zeros((3,1))
+        self.mag_scale = np.ones((3,1))
         self.mag_misalignment = np.zeros((6,1))
         self.mag_strength = 0
         self.calibration = calibration
@@ -47,7 +47,7 @@ class AK8963():
 
         # Load old config from yaml file
         if self.calibration == False: 
-            f = open("config.yaml", "r")
+            f = open("../cfg/config.yaml", "r")
             self.config = yaml.load(f, Loader=yaml.FullLoader)
             mag_bias = ["mx_bias","my_bias","mz_bias"]
             mag_scale = ["mx_scale","my_scale","mz_scale"]
@@ -75,16 +75,16 @@ class AK8963():
             print("It is not AK8963 default value")
             raise RuntimeError("AK8963 not found")
 
-    def config_AK8963(self, bit):
+    def config_AK8963(self, mag_parameter=16):
         """
         Config AK8963 magnetometer mode
 
-        :param int bit: magnetometer configuration register value
+        :param int mag_parameter: magnetometer configuration register value
         """
-        self.set_mode("fuse rom access", 16)
+        self.set_mode("fuse rom access", mag_parameter)
         self.get_adjust_mag()
-        self.set_mode("power down", 16)
-        self.set_mode("continuous measure 2", 16)
+        self.set_mode("power down", mag_parameter)
+        self.set_mode("continuous measure 2", mag_parameter)
         self.get_status()
 
     def get_status(self):
@@ -196,7 +196,7 @@ class AK8963():
             raise ConnectionError("I2C Connection Failure")
 
         # sensitivity adjustment
-        mx = mx*self.adjustment_x       
+        mx = mx*self.adjustment_x
         my = my*self.adjustment_y
         mz = mz*self.adjustment_z
 

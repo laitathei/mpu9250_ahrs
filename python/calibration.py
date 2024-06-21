@@ -26,9 +26,9 @@ if __name__ == '__main__':
     bias = np.vstack((np.vstack((gyro_bias,accel_bias)),mag_bias))
     scale = np.vstack((np.vstack((gyro_scale,accel_scale)),mag_scale))
     misalignment = np.vstack((np.vstack((gyro_misalignment,accel_misalignment)),mag_misalignment))
-    
-    # Refrest new config to yaml file
-    config = yaml.load(open("config.yaml", "r"), Loader=yaml.FullLoader)
+
+    # Refresh new config to yaml file
+    config = yaml.load(open("../cfg/config.yaml", "r"), Loader=yaml.FullLoader)
     bias_parameter = ["gx_bias","gy_bias","gz_bias","ax_bias","ay_bias","az_bias","mx_bias","my_bias","mz_bias"]
     scale_parameter = ["gx_scale","gy_scale","gz_scale","ax_scale","ay_scale","az_scale","mx_scale","my_scale","mz_scale"]
     

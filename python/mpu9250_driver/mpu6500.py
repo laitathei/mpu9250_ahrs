@@ -65,10 +65,10 @@ class MPU6500():
 
         # Accelerometer and gyroscope parameter
         self.accel_bias = np.zeros((3,1))
-        self.accel_scale = np.zeros((3,1))
+        self.accel_scale = np.ones((3,1))
         self.accel_misalignment = np.zeros((6,1))
         self.gyro_bias = np.zeros((3,1))
-        self.gyro_scale = np.zeros((3,1))
+        self.gyro_scale = np.ones((3,1))
         self.gyro_misalignment = np.zeros((6,1))
         self.calibration = calibration
 
@@ -78,7 +78,7 @@ class MPU6500():
 
         # Load old config from yaml file
         if self.calibration == False: 
-            f = open("config.yaml", "r")
+            f = open("../cfg/config.yaml", "r")
             self.config = yaml.load(f, Loader=yaml.FullLoader)
             gyro_bias = ["gx_bias","gy_bias","gz_bias"]
             gyro_scale = ["gx_scale","gy_scale","gz_scale"]
@@ -226,6 +226,7 @@ class MPU6500():
             signed_value = unsigned_value - 65536
         elif (unsigned_value >= 0) and (unsigned_value < 32768):
             signed_value = unsigned_value
+
         return signed_value
 
     def gyro_calibration(self, s: int):
@@ -240,15 +241,15 @@ class MPU6500():
         """
         if s > 0 and self.calibration == True:
             print('Start gyroscope calibration - Do not move the IMU for {}s'.format(s))
-            gyro_bias = np.zeros((3,1))
+            total_gyro = np.zeros((3,1))
 
             for i in range(s*self.hz):
                 gx, gy, gz = self.get_gyro()
-                gyro_bias += np.array([[gx],[gy],[gz]])
+                total_gyro += np.array([[gx],[gy],[gz]])
                 time.sleep(1/self.hz)
             
-            # Calculate bias
-            self.gyro_bias = gyro_bias/(s*self.hz)
+            # calculate bias
+            self.gyro_bias = total_gyro/(s*self.hz)
 
             # calculate scale
             self.gyro_scale = np.array([[1],[1],[1]])

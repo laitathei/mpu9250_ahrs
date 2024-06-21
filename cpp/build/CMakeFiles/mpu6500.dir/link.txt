@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -shared -Wl,-soname,libmpu6500.so -o libmpu6500.so CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o 

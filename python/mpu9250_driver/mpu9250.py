@@ -248,6 +248,7 @@ class MPU9250():
         """
         MPU9250 initialization for accelerometer, gyroscope, magnetometer
         """
+        self.temp = self.get_temp()
         self.ax, self.ay, self.az = self.get_accel()
         self.gx, self.gy, self.gz = self.get_gyro()
         self.mx, self.my, self.mz = self.get_mag()
