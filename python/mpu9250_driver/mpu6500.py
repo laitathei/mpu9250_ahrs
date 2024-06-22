@@ -215,19 +215,23 @@ class MPU6500():
         :returns: 
             - signed_value (int) - sensor value in int16 format
         """
-        high = self.bus.read_byte_data(self.address, high_register)
-        low = self.bus.read_byte_data(self.address, low_register)
+        while True:
+            try:
+                high = self.bus.read_byte_data(self.address, high_register)
+                low = self.bus.read_byte_data(self.address, low_register)
 
-        # Megre higher bytes and lower bytes data
-        unsigned_value = (high << 8) + low
+                # Megre higher bytes and lower bytes data
+                unsigned_value = (high << 8) + low
 
-        # Calculate the unsigned int16 range to signed int16 range
-        if (unsigned_value >= 32768) and (unsigned_value < 65536):
-            signed_value = unsigned_value - 65536
-        elif (unsigned_value >= 0) and (unsigned_value < 32768):
-            signed_value = unsigned_value
+                # Calculate the unsigned int16 range to signed int16 range
+                if (unsigned_value >= 32768) and (unsigned_value < 65536):
+                    signed_value = unsigned_value - 65536
+                elif (unsigned_value >= 0) and (unsigned_value < 32768):
+                    signed_value = unsigned_value
 
-        return signed_value
+                return signed_value
+            except:
+                continue
 
     def gyro_calibration(self, s: int):
         """
