@@ -1,7 +1,4 @@
-#include <math.h>
-#include <time.h>
 #include "mpu9250.h"
-#include "transformation.h"
 
 Vector3d MPU9250::get_accel()
 {

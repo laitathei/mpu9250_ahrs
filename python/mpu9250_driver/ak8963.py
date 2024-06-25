@@ -3,6 +3,7 @@ import smbus
 import time
 import yaml
 import numpy as np
+from progress.bar import Bar
 from utils.transformation import NED2ENU
 
 WIA = 0x00
@@ -67,7 +68,7 @@ class AK8963():
         """
         Check AK8963 WHOAMI register value
         """
-        value = hex(self.bus.read_byte_data(self.address, WIA))
+        value = hex(self.read_8bit_register(WIA))
         print("The register value is {}".format(value))
         if value == "0x48":
             print("It is AK8963 default value")
@@ -91,7 +92,7 @@ class AK8963():
         """
         Check AK8963 magnetometer status
         """
-        ST1_value = self.bus.read_byte_data(self.address, ST1)
+        ST1_value = self.read_8bit_register(ST1)
         bit_0 = ST1_value & int("00000001", 2)
         bit_1 = ST1_value & int("00000010", 2)
         if bit_0 == 0:
@@ -113,9 +114,9 @@ class AK8963():
         AK8963 sensitivity adjustment value for xyz axis
         """
         print("Read sensitivity adjustment value")
-        asax = self.bus.read_byte_data(self.address, ASAX)
-        asay = self.bus.read_byte_data(self.address, ASAY)
-        asaz = self.bus.read_byte_data(self.address, ASAZ)
+        asax = self.read_8bit_register(ASAX)
+        asay = self.read_8bit_register(ASAY)
+        asaz = self.read_8bit_register(ASAZ)
 
         self.adjustment_x = (((asax-128)*0.5/128)+1)
         self.adjustment_y = (((asay-128)*0.5/128)+1)
@@ -141,11 +142,13 @@ class AK8963():
             input("Please move the IMU in slow motion in all possible directions, the calibration process takes {}s".format(s))
             calibration = []
             target = []
-            for i in range(s*self.hz):
-                mx, my, mz = self.get_mag()
-                calibration.append([mx, my, mz, 1])
-                target.append([mx**2+my**2+mz**2])
-                time.sleep(1/self.hz)
+            with Bar('Processing... ', max=int(s*self.hz)) as bar:
+                for i in range(s*self.hz):
+                    mx, my, mz = self.get_mag()
+                    calibration.append([mx, my, mz, 1])
+                    target.append([mx**2+my**2+mz**2])
+                    bar.next()
+                    time.sleep(1/self.hz)
             calibration = np.array(calibration)
             target = np.array(target)
 
@@ -191,7 +194,6 @@ class AK8963():
             mx = self.read_raw_data(HXH, HXL)*self.mag_fs
             my = self.read_raw_data(HYH, HYL)*self.mag_fs
             mz = self.read_raw_data(HZH, HZL)*self.mag_fs
-            # print("raw mx my mz: ", mx, my, mz)
         except:
             raise ConnectionError("I2C Connection Failure")
 
@@ -200,7 +202,7 @@ class AK8963():
         my = my*self.adjustment_y
         mz = mz*self.adjustment_z
 
-        ST2_value = self.bus.read_byte_data(self.address, ST2)
+        ST2_value = self.read_8bit_register(ST2)
         bit_3 = ST2_value & int("00001000", 2)
         bit_4 = ST2_value & int("00010000", 2)
 
@@ -274,7 +276,7 @@ class AK8963():
 
         self.mag_fs = 4912*2/(2**bit)
         print("Set AK8963 to {} mode".format(mode))
-        self.bus.write_byte_data(self.address, CNTL, value)
+        self.write_8bit_register(CNTL, value)
         
     def read_raw_data(self, high_register, low_register):
         """
@@ -302,4 +304,34 @@ class AK8963():
 
                 return signed_value
             except:
+                continue
+
+    def read_8bit_register(self, single_register):
+        """
+        Access the registers and return its raw value
+
+        :param int single_register: single registers address
+        :returns: 
+            - signed_value (int) - sensor value in int16 format
+        """
+        while True:
+            try:
+                value = self.bus.read_byte_data(self.address, single_register)
+                return value
+            except:
+                print("\nAK8963 register error occur")
+                continue
+
+    def write_8bit_register(self, single_register, value):
+        """
+        Access the registers and write byte data
+
+        :param int single_register: single registers address
+        """
+        while True:
+            try:
+                self.bus.write_byte_data(self.address, single_register, value)
+                break
+            except:
+                print("\nAK8963 register error occur")
                 continue

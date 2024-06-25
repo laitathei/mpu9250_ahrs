@@ -1,38 +1,38 @@
 ENU:
-  ax_bias: -0.139666334
-  ax_scale: 0.996681988
-  ay_bias: 0.00996061508
-  ay_scale: 0.996338964
-  az_bias: -0.64784658
-  az_scale: 0.986896873
-  gx_bias: 0.033734262
-  gx_scale: 1
-  gy_bias: 0.0124076679
-  gy_scale: 1
-  gz_bias: -0.00174836535
-  gz_scale: 1
-  mx_bias: 0
-  mx_scale: 1
-  my_bias: 0
-  my_scale: 1
-  mz_bias: 0
-  mz_scale: 1
-NED:
-  ax_bias: -0.1661764957507917
-  ax_scale: 1.0005595492530917
-  ay_bias: 0.005154411886685429
-  ay_scale: 1.004215548453792
-  az_bias: -0.43382805685095044
-  az_scale: 0.9922821639410665
-  gx_bias: 0.01394164830656482
+  ax_bias: 0.007750721342980756
+  ax_scale: 0.9996304560953636
+  ay_bias: 0.0825305330292276
+  ay_scale: 0.9981813818344655
+  az_bias: -0.5149917335544959
+  az_scale: 0.988907651914174
+  gx_bias: 0.034045851375572984
   gx_scale: 1.0
-  gy_bias: 0.03383413006891168
+  gy_bias: 0.011852398431397647
   gy_scale: 1.0
-  gz_bias: 0.008412925883560312
+  gz_bias: -0.0038828888693355286
   gz_scale: 1.0
-  mx_bias: 8.880250814662901
+  mx_bias: -64.41515179455897
   mx_scale: 1.0
-  my_bias: 38.662771864754305
+  my_bias: 24.310837282120907
   my_scale: 1.0
-  mz_bias: -28.839814110400923
+  mz_bias: 5.757384617188379
+  mz_scale: 1.0
+NED:
+  ax_bias: -0.11555596
+  ax_scale: 0.99783389
+  ay_bias: -0.071625
+  ay_scale: 1.00010923
+  az_bias: -0.48078971
+  az_scale: 0.98977632
+  gx_bias: 0.0142346
+  gx_scale: 1.0
+  gy_bias: 0.0335292
+  gy_scale: 1.0
+  gz_bias: 0.00486426
+  gz_scale: 1.0
+  mx_bias: 24.77126693
+  mx_scale: 1.0
+  my_bias: -65.9554325
+  my_scale: 1.0
+  mz_bias: -11.76803637
   mz_scale: 1.0

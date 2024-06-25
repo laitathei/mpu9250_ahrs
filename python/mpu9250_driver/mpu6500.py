@@ -4,6 +4,7 @@ import math
 import time
 import numpy as np
 import yaml
+from progress.bar import Bar
 from utils.transformation import ENU2NED
 
 SMPLRT_DIV = 0x19
@@ -127,13 +128,13 @@ class MPU6500():
             value += 64 # 0b01000000
         if gz == False:
             value += 128 # 0b00100000
-        self.bus.write_byte_data(self.address, PWR_MGMT_2, value)
+        self.write_8bit_register(PWR_MGMT_2, value)
 
     def who_am_i(self):
         """
         Check MPU6500 WHOAMI register value
         """
-        value = hex(self.bus.read_byte_data(self.address, WHO_AM_I))
+        value = hex(self.read_8bit_register(WHO_AM_I))
         print("The register value is {}".format(value))
         if value == "0x71":
             print("It is MPU6500 default value")
@@ -173,14 +174,14 @@ class MPU6500():
             raise ValueError("Wrong gyro config parameter")
 
         # Write byte data to MPU6500 gyroscope and accelerometer configuration register
-        self.bus.write_byte_data(self.address, ACCEL_CONFIG, accel_parameter)
-        self.bus.write_byte_data(self.address, GYRO_CONFIG, gyro_parameter)
+        self.write_8bit_register(ACCEL_CONFIG, accel_parameter)
+        self.write_8bit_register(GYRO_CONFIG, gyro_parameter)
 
         # MPU6500 and AK8963 share the same I2C
         # MPU6500 is master
         # AK8963 is slave
         value = 0x02
-        self.bus.write_byte_data(self.address, BYPASS_ENABLE, value)
+        self.write_8bit_register(BYPASS_ENABLE, value)
 
         # ACCEL_CONFIG_2   | Bandwidth | Delay   
         # 0x00             | 250Hz     | 1.88ms
@@ -201,9 +202,9 @@ class MPU6500():
         # 0x05            | 10Hz      | 17.85ms | 1kHz | 
         # 0x06            | 5Hz       | 33.48ms | 1kHz | 
         # 0x07            | 3600Hz    | 0.17ms  | 8kHz | 
-        self.bus.write_byte_data(self.address, ACCEL_CONFIG_2, 0x06) # Set accel digital high-pass filter
-        self.bus.write_byte_data(self.address, GYRO_CONFIG_2, 0x06) # Set gyro digital low-pass filter
-        self.bus.write_byte_data(self.address, SMPLRT_DIV, 0x00) # Set sample rate to 1 kHz
+        self.write_8bit_register(ACCEL_CONFIG_2, 0x06) # Set accel digital high-pass filter
+        self.write_8bit_register(GYRO_CONFIG_2, 0x06) # Set gyro digital low-pass filter
+        self.write_8bit_register(SMPLRT_DIV, 0x00) # Set sample rate to 1 kHz
 
     def read_raw_data(self, high_register, low_register):
         """
@@ -233,6 +234,37 @@ class MPU6500():
             except:
                 continue
 
+    def read_8bit_register(self, single_register):
+        """
+        Access the registers and return its raw value
+
+        :param int single_register: single registers address
+
+        :returns: 
+            - signed_value (int) - sensor value in int16 format
+        """
+        while True:
+            try:
+                value = self.bus.read_byte_data(self.address, single_register)
+                return value
+            except:
+                print("\nMPU6500 register error occur")
+                continue
+
+    def write_8bit_register(self, single_register, value):
+        """
+        Access the registers and write byte data
+
+        :param int single_register: single registers address
+        """
+        while True:
+            try:
+                self.bus.write_byte_data(self.address, single_register, value)
+                break
+            except:
+                print("\nMPU6500 register error occur")
+                continue
+
     def gyro_calibration(self, s: int):
         """
         Calculate the gyroscope bias to calibrate the gyroscope
@@ -247,10 +279,12 @@ class MPU6500():
             print('Start gyroscope calibration - Do not move the IMU for {}s'.format(s))
             total_gyro = np.zeros((3,1))
 
-            for i in range(s*self.hz):
-                gx, gy, gz = self.get_gyro()
-                total_gyro += np.array([[gx],[gy],[gz]])
-                time.sleep(1/self.hz)
+            with Bar('Processing... ', max=int(s*self.hz)) as bar:
+                for i in range(s*self.hz):
+                    gx, gy, gz = self.get_gyro()
+                    total_gyro += np.array([[gx],[gy],[gz]])
+                    bar.next()
+                    time.sleep(1/self.hz)
             
             # calculate bias
             self.gyro_bias = total_gyro/(s*self.hz)
@@ -286,10 +320,12 @@ class MPU6500():
                 input('Place IMU {} axis ({}) pointing downward and do not move the IMU for {}s'.format(order[i], self.nav_frame, s))
                 total_accel = np.zeros((3))
 
-                for j in range(s*self.hz):
-                    ax, ay, az = self.get_accel()
-                    total_accel += np.array([ax, ay, az])
-                    time.sleep(1/self.hz)
+                with Bar('IMU {} axis ({}) Processing... '.format(order[i], self.nav_frame), max=int(s*self.hz)) as bar:
+                    for j in range(s*self.hz):
+                        ax, ay, az = self.get_accel()
+                        total_accel += np.array([ax, ay, az])
+                        bar.next()
+                        time.sleep(1/self.hz)
                 avg_accel = total_accel/(s*self.hz)
                 calibration.append(avg_accel.tolist())
             calibration = np.array(calibration)

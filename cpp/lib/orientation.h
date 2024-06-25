@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
+#include <stdexcept>
 #include <cmath>
+#include <map>
 #include <eigen3/Eigen/Dense>
 
 using namespace std;

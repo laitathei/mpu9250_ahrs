@@ -15,7 +15,7 @@ using namespace YAML;
 
 int main(int argc, char **argv)
 {
-    string nav_frame = "ENU";
+    string nav_frame = "NED"; // ENU/NED
     int axis = 9;
     float hz = 100;
     float acc_time = 1;
@@ -34,7 +34,6 @@ int main(int argc, char **argv)
 
     MPU9250 mpu9250(nav_frame, axis, hz, calibration);
     mpu9250.initialization();
-
     gyro_result = mpu9250.mpu6500.gyro_calibration(gyro_time);
     gyro_scale = gyro_result.scale;
     gyro_bias = gyro_result.bias;

@@ -1,12 +1,16 @@
 #pragma once
 #define _USE_MATH_DEFINES
 #include <iostream>
+#include <sstream>
+#include <vector>
 #include <cmath>
 #include <math.h>
 #include <eigen3/Eigen/Dense>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <yaml-cpp/yaml.h>
+#include "utils.h"
+#include "transformation.h"
 
 using namespace std;
 using namespace Eigen;

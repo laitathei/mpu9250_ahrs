@@ -1,9 +1,4 @@
-#include <math.h>
-#include <sstream>
-#include <vector>
 #include "ak8963.h"
-#include "transformation.h"
-#include "utils.h"
 
 void AK8963::who_am_i()
 {

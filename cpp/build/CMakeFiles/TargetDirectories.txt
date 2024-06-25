@@ -4,7 +4,9 @@
 /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/mpu6500.dir
 /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/ak8963.dir
 /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/mpu9250.dir
+/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/visualization.dir
 /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/main.dir
 /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/calibration.dir
+/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/viewer.dir
 /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/edit_cache.dir
 /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles/rebuild_cache.dir

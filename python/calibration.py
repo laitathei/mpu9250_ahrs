@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import yaml
 from mpu9250_driver.mpu9250 import MPU9250
-from utils.orientation import quat2eul, eul2quat
 import time
 import numpy as np
 import math
@@ -38,7 +37,7 @@ if __name__ == '__main__':
     for i, element in enumerate(scale_parameter):
         bias_scale[element] = float(scale[i][0])
     config[nav_frame] = bias_scale
-    with open("config.yaml", 'w') as file:
+    with open("../cfg/config.yaml", 'w') as file:
         file.write(yaml.dump(config))
     print("accel bias: ")
     print(accel_bias)

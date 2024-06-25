@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <eigen3/Eigen/Dense>
-#include "../lib/orientation.h"
+#include "orientation.h"
 
 using namespace std;
 using namespace Eigen;
