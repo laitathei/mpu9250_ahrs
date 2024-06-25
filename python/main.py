@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 from mpu9250_driver.mpu9250 import MPU9250
-from utils.orientation import quat2eul, eul2quat
 from ahrs import madgwick, mahony, ekf
 import time
 import numpy as np
@@ -10,9 +9,9 @@ if __name__ == '__main__':
     """
     Display all the information about MPU9250
     """
-    nav_frame = "ENU" # ENU/NED
+    nav_frame = "NED" # ENU/NED
     axis = 9
-    hz = 100
+    hz = 5
     interval = 1/hz
     calibration = False
     # ahrs = madgwick.Madgwick(axis, 1)

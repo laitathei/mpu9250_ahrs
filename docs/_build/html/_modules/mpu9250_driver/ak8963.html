@@ -76,6 +76,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">progress.bar</span> <span class="kn">import</span> <span class="n">Bar</span>
 <span class="kn">from</span> <span class="nn">utils.transformation</span> <span class="kn">import</span> <span class="n">NED2ENU</span>
 
 <span class="n">WIA</span> <span class="o">=</span> <span class="mh">0x00</span>
@@ -111,7 +112,7 @@
 
         <span class="c1"># Magnetometer parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_strength</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">=</span> <span class="n">calibration</span>
@@ -122,7 +123,7 @@
 
         <span class="c1"># Load old config from yaml file</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> 
-            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;../cfg/config.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
             <span class="n">mag_bias</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mx_bias&quot;</span><span class="p">,</span><span class="s2">&quot;my_bias&quot;</span><span class="p">,</span><span class="s2">&quot;mz_bias&quot;</span><span class="p">]</span>
             <span class="n">mag_scale</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mx_scale&quot;</span><span class="p">,</span><span class="s2">&quot;my_scale&quot;</span><span class="p">,</span><span class="s2">&quot;mz_scale&quot;</span><span class="p">]</span>
@@ -144,7 +145,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check AK8963 WHOAMI register value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">WIA</span><span class="p">))</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_8bit_register</span><span class="p">(</span><span class="n">WIA</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The register value is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;0x48&quot;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;It is AK8963 default value&quot;</span><span class="p">)</span>
@@ -155,16 +156,16 @@
 
 <div class="viewcode-block" id="AK8963.config_AK8963">
 <a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.config_AK8963">[docs]</a>
-    <span class="k">def</span> <span class="nf">config_AK8963</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bit</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">config_AK8963</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mag_parameter</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Config AK8963 magnetometer mode</span>
 
-<span class="sd">        :param int bit: magnetometer configuration register value</span>
+<span class="sd">        :param int mag_parameter: magnetometer configuration register value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;fuse rom access&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;fuse rom access&quot;</span><span class="p">,</span> <span class="n">mag_parameter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_adjust_mag</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;power down&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;continuous measure 2&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;power down&quot;</span><span class="p">,</span> <span class="n">mag_parameter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="s2">&quot;continuous measure 2&quot;</span><span class="p">,</span> <span class="n">mag_parameter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span></div>
 
 
@@ -174,7 +175,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check AK8963 magnetometer status</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ST1_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ST1</span><span class="p">)</span>
+        <span class="n">ST1_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_8bit_register</span><span class="p">(</span><span class="n">ST1</span><span class="p">)</span>
         <span class="n">bit_0</span> <span class="o">=</span> <span class="n">ST1_value</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;00000001&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">bit_1</span> <span class="o">=</span> <span class="n">ST1_value</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;00000010&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bit_0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -199,9 +200,9 @@
 <span class="sd">        AK8963 sensitivity adjustment value for xyz axis</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Read sensitivity adjustment value&quot;</span><span class="p">)</span>
-        <span class="n">asax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ASAX</span><span class="p">)</span>
-        <span class="n">asay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ASAY</span><span class="p">)</span>
-        <span class="n">asaz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ASAZ</span><span class="p">)</span>
+        <span class="n">asax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_8bit_register</span><span class="p">(</span><span class="n">ASAX</span><span class="p">)</span>
+        <span class="n">asay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_8bit_register</span><span class="p">(</span><span class="n">ASAY</span><span class="p">)</span>
+        <span class="n">asaz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_8bit_register</span><span class="p">(</span><span class="n">ASAZ</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">adjustment_x</span> <span class="o">=</span> <span class="p">(((</span><span class="n">asax</span><span class="o">-</span><span class="mi">128</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="o">/</span><span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adjustment_y</span> <span class="o">=</span> <span class="p">(((</span><span class="n">asay</span><span class="o">-</span><span class="mi">128</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="o">/</span><span class="mi">128</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -230,11 +231,13 @@
             <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Please move the IMU in slow motion in all possible directions, the calibration process takes </span><span class="si">{}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
             <span class="n">calibration</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">target</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
-                <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mag</span><span class="p">()</span>
-                <span class="n">calibration</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="n">target</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">mx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">my</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">mz</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
-                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">Bar</span><span class="p">(</span><span class="s1">&#39;Processing... &#39;</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">))</span> <span class="k">as</span> <span class="n">bar</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
+                    <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mag</span><span class="p">()</span>
+                    <span class="n">calibration</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                    <span class="n">target</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">mx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">my</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">mz</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">bar</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
             <span class="n">calibration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">calibration</span><span class="p">)</span>
             <span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
@@ -283,16 +286,15 @@
             <span class="n">mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HXH</span><span class="p">,</span> <span class="n">HXL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_fs</span>
             <span class="n">my</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HYH</span><span class="p">,</span> <span class="n">HYL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_fs</span>
             <span class="n">mz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span><span class="n">HZH</span><span class="p">,</span> <span class="n">HZL</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mag_fs</span>
-            <span class="c1"># print(&quot;raw mx my mz: &quot;, mx, my, mz)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;I2C Connection Failure&quot;</span><span class="p">)</span>
 
         <span class="c1"># sensitivity adjustment</span>
-        <span class="n">mx</span> <span class="o">=</span> <span class="n">mx</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustment_x</span>       
+        <span class="n">mx</span> <span class="o">=</span> <span class="n">mx</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustment_x</span>
         <span class="n">my</span> <span class="o">=</span> <span class="n">my</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustment_y</span>
         <span class="n">mz</span> <span class="o">=</span> <span class="n">mz</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustment_z</span>
 
-        <span class="n">ST2_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ST2</span><span class="p">)</span>
+        <span class="n">ST2_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_8bit_register</span><span class="p">(</span><span class="n">ST2</span><span class="p">)</span>
         <span class="n">bit_3</span> <span class="o">=</span> <span class="n">ST2_value</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;00001000&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">bit_4</span> <span class="o">=</span> <span class="n">ST2_value</span> <span class="o">&amp;</span> <span class="nb">int</span><span class="p">(</span><span class="s2">&quot;00010000&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
@@ -369,7 +371,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_fs</span> <span class="o">=</span> <span class="mi">4912</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">bit</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Set AK8963 to </span><span class="si">{}</span><span class="s2"> mode&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">CNTL</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_8bit_register</span><span class="p">(</span><span class="n">CNTL</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
         
 <div class="viewcode-block" id="AK8963.read_raw_data">
@@ -384,18 +386,59 @@
 <span class="sd">        :returns: </span>
 <span class="sd">            - signed_value (int) - sensor value in int16 format</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">high_register</span><span class="p">)</span>
-        <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">low_register</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">high_register</span><span class="p">)</span>
+                <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">low_register</span><span class="p">)</span>
 
-        <span class="c1"># Megre higher bytes and lower bytes data</span>
-        <span class="n">unsigned_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">high</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">low</span>
+                <span class="c1"># Megre higher bytes and lower bytes data</span>
+                <span class="n">unsigned_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">high</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">low</span>
 
-        <span class="c1"># Calculate the unsigned int16 range to signed int16 range</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">32768</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">65536</span><span class="p">):</span>
-            <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span> <span class="o">-</span> <span class="mi">65536</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">32768</span><span class="p">):</span>
-            <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span>
-        <span class="k">return</span> <span class="n">signed_value</span></div>
+                <span class="c1"># Calculate the unsigned int16 range to signed int16 range</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">32768</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">65536</span><span class="p">):</span>
+                    <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span> <span class="o">-</span> <span class="mi">65536</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">32768</span><span class="p">):</span>
+                    <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span>
+
+                <span class="k">return</span> <span class="n">signed_value</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span></div>
+
+
+<div class="viewcode-block" id="AK8963.read_8bit_register">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.read_8bit_register">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_8bit_register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_register</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access the registers and return its raw value</span>
+
+<span class="sd">        :param int single_register: single registers address</span>
+<span class="sd">        :returns: </span>
+<span class="sd">            - signed_value (int) - sensor value in int16 format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">single_register</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">value</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">AK8963 register error occur&quot;</span><span class="p">)</span>
+                <span class="k">continue</span></div>
+
+
+<div class="viewcode-block" id="AK8963.write_8bit_register">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.write_8bit_register">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_8bit_register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_register</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access the registers and write byte data</span>
+
+<span class="sd">        :param int single_register: single registers address</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">single_register</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">AK8963 register error occur&quot;</span><span class="p">)</span>
+                <span class="k">continue</span></div>
 </div>
 
 </pre></div>

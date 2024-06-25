@@ -1,7 +1,7 @@
-visualization module
+viewer module
 ====================
 
-.. automodule:: visualization
+.. automodule:: viewer
    :members:
    :undoc-members:
    :show-inheritance:

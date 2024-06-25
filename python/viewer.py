@@ -124,9 +124,15 @@ class imu_viewer():
 
         # Display euler angle
         self.message_display("Euler Angles (Degree): ", self.width * 0.85, self.font_size * 0, (255, 255, 255))
-        self.message_display("Roll: {} ({}-axis)".format(roll, list(self.rotation_seq)[2].upper()), self.width * 0.85, self.font_size * 1,(255, 255, 255))
-        self.message_display("Pitch: {} ({}-axis)".format(pitch, list(self.rotation_seq)[1].upper()), self.width * 0.85, self.font_size * 2, (255, 255, 255))
-        self.message_display("Yaw: {} ({}-axis)".format(yaw, list(self.rotation_seq)[0].upper()), self.width * 0.85, self.font_size * 3, (255, 255, 255))
+        if self.nav_frame == "ENU": # zxy
+            self.message_display("Roll: {} ({}-axis)".format(roll, list(self.rotation_seq)[1].upper()), self.width * 0.85, self.font_size * 1,(255, 255, 255))
+            self.message_display("Pitch: {} ({}-axis)".format(pitch, list(self.rotation_seq)[2].upper()), self.width * 0.85, self.font_size * 2, (255, 255, 255))
+            self.message_display("Yaw: {} ({}-axis)".format(yaw, list(self.rotation_seq)[0].upper()), self.width * 0.85, self.font_size * 3, (255, 255, 255))
+
+        elif self.nav_frame == "NED": # zyx
+            self.message_display("Roll: {} ({}-axis)".format(roll, list(self.rotation_seq)[2].upper()), self.width * 0.85, self.font_size * 1,(255, 255, 255))
+            self.message_display("Pitch: {} ({}-axis)".format(pitch, list(self.rotation_seq)[1].upper()), self.width * 0.85, self.font_size * 2, (255, 255, 255))
+            self.message_display("Yaw: {} ({}-axis)".format(yaw, list(self.rotation_seq)[0].upper()), self.width * 0.85, self.font_size * 3, (255, 255, 255))
 
         # Display observation message
         self.message_display("Please observe the imu from top view", self.width * 0.4, self.height * 0.95, (255, 255, 255))
@@ -191,14 +197,14 @@ if __name__ == '__main__':
     window_width = 1080
     window_height = 720
     window_hz = 100
-    nav_frame = "ENU" # ENU/NED
+    nav_frame = "NED" # ENU/NED
     axis = 9
     calibration = False
     # ahrs = madgwick.Madgwick(axis, 1, nav_frame)
     # ahrs = mahony.Mahony(axis, 0.1, 0, nav_frame)
-    ahrs = ekf.EKF(axis, [0.3**2, 0.5**2, 0.8**2], nav_frame)
+    # ahrs = ekf.EKF(axis, [0.3**2, 0.5**2, 0.8**2], nav_frame)
     imu = MPU9250(nav_frame, axis, window_hz, calibration)
     imu.initialization()
-    imu.start_thread(ahrs)
+    imu.start_thread()
     viewer = imu_viewer(window_width, window_height, window_hz, nav_frame)
     viewer.run(imu)

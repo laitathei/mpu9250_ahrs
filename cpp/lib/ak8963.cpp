@@ -1,9 +1,4 @@
-#include <math.h>
-#include <sstream>
-#include <vector>
 #include "ak8963.h"
-#include "transformation.h"
-#include "utils.h"
 
 void AK8963::who_am_i()
 {
@@ -96,6 +91,7 @@ mag_calib AK8963::mag_calibration(float s)
             calibration(i,2) = mz;
             calibration(i,3) = 1;
             target[i] = pow(mx,2)+pow(my,2)+pow(mz,2);
+            print_progressbar(i, s*this->hz);
             time_sleep(0, 1/this->hz);
         }
         

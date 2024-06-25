@@ -1,7 +1,4 @@
-#include <iostream>
 #include "transformation.h"
-
-using namespace std;
 
 Vector3d acc2eul(float ax, float ay, float az, string nav)
 {

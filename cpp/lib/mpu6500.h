@@ -7,6 +7,7 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <yaml-cpp/yaml.h>
+#include "utils.h"
 
 using namespace std;
 using namespace Eigen;
@@ -52,7 +53,7 @@ using namespace YAML;
 #define ROOM_TEMP_OFFSET 0
 
 // standard acceleration of gravity
-#define g 9.80665
+#define gravity_constant 9.80665
 
 struct accel_gyro_calib{
     Vector3d scale;

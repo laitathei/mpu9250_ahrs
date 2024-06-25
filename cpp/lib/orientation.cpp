@@ -1,9 +1,4 @@
-#include <iostream>
-#include <stdexcept>
-#include <map>
 #include "orientation.h"
-
-using namespace std;
 
 Matrix3d right_hand_rule::euler_x_rotation(float roll)
 {

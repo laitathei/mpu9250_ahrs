@@ -195,6 +195,19 @@ mpu9250/fast:
 .PHONY : mpu9250/fast
 
 #=============================================================================
+# Target rules for targets named visualization
+
+# Build rule for target.
+visualization: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 visualization
+.PHONY : visualization
+
+# fast build rule for target.
+visualization/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/visualization.dir/build.make CMakeFiles/visualization.dir/build
+.PHONY : visualization/fast
+
+#=============================================================================
 # Target rules for targets named main
 
 # Build rule for target.
@@ -220,6 +233,19 @@ calibration/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/build
 .PHONY : calibration/fast
 
+#=============================================================================
+# Target rules for targets named viewer
+
+# Build rule for target.
+viewer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 viewer
+.PHONY : viewer
+
+# fast build rule for target.
+viewer/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/build
+.PHONY : viewer/fast
+
 lib/ak8963.o: lib/ak8963.cpp.o
 .PHONY : lib/ak8963.o
 
@@ -228,6 +254,7 @@ lib/ak8963.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ak8963.dir/build.make CMakeFiles/ak8963.dir/lib/ak8963.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/ak8963.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/ak8963.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/ak8963.cpp.o
 .PHONY : lib/ak8963.cpp.o
 
 lib/ak8963.i: lib/ak8963.cpp.i
@@ -238,6 +265,7 @@ lib/ak8963.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ak8963.dir/build.make CMakeFiles/ak8963.dir/lib/ak8963.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/ak8963.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/ak8963.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/ak8963.cpp.i
 .PHONY : lib/ak8963.cpp.i
 
 lib/ak8963.s: lib/ak8963.cpp.s
@@ -248,6 +276,7 @@ lib/ak8963.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ak8963.dir/build.make CMakeFiles/ak8963.dir/lib/ak8963.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/ak8963.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/ak8963.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/ak8963.cpp.s
 .PHONY : lib/ak8963.cpp.s
 
 lib/mpu6500.o: lib/mpu6500.cpp.o
@@ -258,6 +287,7 @@ lib/mpu6500.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpu6500.dir/build.make CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mpu6500.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/mpu6500.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mpu6500.cpp.o
 .PHONY : lib/mpu6500.cpp.o
 
 lib/mpu6500.i: lib/mpu6500.cpp.i
@@ -268,6 +298,7 @@ lib/mpu6500.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpu6500.dir/build.make CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mpu6500.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/mpu6500.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mpu6500.cpp.i
 .PHONY : lib/mpu6500.cpp.i
 
 lib/mpu6500.s: lib/mpu6500.cpp.s
@@ -278,6 +309,7 @@ lib/mpu6500.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpu6500.dir/build.make CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mpu6500.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/mpu6500.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mpu6500.cpp.s
 .PHONY : lib/mpu6500.cpp.s
 
 lib/mpu9250.o: lib/mpu9250.cpp.o
@@ -288,6 +320,7 @@ lib/mpu9250.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpu9250.dir/build.make CMakeFiles/mpu9250.dir/lib/mpu9250.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mpu9250.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/mpu9250.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mpu9250.cpp.o
 .PHONY : lib/mpu9250.cpp.o
 
 lib/mpu9250.i: lib/mpu9250.cpp.i
@@ -298,6 +331,7 @@ lib/mpu9250.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpu9250.dir/build.make CMakeFiles/mpu9250.dir/lib/mpu9250.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mpu9250.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/mpu9250.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mpu9250.cpp.i
 .PHONY : lib/mpu9250.cpp.i
 
 lib/mpu9250.s: lib/mpu9250.cpp.s
@@ -308,6 +342,7 @@ lib/mpu9250.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpu9250.dir/build.make CMakeFiles/mpu9250.dir/lib/mpu9250.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mpu9250.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/mpu9250.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mpu9250.cpp.s
 .PHONY : lib/mpu9250.cpp.s
 
 lib/orientation.o: lib/orientation.cpp.o
@@ -318,6 +353,7 @@ lib/orientation.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/oreientation.dir/build.make CMakeFiles/oreientation.dir/lib/orientation.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/orientation.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/orientation.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/orientation.cpp.o
 .PHONY : lib/orientation.cpp.o
 
 lib/orientation.i: lib/orientation.cpp.i
@@ -328,6 +364,7 @@ lib/orientation.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/oreientation.dir/build.make CMakeFiles/oreientation.dir/lib/orientation.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/orientation.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/orientation.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/orientation.cpp.i
 .PHONY : lib/orientation.cpp.i
 
 lib/orientation.s: lib/orientation.cpp.s
@@ -338,6 +375,7 @@ lib/orientation.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/oreientation.dir/build.make CMakeFiles/oreientation.dir/lib/orientation.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/orientation.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/orientation.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/orientation.cpp.s
 .PHONY : lib/orientation.cpp.s
 
 lib/transformation.o: lib/transformation.cpp.o
@@ -348,6 +386,7 @@ lib/transformation.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/transformation.dir/build.make CMakeFiles/transformation.dir/lib/transformation.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/transformation.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/transformation.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/transformation.cpp.o
 .PHONY : lib/transformation.cpp.o
 
 lib/transformation.i: lib/transformation.cpp.i
@@ -358,6 +397,7 @@ lib/transformation.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/transformation.dir/build.make CMakeFiles/transformation.dir/lib/transformation.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/transformation.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/transformation.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/transformation.cpp.i
 .PHONY : lib/transformation.cpp.i
 
 lib/transformation.s: lib/transformation.cpp.s
@@ -368,6 +408,7 @@ lib/transformation.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/transformation.dir/build.make CMakeFiles/transformation.dir/lib/transformation.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/transformation.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/transformation.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/transformation.cpp.s
 .PHONY : lib/transformation.cpp.s
 
 lib/utils.o: lib/utils.cpp.o
@@ -378,6 +419,7 @@ lib/utils.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/utils.dir/build.make CMakeFiles/utils.dir/lib/utils.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/utils.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/utils.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/utils.cpp.o
 .PHONY : lib/utils.cpp.o
 
 lib/utils.i: lib/utils.cpp.i
@@ -388,6 +430,7 @@ lib/utils.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/utils.dir/build.make CMakeFiles/utils.dir/lib/utils.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/utils.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/utils.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/utils.cpp.i
 .PHONY : lib/utils.cpp.i
 
 lib/utils.s: lib/utils.cpp.s
@@ -398,7 +441,35 @@ lib/utils.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/utils.dir/build.make CMakeFiles/utils.dir/lib/utils.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/utils.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/utils.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/utils.cpp.s
 .PHONY : lib/utils.cpp.s
+
+lib/visualization.o: lib/visualization.cpp.o
+.PHONY : lib/visualization.o
+
+# target to build an object file
+lib/visualization.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/visualization.dir/build.make CMakeFiles/visualization.dir/lib/visualization.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/visualization.cpp.o
+.PHONY : lib/visualization.cpp.o
+
+lib/visualization.i: lib/visualization.cpp.i
+.PHONY : lib/visualization.i
+
+# target to preprocess a source file
+lib/visualization.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/visualization.dir/build.make CMakeFiles/visualization.dir/lib/visualization.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/visualization.cpp.i
+.PHONY : lib/visualization.cpp.i
+
+lib/visualization.s: lib/visualization.cpp.s
+.PHONY : lib/visualization.s
+
+# target to generate assembly for a file
+lib/visualization.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/visualization.dir/build.make CMakeFiles/visualization.dir/lib/visualization.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/visualization.cpp.s
+.PHONY : lib/visualization.cpp.s
 
 src/calibration.o: src/calibration.cpp.o
 .PHONY : src/calibration.o
@@ -448,6 +519,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/viewer.o: src/viewer.cpp.o
+.PHONY : src/viewer.o
+
+# target to build an object file
+src/viewer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/src/viewer.cpp.o
+.PHONY : src/viewer.cpp.o
+
+src/viewer.i: src/viewer.cpp.i
+.PHONY : src/viewer.i
+
+# target to preprocess a source file
+src/viewer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/src/viewer.cpp.i
+.PHONY : src/viewer.cpp.i
+
+src/viewer.s: src/viewer.cpp.s
+.PHONY : src/viewer.s
+
+# target to generate assembly for a file
+src/viewer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/src/viewer.cpp.s
+.PHONY : src/viewer.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -464,6 +559,8 @@ help:
 	@echo "... oreientation"
 	@echo "... transformation"
 	@echo "... utils"
+	@echo "... viewer"
+	@echo "... visualization"
 	@echo "... lib/ak8963.o"
 	@echo "... lib/ak8963.i"
 	@echo "... lib/ak8963.s"
@@ -482,12 +579,18 @@ help:
 	@echo "... lib/utils.o"
 	@echo "... lib/utils.i"
 	@echo "... lib/utils.s"
+	@echo "... lib/visualization.o"
+	@echo "... lib/visualization.i"
+	@echo "... lib/visualization.s"
 	@echo "... src/calibration.o"
 	@echo "... src/calibration.i"
 	@echo "... src/calibration.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/viewer.o"
+	@echo "... src/viewer.i"
+	@echo "... src/viewer.s"
 .PHONY : help
 
 

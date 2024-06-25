@@ -2,11 +2,13 @@
 #include <iostream>
 #include <cmath>
 #include <thread>
+#include <math.h>
 #include <eigen3/Eigen/Dense>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include "mpu6500.h"
 #include "ak8963.h"
+#include "transformation.h"
 
 using namespace std;
 using namespace Eigen;
@@ -30,8 +32,6 @@ class MPU9250
         int queue_size = 20;
         int window_size = 5;
         bool calibration;
-        string body_frame;
-        string rotation_seq;
         Vector3d euler, accel, gyro, mag;
         Vector4d quaternion;
 
@@ -42,6 +42,8 @@ class MPU9250
         float temp, roll, pitch, yaw;
         float w, x, y, z;
         float ax, ay, az, gx, gy, gz, mx, my, mz;
+        string body_frame;
+        string rotation_seq;
         MPU6500 mpu6500;
         AK8963 ak8963;
         MPU9250(){}; // Default constructor

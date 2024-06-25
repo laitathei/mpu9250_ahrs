@@ -521,14 +521,27 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
   /usr/local/include/yaml-cpp/node/detail/impl.h \
   /usr/local/include/yaml-cpp/node/parse.h \
   /usr/local/include/yaml-cpp/node/emit.h \
+  ../lib/utils.h \
+  /usr/include/c++/11/iomanip \
+  /usr/include/c++/11/locale \
+  /usr/include/c++/11/bits/locale_facets_nonio.h \
+  /usr/include/c++/11/ctime \
+  /usr/include/aarch64-linux-gnu/c++/11/bits/time_members.h \
+  /usr/include/aarch64-linux-gnu/c++/11/bits/messages_members.h \
+  /usr/include/libintl.h \
+  /usr/include/c++/11/bits/codecvt.h \
+  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
+  /usr/include/c++/11/bits/locale_conv.h \
+  /usr/include/c++/11/bits/quoted_string.h \
   ../lib/transformation.h \
-  ../lib/orientation.h \
-  ../lib/utils.h
+  ../lib/orientation.h
 
 
 ../lib/orientation.h:
 
 ../lib/transformation.h:
+
+/usr/include/libintl.h:
 
 /usr/local/include/yaml-cpp/node/detail/impl.h:
 
@@ -557,6 +570,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 /usr/include/c++/11/bits/stl_map.h:
 
 /usr/include/c++/11/map:
+
+/usr/include/aarch64-linux-gnu/c++/11/bits/messages_members.h:
 
 /usr/include/c++/11/bits/stl_tree.h:
 
@@ -637,6 +652,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 ../lib/utils.h:
 
 /usr/include/eigen3/Eigen/src/misc/Kernel.h:
+
+/usr/include/c++/11/bits/locale_facets_nonio.tcc:
 
 /usr/include/eigen3/Eigen/src/Core/ArrayWrapper.h:
 
@@ -770,6 +787,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 
 /usr/include/eigen3/Eigen/src/Core/MatrixBase.h:
 
+/usr/include/c++/11/bits/locale_conv.h:
+
 /usr/include/eigen3/Eigen/src/Core/Matrix.h:
 
 /usr/include/eigen3/Eigen/src/plugins/ReshapedMethods.h:
@@ -892,6 +911,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 
 /usr/include/aarch64-linux-gnu/sys/cdefs.h:
 
+/usr/include/c++/11/bits/locale_facets_nonio.h:
+
 /usr/local/include/yaml-cpp/node/detail/iterator_fwd.h:
 
 /usr/lib/gcc/aarch64-linux-gnu/11/include/arm_neon.h:
@@ -943,6 +964,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 /usr/include/eigen3/Eigen/SVD:
 
 /usr/include/c++/11/bits/locale_classes.h:
+
+/usr/include/aarch64-linux-gnu/c++/11/bits/time_members.h:
 
 /usr/include/c++/11/limits:
 
@@ -1138,6 +1161,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 
 /usr/include/c++/11/bits/locale_facets.tcc:
 
+/usr/include/c++/11/ctime:
+
 /usr/include/eigen3/Eigen/src/plugins/ArrayCwiseBinaryOps.h:
 
 /usr/include/aarch64-linux-gnu/bits/mathcalls-helper-functions.h:
@@ -1206,6 +1231,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 
 /usr/include/aarch64-linux-gnu/c++/11/bits/os_defines.h:
 
+/usr/include/c++/11/bits/quoted_string.h:
+
 /usr/include/aarch64-linux-gnu/bits/types/locale_t.h:
 
 /usr/include/aarch64-linux-gnu/bits/types/clock_t.h:
@@ -1262,6 +1289,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 
 /usr/include/aarch64-linux-gnu/bits/endianness.h:
 
+/usr/include/c++/11/locale:
+
 /usr/include/ctype.h:
 
 /usr/include/aarch64-linux-gnu/bits/types/__mbstate_t.h:
@@ -1301,6 +1330,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 /usr/include/locale.h:
 
 /usr/include/aarch64-linux-gnu/bits/locale.h:
+
+/usr/include/c++/11/iomanip:
 
 /usr/include/eigen3/Eigen/src/Core/util/XprHelper.h:
 
@@ -1515,6 +1546,8 @@ CMakeFiles/mpu6500.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
 /usr/include/c++/11/bits/refwrap.h:
 
 /usr/include/c++/11/bits/hashtable_policy.h:
+
+/usr/include/c++/11/bits/codecvt.h:
 
 /usr/include/c++/11/bits/basic_ios.tcc:
 

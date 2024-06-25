@@ -168,6 +168,7 @@ accel_gyro_calib MPU6500::gyro_calibration(float s)
         {
             current_gyro = this->get_gyro();
             total_gyro = total_gyro + current_gyro;
+            print_progressbar(i, s*this->hz);
             time_sleep(0, 1/this->hz);
         }
 
@@ -219,6 +220,7 @@ accel_gyro_calib MPU6500::accel_calibration(float s)
             {
                 current_accel = this->get_accel();
                 total_accel = total_accel + current_accel;
+                print_progressbar(j, s*this->hz);
                 time_sleep(0, 1/this->hz);
             }
             avg_accel = total_accel/(s*this->hz);
@@ -226,8 +228,8 @@ accel_gyro_calib MPU6500::accel_calibration(float s)
         }
         calibration.conservativeResize(calibration.rows(), calibration.cols()+1); // append one columns
         calibration.col(calibration.cols()-1) = negative_one; // replace last columns to negative one
-        Matrix<double, 3, 1> positive = Matrix<double, 3, 1>::Constant(g);
-        Matrix<double, 3, 1> negative = Matrix<double, 3, 1>::Constant(-g);
+        Matrix<double, 3, 1> positive = Matrix<double, 3, 1>::Constant(gravity_constant);
+        Matrix<double, 3, 1> negative = Matrix<double, 3, 1>::Constant(-gravity_constant);
         Matrix<double, 3, 3> positive_matrix = positive.asDiagonal();
         Matrix<double, 3, 3> negative_matrix = negative.asDiagonal();
 
@@ -282,9 +284,9 @@ Vector3d MPU6500::get_accel()
     az = this->read_raw_data(ACCEL_ZOUT_H, ACCEL_ZOUT_L)*this->accel_fs;
 
     // convert to m/s^2
-    ax = ax*g;
-    ay = ay*g;
-    az = az*g;
+    ax = ax*gravity_constant;
+    ay = ay*gravity_constant;
+    az = az*gravity_constant;
 
     // convert to NED frame
     if (this->nav_frame == "NED"){

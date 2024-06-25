@@ -7,5 +7,6 @@ python
    ahrs
    mpu9250_driver
    utils
-   visualization
+   viewer
+   calibration
    main

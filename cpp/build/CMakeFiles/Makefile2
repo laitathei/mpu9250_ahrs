@@ -69,8 +69,10 @@ all: CMakeFiles/transformation.dir/all
 all: CMakeFiles/mpu6500.dir/all
 all: CMakeFiles/ak8963.dir/all
 all: CMakeFiles/mpu9250.dir/all
+all: CMakeFiles/visualization.dir/all
 all: CMakeFiles/main.dir/all
 all: CMakeFiles/calibration.dir/all
+all: CMakeFiles/viewer.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -84,8 +86,10 @@ clean: CMakeFiles/transformation.dir/clean
 clean: CMakeFiles/mpu6500.dir/clean
 clean: CMakeFiles/ak8963.dir/clean
 clean: CMakeFiles/mpu9250.dir/clean
+clean: CMakeFiles/visualization.dir/clean
 clean: CMakeFiles/main.dir/clean
 clean: CMakeFiles/calibration.dir/clean
+clean: CMakeFiles/viewer.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -245,6 +249,32 @@ CMakeFiles/mpu9250.dir/clean:
 .PHONY : CMakeFiles/mpu9250.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/visualization.dir
+
+# All Build rule for target.
+CMakeFiles/visualization.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/visualization.dir/build.make CMakeFiles/visualization.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/visualization.dir/build.make CMakeFiles/visualization.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=38,39 "Built target visualization"
+.PHONY : CMakeFiles/visualization.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/visualization.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/visualization.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/visualization.dir/rule
+
+# Convenience name for target.
+visualization: CMakeFiles/visualization.dir/rule
+.PHONY : visualization
+
+# clean rule for target.
+CMakeFiles/visualization.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/visualization.dir/build.make CMakeFiles/visualization.dir/clean
+.PHONY : CMakeFiles/visualization.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/main.dir
 
 # All Build rule for target.
@@ -295,6 +325,32 @@ calibration: CMakeFiles/calibration.dir/rule
 CMakeFiles/calibration.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/clean
 .PHONY : CMakeFiles/calibration.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/viewer.dir
+
+# All Build rule for target.
+CMakeFiles/viewer.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=29,30,31,32,33,34,35,36,37 "Built target viewer"
+.PHONY : CMakeFiles/viewer.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/viewer.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles 9
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/viewer.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/viewer.dir/rule
+
+# Convenience name for target.
+viewer: CMakeFiles/viewer.dir/rule
+.PHONY : viewer
+
+# clean rule for target.
+CMakeFiles/viewer.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/clean
+.PHONY : CMakeFiles/viewer.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

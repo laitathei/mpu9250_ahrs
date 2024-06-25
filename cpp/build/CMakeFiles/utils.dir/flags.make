@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -Dutils_EXPORTS
 
-CXX_INCLUDES = 
+CXX_INCLUDES = -I/usr/include/freetype2
 
 CXX_FLAGS = -fPIC   -lwiringPi -lyaml_cpp
 
