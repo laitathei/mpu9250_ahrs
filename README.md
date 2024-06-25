@@ -7,6 +7,10 @@ Python: 3.10.12
 ROS: noetic
 ```
 
+## Wiring diagram
+![Wiring diagram](./image/wiring_diagram.png)
+[Image Source](https://makersportal.com/blog/calibration-of-an-inertial-measurement-unit-with-raspberry-pi)
+
 ## Install WiringPi
 ```
 git clone https://github.com/WiringPi/WiringPi.git
