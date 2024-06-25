@@ -737,7 +737,6 @@ CMakeFiles/visualization.dir/lib/visualization.cpp.o: ../lib/visualization.cpp \
   /usr/local/include/yaml-cpp/node/detail/impl.h \
   /usr/local/include/yaml-cpp/node/parse.h \
   /usr/local/include/yaml-cpp/node/emit.h \
-  ../lib/ak8963.h \
   ../lib/utils.h \
   /usr/include/c++/11/iomanip \
   /usr/include/c++/11/locale \
@@ -749,6 +748,7 @@ CMakeFiles/visualization.dir/lib/visualization.cpp.o: ../lib/visualization.cpp \
   /usr/include/c++/11/bits/locale_facets_nonio.tcc \
   /usr/include/c++/11/bits/locale_conv.h \
   /usr/include/c++/11/bits/quoted_string.h \
+  ../lib/ak8963.h \
   ../lib/transformation.h \
   ../lib/orientation.h \
   ../lib/shader.h \

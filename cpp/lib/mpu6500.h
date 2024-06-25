@@ -7,6 +7,7 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <yaml-cpp/yaml.h>
+#include "utils.h"
 
 using namespace std;
 using namespace Eigen;

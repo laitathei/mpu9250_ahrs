@@ -1056,8 +1056,6 @@ CMakeFiles/calibration.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
   /usr/local/include/yaml-cpp/node/detail/impl.h \
   /usr/local/include/yaml-cpp/node/parse.h \
   /usr/local/include/yaml-cpp/node/emit.h \
-  ../lib/transformation.h \
-  ../lib/orientation.h \
   ../lib/utils.h \
   /usr/include/c++/11/iomanip \
   /usr/include/c++/11/locale \
@@ -1069,7 +1067,9 @@ CMakeFiles/calibration.dir/lib/mpu6500.cpp.o: ../lib/mpu6500.cpp \
   /usr/include/c++/11/bits/codecvt.h \
   /usr/include/c++/11/bits/locale_facets_nonio.tcc \
   /usr/include/c++/11/bits/locale_conv.h \
-  /usr/include/c++/11/bits/quoted_string.h
+  /usr/include/c++/11/bits/quoted_string.h \
+  ../lib/transformation.h \
+  ../lib/orientation.h
 
 CMakeFiles/calibration.dir/lib/mpu9250.cpp.o: ../lib/mpu9250.cpp \
   /usr/include/stdc-predef.h \
@@ -1599,7 +1599,6 @@ CMakeFiles/calibration.dir/lib/mpu9250.cpp.o: ../lib/mpu9250.cpp \
   /usr/local/include/yaml-cpp/node/detail/impl.h \
   /usr/local/include/yaml-cpp/node/parse.h \
   /usr/local/include/yaml-cpp/node/emit.h \
-  ../lib/ak8963.h \
   ../lib/utils.h \
   /usr/include/c++/11/iomanip \
   /usr/include/c++/11/locale \
@@ -1611,6 +1610,7 @@ CMakeFiles/calibration.dir/lib/mpu9250.cpp.o: ../lib/mpu9250.cpp \
   /usr/include/c++/11/bits/locale_facets_nonio.tcc \
   /usr/include/c++/11/bits/locale_conv.h \
   /usr/include/c++/11/bits/quoted_string.h \
+  ../lib/ak8963.h \
   ../lib/transformation.h \
   ../lib/orientation.h
 

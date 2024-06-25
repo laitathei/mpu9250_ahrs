@@ -21,3 +21,18 @@ string round_to_string(float number, int precision)
     out << fixed << setprecision(precision) << rounded_number;
     return out.str();
 }
+
+void print_progressbar(int progress, int total) {
+    int bar_width = 50;  // progress bar length
+    float percentage = (float)progress / total;
+    
+    cout << "[";
+    int pos = bar_width * percentage;
+    for (int i = 0; i < bar_width; ++i) {
+        if (i < pos) cout << "=";
+        else if (i == pos) cout << ">";
+        else cout << " ";
+    }
+    cout << "] " << int(percentage * 100.0) << " %\r";
+    cout.flush();
+}

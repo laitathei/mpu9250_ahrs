@@ -461,7 +461,6 @@ CMakeFiles/viewer.dir/src/viewer.cpp.o: \
  /usr/local/include/yaml-cpp/node/detail/impl.h \
  /usr/local/include/yaml-cpp/node/parse.h \
  /usr/local/include/yaml-cpp/node/emit.h \
- /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/ak8963.h \
  /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/utils.h \
  /usr/include/c++/11/iomanip /usr/include/c++/11/locale \
  /usr/include/c++/11/bits/locale_facets_nonio.h \
@@ -471,6 +470,7 @@ CMakeFiles/viewer.dir/src/viewer.cpp.o: \
  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
  /usr/include/c++/11/bits/locale_conv.h \
  /usr/include/c++/11/bits/quoted_string.h \
+ /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/ak8963.h \
  /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/transformation.h \
  /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/orientation.h \
  /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/visualization.h \

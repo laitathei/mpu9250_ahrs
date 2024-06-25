@@ -87,6 +87,7 @@ class shader
                 glGetProgramInfoLog(this->program, 512, NULL, infoLog);
                 throw invalid_argument("Fail to link shader program");
             }
+            
             // delete shader object as already linked into program
             glDeleteShader(vertex);        
             glDeleteShader(fragment);

@@ -1,7 +1,7 @@
-visualization module
+calibration module
 ====================
 
-.. automodule:: visualization
+.. automodule:: calibration
    :members:
    :undoc-members:
    :show-inheritance:

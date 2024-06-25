@@ -529,7 +529,6 @@ CMakeFiles/mpu9250.dir/lib/mpu9250.cpp.o: ../lib/mpu9250.cpp \
   /usr/local/include/yaml-cpp/node/detail/impl.h \
   /usr/local/include/yaml-cpp/node/parse.h \
   /usr/local/include/yaml-cpp/node/emit.h \
-  ../lib/ak8963.h \
   ../lib/utils.h \
   /usr/include/c++/11/iomanip \
   /usr/include/c++/11/locale \
@@ -541,6 +540,7 @@ CMakeFiles/mpu9250.dir/lib/mpu9250.cpp.o: ../lib/mpu9250.cpp \
   /usr/include/c++/11/bits/locale_facets_nonio.tcc \
   /usr/include/c++/11/bits/locale_conv.h \
   /usr/include/c++/11/bits/quoted_string.h \
+  ../lib/ak8963.h \
   ../lib/transformation.h \
   ../lib/orientation.h
 
@@ -549,9 +549,9 @@ CMakeFiles/mpu9250.dir/lib/mpu9250.cpp.o: ../lib/mpu9250.cpp \
 
 ../lib/transformation.h:
 
-/usr/include/libintl.h:
-
 ../lib/ak8963.h:
+
+/usr/include/libintl.h:
 
 /usr/local/include/yaml-cpp/node/detail/impl.h:
 

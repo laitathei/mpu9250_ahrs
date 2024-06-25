@@ -168,6 +168,7 @@ accel_gyro_calib MPU6500::gyro_calibration(float s)
         {
             current_gyro = this->get_gyro();
             total_gyro = total_gyro + current_gyro;
+            print_progressbar(i, s*this->hz);
             time_sleep(0, 1/this->hz);
         }
 
@@ -219,6 +220,7 @@ accel_gyro_calib MPU6500::accel_calibration(float s)
             {
                 current_accel = this->get_accel();
                 total_accel = total_accel + current_accel;
+                print_progressbar(j, s*this->hz);
                 time_sleep(0, 1/this->hz);
             }
             avg_accel = total_accel/(s*this->hz);

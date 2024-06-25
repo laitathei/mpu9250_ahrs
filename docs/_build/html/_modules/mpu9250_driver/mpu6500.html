@@ -77,6 +77,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">progress.bar</span> <span class="kn">import</span> <span class="n">Bar</span>
 <span class="kn">from</span> <span class="nn">utils.transformation</span> <span class="kn">import</span> <span class="n">ENU2NED</span>
 
 <span class="n">SMPLRT_DIV</span> <span class="o">=</span> <span class="mh">0x19</span>
@@ -140,10 +141,10 @@
 
         <span class="c1"># Accelerometer and gyroscope parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">accel_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">accel_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gyro_misalignment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">=</span> <span class="n">calibration</span>
 
@@ -153,7 +154,7 @@
 
         <span class="c1"># Load old config from yaml file</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span> 
-            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;../cfg/config.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
             <span class="n">gyro_bias</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gx_bias&quot;</span><span class="p">,</span><span class="s2">&quot;gy_bias&quot;</span><span class="p">,</span><span class="s2">&quot;gz_bias&quot;</span><span class="p">]</span>
             <span class="n">gyro_scale</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gx_scale&quot;</span><span class="p">,</span><span class="s2">&quot;gy_scale&quot;</span><span class="p">,</span><span class="s2">&quot;gz_scale&quot;</span><span class="p">]</span>
@@ -204,7 +205,7 @@
             <span class="n">value</span> <span class="o">+=</span> <span class="mi">64</span> <span class="c1"># 0b01000000</span>
         <span class="k">if</span> <span class="n">gz</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">+=</span> <span class="mi">128</span> <span class="c1"># 0b00100000</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">PWR_MGMT_2</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_8bit_register</span><span class="p">(</span><span class="n">PWR_MGMT_2</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MPU6500.who_am_i">
@@ -213,7 +214,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check MPU6500 WHOAMI register value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">WHO_AM_I</span><span class="p">))</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_8bit_register</span><span class="p">(</span><span class="n">WHO_AM_I</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The register value is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;0x71&quot;</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;It is MPU6500 default value&quot;</span><span class="p">)</span>
@@ -256,14 +257,14 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong gyro config parameter&quot;</span><span class="p">)</span>
 
         <span class="c1"># Write byte data to MPU6500 gyroscope and accelerometer configuration register</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ACCEL_CONFIG</span><span class="p">,</span> <span class="n">accel_parameter</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">GYRO_CONFIG</span><span class="p">,</span> <span class="n">gyro_parameter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_8bit_register</span><span class="p">(</span><span class="n">ACCEL_CONFIG</span><span class="p">,</span> <span class="n">accel_parameter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_8bit_register</span><span class="p">(</span><span class="n">GYRO_CONFIG</span><span class="p">,</span> <span class="n">gyro_parameter</span><span class="p">)</span>
 
         <span class="c1"># MPU6500 and AK8963 share the same I2C</span>
         <span class="c1"># MPU6500 is master</span>
         <span class="c1"># AK8963 is slave</span>
         <span class="n">value</span> <span class="o">=</span> <span class="mh">0x02</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">BYPASS_ENABLE</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_8bit_register</span><span class="p">(</span><span class="n">BYPASS_ENABLE</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
         <span class="c1"># ACCEL_CONFIG_2   | Bandwidth | Delay   </span>
         <span class="c1"># 0x00             | 250Hz     | 1.88ms</span>
@@ -284,9 +285,9 @@
         <span class="c1"># 0x05            | 10Hz      | 17.85ms | 1kHz | </span>
         <span class="c1"># 0x06            | 5Hz       | 33.48ms | 1kHz | </span>
         <span class="c1"># 0x07            | 3600Hz    | 0.17ms  | 8kHz | </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">ACCEL_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set accel digital high-pass filter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">GYRO_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set gyro digital low-pass filter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">SMPLRT_DIV</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">)</span> <span class="c1"># Set sample rate to 1 kHz</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_8bit_register</span><span class="p">(</span><span class="n">ACCEL_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set accel digital high-pass filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_8bit_register</span><span class="p">(</span><span class="n">GYRO_CONFIG_2</span><span class="p">,</span> <span class="mh">0x06</span><span class="p">)</span> <span class="c1"># Set gyro digital low-pass filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_8bit_register</span><span class="p">(</span><span class="n">SMPLRT_DIV</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">)</span> <span class="c1"># Set sample rate to 1 kHz</span></div>
 
 
 <div class="viewcode-block" id="MPU6500.read_raw_data">
@@ -301,18 +302,60 @@
 <span class="sd">        :returns: </span>
 <span class="sd">            - signed_value (int) - sensor value in int16 format</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">high_register</span><span class="p">)</span>
-        <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">low_register</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">high_register</span><span class="p">)</span>
+                <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">low_register</span><span class="p">)</span>
 
-        <span class="c1"># Megre higher bytes and lower bytes data</span>
-        <span class="n">unsigned_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">high</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">low</span>
+                <span class="c1"># Megre higher bytes and lower bytes data</span>
+                <span class="n">unsigned_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">high</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">low</span>
 
-        <span class="c1"># Calculate the unsigned int16 range to signed int16 range</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">32768</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">65536</span><span class="p">):</span>
-            <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span> <span class="o">-</span> <span class="mi">65536</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">32768</span><span class="p">):</span>
-            <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span>
-        <span class="k">return</span> <span class="n">signed_value</span></div>
+                <span class="c1"># Calculate the unsigned int16 range to signed int16 range</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">32768</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">65536</span><span class="p">):</span>
+                    <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span> <span class="o">-</span> <span class="mi">65536</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">unsigned_value</span> <span class="o">&lt;</span> <span class="mi">32768</span><span class="p">):</span>
+                    <span class="n">signed_value</span> <span class="o">=</span> <span class="n">unsigned_value</span>
+
+                <span class="k">return</span> <span class="n">signed_value</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.read_8bit_register">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.read_8bit_register">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_8bit_register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_register</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access the registers and return its raw value</span>
+
+<span class="sd">        :param int single_register: single registers address</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - signed_value (int) - sensor value in int16 format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">read_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">single_register</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">value</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">MPU6500 register error occur&quot;</span><span class="p">)</span>
+                <span class="k">continue</span></div>
+
+
+<div class="viewcode-block" id="MPU6500.write_8bit_register">
+<a class="viewcode-back" href="../../mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.write_8bit_register">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_8bit_register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_register</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access the registers and write byte data</span>
+
+<span class="sd">        :param int single_register: single registers address</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bus</span><span class="o">.</span><span class="n">write_byte_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">single_register</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">MPU6500 register error occur&quot;</span><span class="p">)</span>
+                <span class="k">continue</span></div>
 
 
 <div class="viewcode-block" id="MPU6500.gyro_calibration">
@@ -329,15 +372,17 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Start gyroscope calibration - Do not move the IMU for </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
-            <span class="n">gyro_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">total_gyro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
-                <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gyro</span><span class="p">()</span>
-                <span class="n">gyro_bias</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span>
-                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">Bar</span><span class="p">(</span><span class="s1">&#39;Processing... &#39;</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">))</span> <span class="k">as</span> <span class="n">bar</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
+                    <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gyro</span><span class="p">()</span>
+                    <span class="n">total_gyro</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">gx</span><span class="p">],[</span><span class="n">gy</span><span class="p">],[</span><span class="n">gz</span><span class="p">]])</span>
+                    <span class="n">bar</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
             
-            <span class="c1"># Calculate bias</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">=</span> <span class="n">gyro_bias</span><span class="o">/</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+            <span class="c1"># calculate bias</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gyro_bias</span> <span class="o">=</span> <span class="n">total_gyro</span><span class="o">/</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
 
             <span class="c1"># calculate scale</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gyro_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">]])</span>
@@ -373,10 +418,12 @@
                 <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Place IMU </span><span class="si">{}</span><span class="s1"> axis (</span><span class="si">{}</span><span class="s1">) pointing downward and do not move the IMU for </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">order</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">,</span> <span class="n">s</span><span class="p">))</span>
                 <span class="n">total_accel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">))</span>
 
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
-                    <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_accel</span><span class="p">()</span>
-                    <span class="n">total_accel</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">])</span>
-                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">Bar</span><span class="p">(</span><span class="s1">&#39;IMU </span><span class="si">{}</span><span class="s1"> axis (</span><span class="si">{}</span><span class="s1">) Processing... &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">order</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">),</span> <span class="nb">max</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">))</span> <span class="k">as</span> <span class="n">bar</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">):</span>
+                        <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_accel</span><span class="p">()</span>
+                        <span class="n">total_accel</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ax</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">az</span><span class="p">])</span>
+                        <span class="n">bar</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
                 <span class="n">avg_accel</span> <span class="o">=</span> <span class="n">total_accel</span><span class="o">/</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
                 <span class="n">calibration</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_accel</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
             <span class="n">calibration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">calibration</span><span class="p">)</span>

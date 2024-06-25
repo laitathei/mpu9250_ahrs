@@ -8,3 +8,4 @@ using namespace std;
 
 void time_sleep(float dt, float time);
 string round_to_string(float number, int precision);
+void print_progressbar(int progress, int total);

@@ -85,6 +85,7 @@ void imu_viewer::run(MPU9250& imu)
                 this->message_display(text_shader, "Pitch: "+pitch+" ("+static_cast<char>(toupper(imu.rotation_seq[1]))+"-axis) ", this->width*0.8f, this->height-55.0f, 0.35f, vec3(1.0f, 1.0f, 1.0f));
                 this->message_display(text_shader, "Yaw: "+yaw+" ("+static_cast<char>(toupper(imu.rotation_seq[0]))+"-axis) ", this->width*0.8f, this->height-75.0f, 0.35f, vec3(1.0f, 1.0f, 1.0f));
             }
+            
             // display observation message
             this->message_display(text_shader, "Please observe the imu from top view", this->width*0.375f, 15.0f, 0.35f, vec3(1.0f, 1.0f, 1.0f));
 

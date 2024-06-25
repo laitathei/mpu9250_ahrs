@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>visualization module &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+  <title>viewer module &mdash; mpu9250_ahrs 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="main module" href="main.html" />
+    <link rel="next" title="calibration module" href="calibration.html" />
     <link rel="prev" title="utils package" href="utils.html" /> 
 </head>
 
@@ -50,16 +50,17 @@
 <li class="toctree-l2"><a class="reference internal" href="ahrs.html">ahrs package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html">mpu9250_driver package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html">utils package</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">visualization module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#visualization.imu_viewer"><code class="docutils literal notranslate"><span class="pre">imu_viewer</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#visualization.imu_viewer.display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.display()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#visualization.imu_viewer.message_display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.message_display()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#visualization.imu_viewer.project2window"><code class="docutils literal notranslate"><span class="pre">imu_viewer.project2window()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#visualization.imu_viewer.run"><code class="docutils literal notranslate"><span class="pre">imu_viewer.run()</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">viewer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#viewer.imu_viewer"><code class="docutils literal notranslate"><span class="pre">imu_viewer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#viewer.imu_viewer.display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#viewer.imu_viewer.message_display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.message_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#viewer.imu_viewer.project2window"><code class="docutils literal notranslate"><span class="pre">imu_viewer.project2window()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#viewer.imu_viewer.run"><code class="docutils literal notranslate"><span class="pre">imu_viewer.run()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="calibration.html">calibration module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
 </ul>
 </li>
@@ -80,9 +81,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="modules.html">python</a></li>
-      <li class="breadcrumb-item active">visualization module</li>
+      <li class="breadcrumb-item active">viewer module</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/visualization.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/viewer.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -90,15 +91,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-visualization">
-<span id="visualization-module"></span><h1>visualization module<a class="headerlink" href="#module-visualization" title="Link to this heading"></a></h1>
+  <section id="module-viewer">
+<span id="viewer-module"></span><h1>viewer module<a class="headerlink" href="#module-viewer" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="visualization.imu_viewer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">visualization.</span></span><span class="sig-name descname"><span class="pre">imu_viewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/visualization.html#imu_viewer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#visualization.imu_viewer" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="viewer.imu_viewer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">viewer.</span></span><span class="sig-name descname"><span class="pre">imu_viewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/viewer.html#imu_viewer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#viewer.imu_viewer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="visualization.imu_viewer.display">
-<span class="sig-name descname"><span class="pre">display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gyr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">euler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quaternion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/visualization.html#imu_viewer.display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#visualization.imu_viewer.display" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="viewer.imu_viewer.display">
+<span class="sig-name descname"><span class="pre">display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gyr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">euler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quaternion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nav</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/viewer.html#imu_viewer.display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#viewer.imu_viewer.display" title="Link to this definition"></a></dt>
 <dd><p>Display IMU information and visualize the IMU model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -116,8 +117,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="visualization.imu_viewer.message_display">
-<span class="sig-name descname"><span class="pre">message_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_color</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/visualization.html#imu_viewer.message_display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#visualization.imu_viewer.message_display" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="viewer.imu_viewer.message_display">
+<span class="sig-name descname"><span class="pre">message_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_color</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/viewer.html#imu_viewer.message_display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#viewer.imu_viewer.message_display" title="Link to this definition"></a></dt>
 <dd><p>Display the color message in the window</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -132,8 +133,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="visualization.imu_viewer.project2window">
-<span class="sig-name descname"><span class="pre">project2window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_constant</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/visualization.html#imu_viewer.project2window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#visualization.imu_viewer.project2window" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="viewer.imu_viewer.project2window">
+<span class="sig-name descname"><span class="pre">project2window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_constant</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/viewer.html#imu_viewer.project2window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#viewer.imu_viewer.project2window" title="Link to this definition"></a></dt>
 <dd><p>Project position into window coordinates pixel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -154,8 +155,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="visualization.imu_viewer.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/visualization.html#imu_viewer.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#visualization.imu_viewer.run" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="viewer.imu_viewer.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/viewer.html#imu_viewer.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#viewer.imu_viewer.run" title="Link to this definition"></a></dt>
 <dd><p>Create IMU wireframe and keep display IMU information until it close</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -173,7 +174,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="utils.html" class="btn btn-neutral float-left" title="utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="main.html" class="btn btn-neutral float-right" title="main module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="calibration.html" class="btn btn-neutral float-right" title="calibration module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
