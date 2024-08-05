@@ -13,8 +13,8 @@ MPU9250 IMU driver with AHRS algoritm
 * Platform
   - [x] Python
   - [x] C++
-  - [] Arduino
-  - [] STM32
+  - [ ] Arduino
+  - [ ] STM32
 
 ## Build
 ```
