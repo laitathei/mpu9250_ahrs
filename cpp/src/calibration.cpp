@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <cmath>
 #include <map>
 #include <eigen3/Eigen/Dense>
 #include <yaml-cpp/yaml.h>

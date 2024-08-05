@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -frtti -shared -Wl,-soname,libmahony.so -o libmahony.so CMakeFiles/mahony.dir/lib/mahony.cpp.o 

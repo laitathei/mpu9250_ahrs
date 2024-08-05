@@ -6,5 +6,5 @@ CXX_DEFINES = -Dak8963_EXPORTS
 
 CXX_INCLUDES = -I/usr/include/freetype2
 
-CXX_FLAGS = -fPIC   -lwiringPi -lyaml_cpp
+CXX_FLAGS =  -frtti -fPIC   -lwiringPi -lyaml_cpp
 

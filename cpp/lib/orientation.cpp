@@ -133,10 +133,10 @@ Vector4d eul2quat(float roll, float pitch, float yaw, string seq)
 Vector3d dcm2eul(Matrix3d dcm, string seq)
 {
     float det = dcm.determinant();
-    if (int(det) != 1)
-    {
-        throw invalid_argument("Wrong rotation matrix");
-    }
+    // if (int(det) != 1)
+    // {
+    //     throw invalid_argument("Wrong rotation matrix");
+    // }
     float roll, pitch, yaw;
     if (seq == "xzy"){
         yaw = -asin(dcm(0,1));
@@ -175,10 +175,10 @@ Vector3d dcm2eul(Matrix3d dcm, string seq)
 Vector4d dcm2quat(Matrix3d dcm, string seq)
 {
     float det = dcm.determinant();
-    if (int(det) != 1)
-    {
-        throw invalid_argument("Wrong rotation matrix");
-    }
+    // if (int(det) != 1)
+    // {
+    //     throw invalid_argument("Wrong rotation matrix");
+    // }
     float roll, pitch, yaw;
     Vector3d eul;
     Vector4d quat;

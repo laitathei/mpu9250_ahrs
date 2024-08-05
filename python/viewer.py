@@ -197,7 +197,7 @@ if __name__ == '__main__':
     window_width = 1080
     window_height = 720
     window_hz = 100
-    nav_frame = "NED" # ENU/NED
+    nav_frame = "ENU" # ENU/NED
     axis = 9
     calibration = False
     # ahrs = madgwick.Madgwick(axis, 1, nav_frame)
@@ -205,6 +205,6 @@ if __name__ == '__main__':
     # ahrs = ekf.EKF(axis, [0.3**2, 0.5**2, 0.8**2], nav_frame)
     imu = MPU9250(nav_frame, axis, window_hz, calibration)
     imu.initialization()
-    imu.start_thread()
+    imu.start_thread(ahrs=None)
     viewer = imu_viewer(window_width, window_height, window_hz, nav_frame)
     viewer.run(imu)

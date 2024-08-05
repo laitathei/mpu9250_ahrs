@@ -9,7 +9,7 @@ if __name__ == '__main__':
     """
     Do calibration for gyroscope and accelerometer
     """
-    nav_frame = "NED" # ENU/NED
+    nav_frame = "ENU" # ENU/NED
     axis = 9
     hz = 100
     interval = 1/hz

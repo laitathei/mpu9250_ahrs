@@ -36,19 +36,28 @@ class EKF():
 
         # Hong Kong geomagnetic field parameter
         # http://www.geomag.bgs.ac.uk/data_service/models_compass/wmm_calc.html
-        self.declination = -3.404 # declination angle (degree)
-        self.inclination = 33.739 # inclination angle (degree)
-        self.north_intensity = 37794 # north intensity (nT)
-        self.east_intensity = -2248 # east intensity (nT)
-        self.vertical_intensity = 25287 # vertical intensity (nT)
-        self.horizontal_intensity = 37861 # horizontal intensity (nT)
-        self.total_intensity = 45529 # total intensity (nT)
+        # self.declination = -3.404 # declination angle (degree)
+        # self.inclination = 33.739 # inclination angle (degree)
+        # self.north_intensity = 37794 # north intensity (nT)
+        # self.east_intensity = -2248 # east intensity (nT)
+        # self.horizontal_intensity = 37861 # horizontal intensity (nT)
+        # self.vertical_intensity = 25287 # vertical intensity (nT)
+        # self.total_intensity = 45529 # total intensity (nT)
 
-        self.a_ref = np.array([[0],[0],[1]]) # Gravitational Reference Vector
+        # Waterloo, Canada geomagnetic field parameter
+        self.declination = -9.434 # declination angle (degree)
+        self.inclination = 69.037 # inclination angle (degree)
+        self.north_intensity = 18780 # north intensity (nT)
+        self.east_intensity = -3120 # east intensity (nT)
+        self.horizontal_intensity = 19037 # horizontal intensity (nT)
+        self.vertical_intensity = 49688 # vertical intensity (nT)
+        self.total_intensity = 53210 # total intensity (nT)
+
+        self.a_ref = np.array([[0],[0],[1]]) # Gravitational Reference Vector (due to my accelerometer definition)
         if self.nav_frame == "ENU":
-            self.m_ref = np.array([[0],[math.cos(math.radians(self.inclination))],[-math.sin(math.radians(self.inclination))]])# Magnetic Reference Vector
+            self.m_ref = np.array([[0],[math.cos(math.radians(self.inclination))],[-math.sin(math.radians(self.inclination))]]) # Magnetic Reference Vector
         elif self.nav_frame == "NED":
-            self.m_ref = np.array([[math.cos(math.radians(self.inclination))],[0],[math.sin(math.radians(self.inclination))]])# Magnetic Reference Vector
+            self.m_ref = np.array([[math.cos(math.radians(self.inclination))],[0],[math.sin(math.radians(self.inclination))]]) # Magnetic Reference Vector
         self.m_ref = self.m_ref/np.linalg.norm(self.m_ref)
 
         if self.nav_frame != "ENU" and self.nav_frame != "NED":
@@ -149,7 +158,7 @@ class EKF():
             K   = P @ H.T @ sp.linalg.inv(S) # Kalman Gain 
             self.P = (self.I - K @ H) @ P # Updated Covariance Matrix
             self.est_quat = f + K @ v # Corrected State
-            self.est_quat = self.est_quat/np.linalg.norm(self.est_quat)
+            self.est_quat = self.est_quat/np.linalg.norm(self.est_quat) # normalize quaternion vector
             qw, qx, qy, qz = self.est_quat[0][0], self.est_quat[1][0], self.est_quat[2][0], self.est_quat[3][0]
         return qw, qx, qy, qz
 
@@ -201,7 +210,7 @@ class EKF():
             K   = P @ H.T @ sp.linalg.inv(S) # Kalman Gain 
             self.P = (self.I - K @ H) @ P # Updated Covariance Matrix
             self.est_quat = f + K @ v # Corrected State
-            self.est_quat = self.est_quat/np.linalg.norm(self.est_quat)
+            self.est_quat = self.est_quat/np.linalg.norm(self.est_quat) # normalize quaternion vector
             qw, qx, qy, qz = self.est_quat[0][0], self.est_quat[1][0], self.est_quat[2][0], self.est_quat[3][0]
         return qw, qx, qy, qz
 

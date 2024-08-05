@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC -shared -Wl,-soname,liboreientation.so -o liboreientation.so CMakeFiles/oreientation.dir/lib/orientation.cpp.o 
+/usr/bin/c++ -fPIC  -frtti -shared -Wl,-soname,liboreientation.so -o liboreientation.so CMakeFiles/oreientation.dir/lib/orientation.cpp.o 

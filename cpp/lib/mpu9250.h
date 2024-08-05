@@ -2,12 +2,14 @@
 #include <iostream>
 #include <cmath>
 #include <thread>
+#include <memory>
 #include <math.h>
 #include <eigen3/Eigen/Dense>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include "mpu6500.h"
 #include "ak8963.h"
+#include "ahrs.h"
 #include "transformation.h"
 
 using namespace std;
@@ -36,7 +38,8 @@ class MPU9250
         Vector4d quaternion;
 
     public:
-        thread th;
+        thread imu_th;
+        unique_ptr<ahrs> ahrs_ptr;
         string nav_frame;
         float hz, dt;
         float temp, roll, pitch, yaw;
@@ -95,7 +98,9 @@ class MPU9250
         float get_temp();
         Vector3d get_euler();
         Vector4d get_quaternion();
+        Vector3d get_ahrs_euler();
+        Vector4d get_ahrs_quaternion();
         void initialization();
-        void start_thread();
+        void start_thread(unique_ptr<ahrs> ahrs_ptr=nullptr);
         void run();
 };

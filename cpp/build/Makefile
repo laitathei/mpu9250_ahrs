@@ -156,6 +156,45 @@ transformation/fast:
 .PHONY : transformation/fast
 
 #=============================================================================
+# Target rules for targets named madgwick
+
+# Build rule for target.
+madgwick: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 madgwick
+.PHONY : madgwick
+
+# fast build rule for target.
+madgwick/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/madgwick.dir/build.make CMakeFiles/madgwick.dir/build
+.PHONY : madgwick/fast
+
+#=============================================================================
+# Target rules for targets named mahony
+
+# Build rule for target.
+mahony: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mahony
+.PHONY : mahony
+
+# fast build rule for target.
+mahony/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mahony.dir/build.make CMakeFiles/mahony.dir/build
+.PHONY : mahony/fast
+
+#=============================================================================
+# Target rules for targets named ekf
+
+# Build rule for target.
+ekf: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ekf
+.PHONY : ekf
+
+# fast build rule for target.
+ekf/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ekf.dir/build.make CMakeFiles/ekf.dir/build
+.PHONY : ekf/fast
+
+#=============================================================================
 # Target rules for targets named mpu6500
 
 # Build rule for target.
@@ -278,6 +317,96 @@ lib/ak8963.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/lib/ak8963.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/ak8963.cpp.s
 .PHONY : lib/ak8963.cpp.s
+
+lib/ekf.o: lib/ekf.cpp.o
+.PHONY : lib/ekf.o
+
+# target to build an object file
+lib/ekf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ekf.dir/build.make CMakeFiles/ekf.dir/lib/ekf.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/ekf.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/ekf.cpp.o
+.PHONY : lib/ekf.cpp.o
+
+lib/ekf.i: lib/ekf.cpp.i
+.PHONY : lib/ekf.i
+
+# target to preprocess a source file
+lib/ekf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ekf.dir/build.make CMakeFiles/ekf.dir/lib/ekf.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/ekf.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/ekf.cpp.i
+.PHONY : lib/ekf.cpp.i
+
+lib/ekf.s: lib/ekf.cpp.s
+.PHONY : lib/ekf.s
+
+# target to generate assembly for a file
+lib/ekf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ekf.dir/build.make CMakeFiles/ekf.dir/lib/ekf.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/ekf.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/ekf.cpp.s
+.PHONY : lib/ekf.cpp.s
+
+lib/madgwick.o: lib/madgwick.cpp.o
+.PHONY : lib/madgwick.o
+
+# target to build an object file
+lib/madgwick.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/madgwick.dir/build.make CMakeFiles/madgwick.dir/lib/madgwick.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/madgwick.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/madgwick.cpp.o
+.PHONY : lib/madgwick.cpp.o
+
+lib/madgwick.i: lib/madgwick.cpp.i
+.PHONY : lib/madgwick.i
+
+# target to preprocess a source file
+lib/madgwick.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/madgwick.dir/build.make CMakeFiles/madgwick.dir/lib/madgwick.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/madgwick.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/madgwick.cpp.i
+.PHONY : lib/madgwick.cpp.i
+
+lib/madgwick.s: lib/madgwick.cpp.s
+.PHONY : lib/madgwick.s
+
+# target to generate assembly for a file
+lib/madgwick.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/madgwick.dir/build.make CMakeFiles/madgwick.dir/lib/madgwick.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/madgwick.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/madgwick.cpp.s
+.PHONY : lib/madgwick.cpp.s
+
+lib/mahony.o: lib/mahony.cpp.o
+.PHONY : lib/mahony.o
+
+# target to build an object file
+lib/mahony.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mahony.dir/build.make CMakeFiles/mahony.dir/lib/mahony.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mahony.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mahony.cpp.o
+.PHONY : lib/mahony.cpp.o
+
+lib/mahony.i: lib/mahony.cpp.i
+.PHONY : lib/mahony.i
+
+# target to preprocess a source file
+lib/mahony.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mahony.dir/build.make CMakeFiles/mahony.dir/lib/mahony.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mahony.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mahony.cpp.i
+.PHONY : lib/mahony.cpp.i
+
+lib/mahony.s: lib/mahony.cpp.s
+.PHONY : lib/mahony.s
+
+# target to generate assembly for a file
+lib/mahony.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mahony.dir/build.make CMakeFiles/mahony.dir/lib/mahony.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/lib/mahony.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/lib/mahony.cpp.s
+.PHONY : lib/mahony.cpp.s
 
 lib/mpu6500.o: lib/mpu6500.cpp.o
 .PHONY : lib/mpu6500.o
@@ -553,6 +682,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... ak8963"
 	@echo "... calibration"
+	@echo "... ekf"
+	@echo "... madgwick"
+	@echo "... mahony"
 	@echo "... main"
 	@echo "... mpu6500"
 	@echo "... mpu9250"
@@ -564,6 +696,15 @@ help:
 	@echo "... lib/ak8963.o"
 	@echo "... lib/ak8963.i"
 	@echo "... lib/ak8963.s"
+	@echo "... lib/ekf.o"
+	@echo "... lib/ekf.i"
+	@echo "... lib/ekf.s"
+	@echo "... lib/madgwick.o"
+	@echo "... lib/madgwick.i"
+	@echo "... lib/madgwick.s"
+	@echo "... lib/mahony.o"
+	@echo "... lib/mahony.i"
+	@echo "... lib/mahony.s"
 	@echo "... lib/mpu6500.o"
 	@echo "... lib/mpu6500.i"
 	@echo "... lib/mpu6500.s"

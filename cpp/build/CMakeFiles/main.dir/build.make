@@ -167,6 +167,48 @@ CMakeFiles/main.dir/lib/ak8963.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/lib/ak8963.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/ak8963.cpp -o CMakeFiles/main.dir/lib/ak8963.cpp.s
 
+CMakeFiles/main.dir/lib/madgwick.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/lib/madgwick.cpp.o: ../lib/madgwick.cpp
+CMakeFiles/main.dir/lib/madgwick.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/main.dir/lib/madgwick.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/lib/madgwick.cpp.o -MF CMakeFiles/main.dir/lib/madgwick.cpp.o.d -o CMakeFiles/main.dir/lib/madgwick.cpp.o -c /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/madgwick.cpp
+
+CMakeFiles/main.dir/lib/madgwick.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/lib/madgwick.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/madgwick.cpp > CMakeFiles/main.dir/lib/madgwick.cpp.i
+
+CMakeFiles/main.dir/lib/madgwick.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/lib/madgwick.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/madgwick.cpp -o CMakeFiles/main.dir/lib/madgwick.cpp.s
+
+CMakeFiles/main.dir/lib/mahony.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/lib/mahony.cpp.o: ../lib/mahony.cpp
+CMakeFiles/main.dir/lib/mahony.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/main.dir/lib/mahony.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/lib/mahony.cpp.o -MF CMakeFiles/main.dir/lib/mahony.cpp.o.d -o CMakeFiles/main.dir/lib/mahony.cpp.o -c /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/mahony.cpp
+
+CMakeFiles/main.dir/lib/mahony.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/lib/mahony.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/mahony.cpp > CMakeFiles/main.dir/lib/mahony.cpp.i
+
+CMakeFiles/main.dir/lib/mahony.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/lib/mahony.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/mahony.cpp -o CMakeFiles/main.dir/lib/mahony.cpp.s
+
+CMakeFiles/main.dir/lib/ekf.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/lib/ekf.cpp.o: ../lib/ekf.cpp
+CMakeFiles/main.dir/lib/ekf.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/main.dir/lib/ekf.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/lib/ekf.cpp.o -MF CMakeFiles/main.dir/lib/ekf.cpp.o.d -o CMakeFiles/main.dir/lib/ekf.cpp.o -c /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/ekf.cpp
+
+CMakeFiles/main.dir/lib/ekf.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/lib/ekf.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/ekf.cpp > CMakeFiles/main.dir/lib/ekf.cpp.i
+
+CMakeFiles/main.dir/lib/ekf.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/lib/ekf.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/ekf.cpp -o CMakeFiles/main.dir/lib/ekf.cpp.s
+
 # Object files for target main
 main_OBJECTS = \
 "CMakeFiles/main.dir/src/main.cpp.o" \
@@ -175,7 +217,10 @@ main_OBJECTS = \
 "CMakeFiles/main.dir/lib/transformation.cpp.o" \
 "CMakeFiles/main.dir/lib/mpu9250.cpp.o" \
 "CMakeFiles/main.dir/lib/mpu6500.cpp.o" \
-"CMakeFiles/main.dir/lib/ak8963.cpp.o"
+"CMakeFiles/main.dir/lib/ak8963.cpp.o" \
+"CMakeFiles/main.dir/lib/madgwick.cpp.o" \
+"CMakeFiles/main.dir/lib/mahony.cpp.o" \
+"CMakeFiles/main.dir/lib/ekf.cpp.o"
 
 # External object files for target main
 main_EXTERNAL_OBJECTS =
@@ -187,11 +232,14 @@ main_EXTERNAL_OBJECTS =
 ../bin/main: CMakeFiles/main.dir/lib/mpu9250.cpp.o
 ../bin/main: CMakeFiles/main.dir/lib/mpu6500.cpp.o
 ../bin/main: CMakeFiles/main.dir/lib/ak8963.cpp.o
+../bin/main: CMakeFiles/main.dir/lib/madgwick.cpp.o
+../bin/main: CMakeFiles/main.dir/lib/mahony.cpp.o
+../bin/main: CMakeFiles/main.dir/lib/ekf.cpp.o
 ../bin/main: CMakeFiles/main.dir/build.make
 ../bin/main: /usr/local/lib/libwiringPi.so
 ../bin/main: /usr/local/lib/libyaml-cpp.a
 ../bin/main: CMakeFiles/main.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable ../bin/main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable ../bin/main"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

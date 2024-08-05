@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC -shared -Wl,-soname,libmpu9250.so -o libmpu9250.so CMakeFiles/mpu9250.dir/lib/mpu9250.cpp.o 
+/usr/bin/c++ -fPIC  -frtti -shared -Wl,-soname,libmpu9250.so -o libmpu9250.so CMakeFiles/mpu9250.dir/lib/mpu9250.cpp.o 

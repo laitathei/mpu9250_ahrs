@@ -150,8 +150,21 @@ CMakeFiles/calibration.dir/src/calibration.cpp.o: \
  /usr/include/c++/11/bits/codecvt.h \
  /usr/include/aarch64-linux-gnu/c++/11/bits/basic_file.h \
  /usr/include/aarch64-linux-gnu/c++/11/bits/c++io.h \
- /usr/include/c++/11/bits/fstream.tcc /usr/include/c++/11/cmath \
- /usr/include/math.h /usr/include/aarch64-linux-gnu/bits/math-vector.h \
+ /usr/include/c++/11/bits/fstream.tcc /usr/include/c++/11/map \
+ /usr/include/c++/11/bits/stl_tree.h \
+ /usr/include/c++/11/ext/aligned_buffer.h \
+ /usr/include/c++/11/bits/node_handle.h \
+ /usr/include/c++/11/bits/stl_map.h /usr/include/c++/11/tuple \
+ /usr/include/c++/11/utility /usr/include/c++/11/bits/stl_relops.h \
+ /usr/include/c++/11/array /usr/include/c++/11/bits/uses_allocator.h \
+ /usr/include/c++/11/bits/invoke.h \
+ /usr/include/c++/11/bits/stl_multimap.h \
+ /usr/include/c++/11/bits/erase_if.h /usr/include/eigen3/Eigen/Dense \
+ /usr/include/eigen3/Eigen/Core \
+ /usr/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h \
+ /usr/include/eigen3/Eigen/src/Core/util/Macros.h \
+ /usr/include/c++/11/cmath /usr/include/math.h \
+ /usr/include/aarch64-linux-gnu/bits/math-vector.h \
  /usr/include/aarch64-linux-gnu/bits/libm-simd-decl-stubs.h \
  /usr/include/aarch64-linux-gnu/bits/flt-eval-method.h \
  /usr/include/aarch64-linux-gnu/bits/fp-logb.h \
@@ -172,19 +185,7 @@ CMakeFiles/calibration.dir/src/calibration.cpp.o: \
  /usr/include/c++/11/tr1/modified_bessel_func.tcc \
  /usr/include/c++/11/tr1/poly_hermite.tcc \
  /usr/include/c++/11/tr1/poly_laguerre.tcc \
- /usr/include/c++/11/tr1/riemann_zeta.tcc /usr/include/c++/11/map \
- /usr/include/c++/11/bits/stl_tree.h \
- /usr/include/c++/11/ext/aligned_buffer.h \
- /usr/include/c++/11/bits/node_handle.h \
- /usr/include/c++/11/bits/stl_map.h /usr/include/c++/11/tuple \
- /usr/include/c++/11/utility /usr/include/c++/11/bits/stl_relops.h \
- /usr/include/c++/11/array /usr/include/c++/11/bits/uses_allocator.h \
- /usr/include/c++/11/bits/invoke.h \
- /usr/include/c++/11/bits/stl_multimap.h \
- /usr/include/c++/11/bits/erase_if.h /usr/include/eigen3/Eigen/Dense \
- /usr/include/eigen3/Eigen/Core \
- /usr/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h \
- /usr/include/eigen3/Eigen/src/Core/util/Macros.h \
+ /usr/include/c++/11/tr1/riemann_zeta.tcc \
  /usr/include/eigen3/Eigen/src/Core/util/ConfigureVectorization.h \
  /usr/lib/gcc/aarch64-linux-gnu/11/include/arm_neon.h \
  /usr/lib/gcc/aarch64-linux-gnu/11/include/arm_fp16.h \
@@ -474,4 +475,5 @@ CMakeFiles/calibration.dir/src/calibration.cpp.o: \
  /usr/include/c++/11/math.h /usr/local/include/wiringPi.h \
  /usr/local/include/wiringPiI2C.h \
  /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/mpu6500.h \
- /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/ak8963.h
+ /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/ak8963.h \
+ /home/laitathei/Desktop/mpu9250_ahrs/cpp/src/../lib/ahrs.h

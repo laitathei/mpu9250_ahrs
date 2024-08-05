@@ -1,17 +1,12 @@
 #include <iostream>
-#include <fstream>
-#include <cmath>
-#include <map>
-#include <eigen3/Eigen/Dense>
-#include <yaml-cpp/yaml.h>
+#include <memory>
 #include "../lib/utils.h"
-#include "../lib/orientation.h"
-#include "../lib/transformation.h"
 #include "../lib/mpu9250.h"
+#include "../lib/madgwick.h"
+#include "../lib/mahony.h"
+#include "../lib/ekf.h"
 
 using namespace std;
-using namespace Eigen;
-using namespace YAML;
 
 int main(int argc, char **argv)
 {
@@ -19,9 +14,13 @@ int main(int argc, char **argv)
     int axis = 9;
     float hz = 100;
     bool calibration = false;
+    // unique_ptr<ahrs> ahrs_ptr = make_unique<Madgwick>(axis, 1, nav_frame);
+    // unique_ptr<ahrs> ahrs_ptr = make_unique<Mahony>(axis, 0.1, 0, nav_frame);
+    // unique_ptr<ahrs> ahrs_ptr = make_unique<EKF>(axis, Vector3d(pow(0.3,2), pow(0.5,2), pow(0.8,2)), nav_frame);
     MPU9250 imu(nav_frame, axis, hz, calibration);
     imu.initialization();
-    imu.start_thread();
+    imu.start_thread(nullptr); // turn off ahrs filter
+    // imu.start_thread(move(ahrs_ptr)); // turn on ahrs filter
     clock_t start = clock();
     clock_t last = clock();
     while(1)

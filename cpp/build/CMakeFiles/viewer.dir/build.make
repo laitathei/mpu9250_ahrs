@@ -181,6 +181,48 @@ CMakeFiles/viewer.dir/lib/visualization.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viewer.dir/lib/visualization.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/visualization.cpp -o CMakeFiles/viewer.dir/lib/visualization.cpp.s
 
+CMakeFiles/viewer.dir/lib/madgwick.cpp.o: CMakeFiles/viewer.dir/flags.make
+CMakeFiles/viewer.dir/lib/madgwick.cpp.o: ../lib/madgwick.cpp
+CMakeFiles/viewer.dir/lib/madgwick.cpp.o: CMakeFiles/viewer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/viewer.dir/lib/madgwick.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viewer.dir/lib/madgwick.cpp.o -MF CMakeFiles/viewer.dir/lib/madgwick.cpp.o.d -o CMakeFiles/viewer.dir/lib/madgwick.cpp.o -c /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/madgwick.cpp
+
+CMakeFiles/viewer.dir/lib/madgwick.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viewer.dir/lib/madgwick.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/madgwick.cpp > CMakeFiles/viewer.dir/lib/madgwick.cpp.i
+
+CMakeFiles/viewer.dir/lib/madgwick.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viewer.dir/lib/madgwick.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/madgwick.cpp -o CMakeFiles/viewer.dir/lib/madgwick.cpp.s
+
+CMakeFiles/viewer.dir/lib/mahony.cpp.o: CMakeFiles/viewer.dir/flags.make
+CMakeFiles/viewer.dir/lib/mahony.cpp.o: ../lib/mahony.cpp
+CMakeFiles/viewer.dir/lib/mahony.cpp.o: CMakeFiles/viewer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/viewer.dir/lib/mahony.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viewer.dir/lib/mahony.cpp.o -MF CMakeFiles/viewer.dir/lib/mahony.cpp.o.d -o CMakeFiles/viewer.dir/lib/mahony.cpp.o -c /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/mahony.cpp
+
+CMakeFiles/viewer.dir/lib/mahony.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viewer.dir/lib/mahony.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/mahony.cpp > CMakeFiles/viewer.dir/lib/mahony.cpp.i
+
+CMakeFiles/viewer.dir/lib/mahony.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viewer.dir/lib/mahony.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/mahony.cpp -o CMakeFiles/viewer.dir/lib/mahony.cpp.s
+
+CMakeFiles/viewer.dir/lib/ekf.cpp.o: CMakeFiles/viewer.dir/flags.make
+CMakeFiles/viewer.dir/lib/ekf.cpp.o: ../lib/ekf.cpp
+CMakeFiles/viewer.dir/lib/ekf.cpp.o: CMakeFiles/viewer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/viewer.dir/lib/ekf.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viewer.dir/lib/ekf.cpp.o -MF CMakeFiles/viewer.dir/lib/ekf.cpp.o.d -o CMakeFiles/viewer.dir/lib/ekf.cpp.o -c /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/ekf.cpp
+
+CMakeFiles/viewer.dir/lib/ekf.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viewer.dir/lib/ekf.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/ekf.cpp > CMakeFiles/viewer.dir/lib/ekf.cpp.i
+
+CMakeFiles/viewer.dir/lib/ekf.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viewer.dir/lib/ekf.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/laitathei/Desktop/mpu9250_ahrs/cpp/lib/ekf.cpp -o CMakeFiles/viewer.dir/lib/ekf.cpp.s
+
 # Object files for target viewer
 viewer_OBJECTS = \
 "CMakeFiles/viewer.dir/src/viewer.cpp.o" \
@@ -190,7 +232,10 @@ viewer_OBJECTS = \
 "CMakeFiles/viewer.dir/lib/mpu9250.cpp.o" \
 "CMakeFiles/viewer.dir/lib/mpu6500.cpp.o" \
 "CMakeFiles/viewer.dir/lib/ak8963.cpp.o" \
-"CMakeFiles/viewer.dir/lib/visualization.cpp.o"
+"CMakeFiles/viewer.dir/lib/visualization.cpp.o" \
+"CMakeFiles/viewer.dir/lib/madgwick.cpp.o" \
+"CMakeFiles/viewer.dir/lib/mahony.cpp.o" \
+"CMakeFiles/viewer.dir/lib/ekf.cpp.o"
 
 # External object files for target viewer
 viewer_EXTERNAL_OBJECTS =
@@ -203,6 +248,9 @@ viewer_EXTERNAL_OBJECTS =
 ../bin/viewer: CMakeFiles/viewer.dir/lib/mpu6500.cpp.o
 ../bin/viewer: CMakeFiles/viewer.dir/lib/ak8963.cpp.o
 ../bin/viewer: CMakeFiles/viewer.dir/lib/visualization.cpp.o
+../bin/viewer: CMakeFiles/viewer.dir/lib/madgwick.cpp.o
+../bin/viewer: CMakeFiles/viewer.dir/lib/mahony.cpp.o
+../bin/viewer: CMakeFiles/viewer.dir/lib/ekf.cpp.o
 ../bin/viewer: CMakeFiles/viewer.dir/build.make
 ../bin/viewer: /usr/local/lib/libwiringPi.so
 ../bin/viewer: /usr/local/lib/libyaml-cpp.a
@@ -213,7 +261,7 @@ viewer_EXTERNAL_OBJECTS =
 ../bin/viewer: /usr/lib/aarch64-linux-gnu/libfreetype.so
 ../bin/viewer: /usr/lib/aarch64-linux-gnu/libglfw.so.3.3
 ../bin/viewer: CMakeFiles/viewer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable ../bin/viewer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/laitathei/Desktop/mpu9250_ahrs/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable ../bin/viewer"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/viewer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

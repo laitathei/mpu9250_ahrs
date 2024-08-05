@@ -231,7 +231,10 @@ class MPU6500():
                     signed_value = unsigned_value
 
                 return signed_value
-            except:
+            except TimeoutError:
+                raise TimeoutError("Connection timed out. Check hardware connection")
+            except Exception as e:
+                print("\nMPU6500 read raw data error occur")
                 continue
 
     def read_8bit_register(self, single_register):

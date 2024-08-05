@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/usr/include/freetype2
 
-CXX_FLAGS =   -lwiringPi -lyaml_cpp
+CXX_FLAGS =  -frtti   -lwiringPi -lyaml_cpp
 
