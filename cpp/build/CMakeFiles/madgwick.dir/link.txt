@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -frtti -shared -Wl,-soname,libmadgwick.so -o libmadgwick.so CMakeFiles/madgwick.dir/lib/madgwick.cpp.o 

@@ -26,7 +26,7 @@ def acc2eul(ax, ay, az, nav="ENU"):
 
     .. Reference
     .. [1] Page.163, Fundamentals of Inertial Navigation, Satellite-based Positioning and their Intergration, Springer, 2013 
-    .. [2] `Gimbal Lock explaination <https://www.nxp.com/docs/en/application-note/AN5017.pdf>`
+    .. [2] 'Gimbal Lock explaination <https://www.nxp.com/docs/en/application-note/AN5017.pdf>'
     """
     roll = 0
     pitch = 0

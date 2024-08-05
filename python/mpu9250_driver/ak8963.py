@@ -3,6 +3,7 @@ import smbus
 import time
 import yaml
 import numpy as np
+from progress.bar import Bar
 from utils.transformation import NED2ENU
 
 WIA = 0x00
@@ -36,7 +37,7 @@ class AK8963():
 
         # Magnetometer parameter
         self.mag_bias = np.zeros((3,1))
-        self.mag_scale = np.zeros((3,1))
+        self.mag_scale = np.ones((3,1))
         self.mag_misalignment = np.zeros((6,1))
         self.mag_strength = 0
         self.calibration = calibration
@@ -47,7 +48,7 @@ class AK8963():
 
         # Load old config from yaml file
         if self.calibration == False: 
-            f = open("config.yaml", "r")
+            f = open("../cfg/config.yaml", "r")
             self.config = yaml.load(f, Loader=yaml.FullLoader)
             mag_bias = ["mx_bias","my_bias","mz_bias"]
             mag_scale = ["mx_scale","my_scale","mz_scale"]
@@ -67,7 +68,7 @@ class AK8963():
         """
         Check AK8963 WHOAMI register value
         """
-        value = hex(self.bus.read_byte_data(self.address, WIA))
+        value = hex(self.read_8bit_register(WIA))
         print("The register value is {}".format(value))
         if value == "0x48":
             print("It is AK8963 default value")
@@ -75,23 +76,23 @@ class AK8963():
             print("It is not AK8963 default value")
             raise RuntimeError("AK8963 not found")
 
-    def config_AK8963(self, bit):
+    def config_AK8963(self, mag_parameter=16):
         """
         Config AK8963 magnetometer mode
 
-        :param int bit: magnetometer configuration register value
+        :param int mag_parameter: magnetometer configuration register value
         """
-        self.set_mode("fuse rom access", 16)
+        self.set_mode("fuse rom access", mag_parameter)
         self.get_adjust_mag()
-        self.set_mode("power down", 16)
-        self.set_mode("continuous measure 2", 16)
+        self.set_mode("power down", mag_parameter)
+        self.set_mode("continuous measure 2", mag_parameter)
         self.get_status()
 
     def get_status(self):
         """
         Check AK8963 magnetometer status
         """
-        ST1_value = self.bus.read_byte_data(self.address, ST1)
+        ST1_value = self.read_8bit_register(ST1)
         bit_0 = ST1_value & int("00000001", 2)
         bit_1 = ST1_value & int("00000010", 2)
         if bit_0 == 0:
@@ -113,9 +114,9 @@ class AK8963():
         AK8963 sensitivity adjustment value for xyz axis
         """
         print("Read sensitivity adjustment value")
-        asax = self.bus.read_byte_data(self.address, ASAX)
-        asay = self.bus.read_byte_data(self.address, ASAY)
-        asaz = self.bus.read_byte_data(self.address, ASAZ)
+        asax = self.read_8bit_register(ASAX)
+        asay = self.read_8bit_register(ASAY)
+        asaz = self.read_8bit_register(ASAZ)
 
         self.adjustment_x = (((asax-128)*0.5/128)+1)
         self.adjustment_y = (((asay-128)*0.5/128)+1)
@@ -134,18 +135,20 @@ class AK8963():
             - mag_strength (float) - geomagnetic field strength in µT
 
         .. Reference
-        .. [1] `four element calibration <https://www.nxp.com/docs/en/application-note/AN5019.pdf>`
-        .. [2] `ten element calibration <https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py>`
+        .. [1] 'four element calibration <https://www.nxp.com/docs/en/application-note/AN5019.pdf>'
+        .. [2] 'ten element calibration <https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py>'
         """
         if s > 0 and self.calibration == True:
             input("Please move the IMU in slow motion in all possible directions, the calibration process takes {}s".format(s))
             calibration = []
             target = []
-            for i in range(s*self.hz):
-                mx, my, mz = self.get_mag()
-                calibration.append([mx, my, mz, 1])
-                target.append([mx**2+my**2+mz**2])
-                time.sleep(1/self.hz)
+            with Bar('Processing... ', max=int(s*self.hz)) as bar:
+                for i in range(s*self.hz):
+                    mx, my, mz = self.get_mag()
+                    calibration.append([mx, my, mz, 1])
+                    target.append([mx**2+my**2+mz**2])
+                    bar.next()
+                    time.sleep(1/self.hz)
             calibration = np.array(calibration)
             target = np.array(target)
 
@@ -191,16 +194,15 @@ class AK8963():
             mx = self.read_raw_data(HXH, HXL)*self.mag_fs
             my = self.read_raw_data(HYH, HYL)*self.mag_fs
             mz = self.read_raw_data(HZH, HZL)*self.mag_fs
-            # print("raw mx my mz: ", mx, my, mz)
         except:
             raise ConnectionError("I2C Connection Failure")
 
         # sensitivity adjustment
-        mx = mx*self.adjustment_x       
+        mx = mx*self.adjustment_x
         my = my*self.adjustment_y
         mz = mz*self.adjustment_z
 
-        ST2_value = self.bus.read_byte_data(self.address, ST2)
+        ST2_value = self.read_8bit_register(ST2)
         bit_3 = ST2_value & int("00001000", 2)
         bit_4 = ST2_value & int("00010000", 2)
 
@@ -274,7 +276,7 @@ class AK8963():
 
         self.mag_fs = 4912*2/(2**bit)
         print("Set AK8963 to {} mode".format(mode))
-        self.bus.write_byte_data(self.address, CNTL, value)
+        self.write_8bit_register(CNTL, value)
         
     def read_raw_data(self, high_register, low_register):
         """
@@ -286,15 +288,53 @@ class AK8963():
         :returns: 
             - signed_value (int) - sensor value in int16 format
         """
-        high = self.bus.read_byte_data(self.address, high_register)
-        low = self.bus.read_byte_data(self.address, low_register)
+        while True:
+            try:
+                high = self.bus.read_byte_data(self.address, high_register)
+                low = self.bus.read_byte_data(self.address, low_register)
 
-        # Megre higher bytes and lower bytes data
-        unsigned_value = (high << 8) + low
+                # Megre higher bytes and lower bytes data
+                unsigned_value = (high << 8) + low
 
-        # Calculate the unsigned int16 range to signed int16 range
-        if (unsigned_value >= 32768) and (unsigned_value < 65536):
-            signed_value = unsigned_value - 65536
-        elif (unsigned_value >= 0) and (unsigned_value < 32768):
-            signed_value = unsigned_value
-        return signed_value
+                # Calculate the unsigned int16 range to signed int16 range
+                if (unsigned_value >= 32768) and (unsigned_value < 65536):
+                    signed_value = unsigned_value - 65536
+                elif (unsigned_value >= 0) and (unsigned_value < 32768):
+                    signed_value = unsigned_value
+
+                return signed_value
+            except TimeoutError:
+                raise TimeoutError("Connection timed out. Check hardware connection")
+            except Exception as e:
+                print("\nAK8963 read raw data error occur")
+                continue
+
+    def read_8bit_register(self, single_register):
+        """
+        Access the registers and return its raw value
+
+        :param int single_register: single registers address
+        :returns: 
+            - signed_value (int) - sensor value in int16 format
+        """
+        while True:
+            try:
+                value = self.bus.read_byte_data(self.address, single_register)
+                return value
+            except:
+                print("\nAK8963 register error occur")
+                continue
+
+    def write_8bit_register(self, single_register, value):
+        """
+        Access the registers and write byte data
+
+        :param int single_register: single registers address
+        """
+        while True:
+            try:
+                self.bus.write_byte_data(self.address, single_register, value)
+                break
+            except:
+                print("\nAK8963 register error occur")
+                continue

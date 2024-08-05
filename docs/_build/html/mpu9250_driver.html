@@ -66,7 +66,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html">utils package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="viewer.html">viewer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calibration.html">calibration module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
 </ul>
 </li>
@@ -121,11 +122,11 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.config_AK8963">
-<span class="sig-name descname"><span class="pre">config_AK8963</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.config_AK8963"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.config_AK8963" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">config_AK8963</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mag_parameter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.config_AK8963"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.config_AK8963" title="Link to this definition"></a></dt>
 <dd><p>Config AK8963 magnetometer mode</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>bit</strong> (<em>int</em>) – magnetometer configuration register value</p>
+<dd class="field-odd"><p><strong>mag_parameter</strong> (<em>int</em>) – magnetometer configuration register value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -188,13 +189,30 @@ Using least square method to solve the error</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id1" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>four element calibration &lt;https://www.nxp.com/docs/en/application-note/AN5019.pdf&gt;</cite></p>
+<p>‘four element calibration &lt;<a class="reference external" href="https://www.nxp.com/docs/en/application-note/AN5019.pdf">https://www.nxp.com/docs/en/application-note/AN5019.pdf</a>&gt;’</p>
 </aside>
 <aside class="footnote brackets" id="id2" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
-<p><cite>ten element calibration &lt;https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py&gt;</cite></p>
+<p>‘ten element calibration &lt;<a class="reference external" href="https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py">https://github.com/nliaudat/magnetometer_calibration/blob/main/calibrate.py</a>&gt;’</p>
 </aside>
 </aside>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.read_8bit_register">
+<span class="sig-name descname"><span class="pre">read_8bit_register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">single_register</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.read_8bit_register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.read_8bit_register" title="Link to this definition"></a></dt>
+<dd><p>Access the registers and return its raw value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>single_register</strong> (<em>int</em>) – single registers address</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>signed_value (int) - sensor value in int16 format</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -235,6 +253,17 @@ Using least square method to solve the error</p>
 <dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.who_am_i">
 <span class="sig-name descname"><span class="pre">who_am_i</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.who_am_i"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.who_am_i" title="Link to this definition"></a></dt>
 <dd><p>Check AK8963 WHOAMI register value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.ak8963.AK8963.write_8bit_register">
+<span class="sig-name descname"><span class="pre">write_8bit_register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">single_register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/ak8963.html#AK8963.write_8bit_register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.ak8963.AK8963.write_8bit_register" title="Link to this definition"></a></dt>
+<dd><p>Access the registers and write byte data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>single_register</strong> (<em>int</em>) – single registers address</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -279,7 +308,7 @@ Using least square method to solve the error</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id3" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>Accelerometer calibration &lt;https://zhuanlan.zhihu.com/p/296381805&gt;</cite></p>
+<p>‘Accelerometer calibration &lt;<a class="reference external" href="https://zhuanlan.zhihu.com/p/296381805">https://zhuanlan.zhihu.com/p/296381805</a>&gt;’</p>
 </aside>
 <aside class="footnote brackets" id="id4" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
@@ -405,6 +434,23 @@ Gravity is defined as negative when pointing downward</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.read_8bit_register">
+<span class="sig-name descname"><span class="pre">read_8bit_register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">single_register</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.read_8bit_register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.read_8bit_register" title="Link to this definition"></a></dt>
+<dd><p>Access the registers and return its raw value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>single_register</strong> (<em>int</em>) – single registers address</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>signed_value (int) - sensor value in int16 format</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.read_raw_data">
 <span class="sig-name descname"><span class="pre">read_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">high_register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_register</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.read_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.read_raw_data" title="Link to this definition"></a></dt>
 <dd><p>Access the high and low registers of the accelerometer and gyroscope to calculate their values into int16 format</p>
@@ -430,6 +476,17 @@ Gravity is defined as negative when pointing downward</p>
 <dd><p>Check MPU6500 WHOAMI register value</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="mpu9250_driver.mpu6500.MPU6500.write_8bit_register">
+<span class="sig-name descname"><span class="pre">write_8bit_register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">single_register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mpu9250_driver/mpu6500.html#MPU6500.write_8bit_register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mpu9250_driver.mpu6500.MPU6500.write_8bit_register" title="Link to this definition"></a></dt>
+<dd><p>Access the registers and write byte data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>single_register</strong> (<em>int</em>) – single registers address</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -453,11 +510,11 @@ Gravity is defined as negative when pointing downward</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id7" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p><cite>MPU-9250 Product Specification &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf&gt;</cite></p>
+<p>‘MPU-9250 Product Specification &lt;<a class="reference external" href="https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf">https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf</a>&gt;’</p>
 </aside>
 <aside class="footnote brackets" id="id8" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
-<p><cite>MPU-9250 Register Map and Descriptions &lt;https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf&gt;</cite></p>
+<p>‘MPU-9250 Register Map and Descriptions &lt;<a class="reference external" href="https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf">https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf</a>&gt;’</p>
 </aside>
 </aside>
 <dl class="py method">

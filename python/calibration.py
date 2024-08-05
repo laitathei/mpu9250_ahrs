@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import yaml
 from mpu9250_driver.mpu9250 import MPU9250
-from utils.orientation import quat2eul, eul2quat
 import time
 import numpy as np
 import math
@@ -10,7 +9,7 @@ if __name__ == '__main__':
     """
     Do calibration for gyroscope and accelerometer
     """
-    nav_frame = "NED" # ENU/NED
+    nav_frame = "ENU" # ENU/NED
     axis = 9
     hz = 100
     interval = 1/hz
@@ -26,9 +25,9 @@ if __name__ == '__main__':
     bias = np.vstack((np.vstack((gyro_bias,accel_bias)),mag_bias))
     scale = np.vstack((np.vstack((gyro_scale,accel_scale)),mag_scale))
     misalignment = np.vstack((np.vstack((gyro_misalignment,accel_misalignment)),mag_misalignment))
-    
-    # Refrest new config to yaml file
-    config = yaml.load(open("config.yaml", "r"), Loader=yaml.FullLoader)
+
+    # Refresh new config to yaml file
+    config = yaml.load(open("../cfg/config.yaml", "r"), Loader=yaml.FullLoader)
     bias_parameter = ["gx_bias","gy_bias","gz_bias","ax_bias","ay_bias","az_bias","mx_bias","my_bias","mz_bias"]
     scale_parameter = ["gx_scale","gy_scale","gz_scale","ax_scale","ay_scale","az_scale","mx_scale","my_scale","mz_scale"]
     
@@ -38,7 +37,7 @@ if __name__ == '__main__':
     for i, element in enumerate(scale_parameter):
         bias_scale[element] = float(scale[i][0])
     config[nav_frame] = bias_scale
-    with open("config.yaml", 'w') as file:
+    with open("../cfg/config.yaml", 'w') as file:
         file.write(yaml.dump(config))
     print("accel bias: ")
     print(accel_bias)

@@ -7,7 +7,7 @@ class Madgwick():
     Madgwick is one of the AHRS filter applied with gradient descent technique [1]_
 
     :param int axis: axis data for fusion
-    :param float gain: 6 axis fusion gain
+    :param float gain: 6/9 axis fusion gain
     :param str nav_frame: navigation frame
 
     .. Reference

@@ -50,7 +50,8 @@
 <li class="toctree-l2"><a class="reference internal" href="ahrs.html">ahrs package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mpu9250_driver.html">mpu9250_driver package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html">utils package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="viewer.html">viewer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calibration.html">calibration module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
 </ul>
 </li>
@@ -133,9 +134,11 @@
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_mag"><code class="docutils literal notranslate"><span class="pre">AK8963.get_mag()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.get_status"><code class="docutils literal notranslate"><span class="pre">AK8963.get_status()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.mag_calibration"><code class="docutils literal notranslate"><span class="pre">AK8963.mag_calibration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.read_8bit_register"><code class="docutils literal notranslate"><span class="pre">AK8963.read_8bit_register()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.read_raw_data"><code class="docutils literal notranslate"><span class="pre">AK8963.read_raw_data()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.set_mode"><code class="docutils literal notranslate"><span class="pre">AK8963.set_mode()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.who_am_i"><code class="docutils literal notranslate"><span class="pre">AK8963.who_am_i()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.ak8963.AK8963.write_8bit_register"><code class="docutils literal notranslate"><span class="pre">AK8963.write_8bit_register()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -149,8 +152,10 @@
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.get_gyro"><code class="docutils literal notranslate"><span class="pre">MPU6500.get_gyro()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.get_temp"><code class="docutils literal notranslate"><span class="pre">MPU6500.get_temp()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.gyro_calibration"><code class="docutils literal notranslate"><span class="pre">MPU6500.gyro_calibration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.read_8bit_register"><code class="docutils literal notranslate"><span class="pre">MPU6500.read_8bit_register()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.read_raw_data"><code class="docutils literal notranslate"><span class="pre">MPU6500.read_raw_data()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.who_am_i"><code class="docutils literal notranslate"><span class="pre">MPU6500.who_am_i()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mpu9250_driver.html#mpu9250_driver.mpu6500.MPU6500.write_8bit_register"><code class="docutils literal notranslate"><span class="pre">MPU6500.write_8bit_register()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -179,6 +184,11 @@
 <li class="toctree-l1"><a class="reference internal" href="utils.html">utils package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="utils.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="utils.html#module-utils.filter">utils.filter module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.filter.butterworth_coefficient"><code class="docutils literal notranslate"><span class="pre">butterworth_coefficient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.filter.high_pass_filter_1st"><code class="docutils literal notranslate"><span class="pre">high_pass_filter_1st()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.filter.high_pass_filter_2nd"><code class="docutils literal notranslate"><span class="pre">high_pass_filter_2nd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.filter.low_pass_filter_1st"><code class="docutils literal notranslate"><span class="pre">low_pass_filter_1st()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#utils.filter.low_pass_filter_2nd"><code class="docutils literal notranslate"><span class="pre">low_pass_filter_2nd()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="utils.html#utils.filter.sliding_window"><code class="docutils literal notranslate"><span class="pre">sliding_window()</span></code></a></li>
 </ul>
 </li>
@@ -234,16 +244,17 @@
 <li class="toctree-l2"><a class="reference internal" href="utils.html#module-utils">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">visualization module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="visualization.html#visualization.imu_viewer"><code class="docutils literal notranslate"><span class="pre">imu_viewer</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="visualization.html#visualization.imu_viewer.display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.display()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="visualization.html#visualization.imu_viewer.message_display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.message_display()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="visualization.html#visualization.imu_viewer.project2window"><code class="docutils literal notranslate"><span class="pre">imu_viewer.project2window()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="visualization.html#visualization.imu_viewer.run"><code class="docutils literal notranslate"><span class="pre">imu_viewer.run()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">viewer module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="viewer.html#viewer.imu_viewer"><code class="docutils literal notranslate"><span class="pre">imu_viewer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="viewer.html#viewer.imu_viewer.display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.display()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="viewer.html#viewer.imu_viewer.message_display"><code class="docutils literal notranslate"><span class="pre">imu_viewer.message_display()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="viewer.html#viewer.imu_viewer.project2window"><code class="docutils literal notranslate"><span class="pre">imu_viewer.project2window()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="viewer.html#viewer.imu_viewer.run"><code class="docutils literal notranslate"><span class="pre">imu_viewer.run()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="calibration.html">calibration module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
 </ul>
 </div>

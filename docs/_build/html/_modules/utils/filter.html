@@ -94,6 +94,183 @@
 <span class="c1">#     sf_l = sf_l/pf_b</span>
 <span class="c1">#     sf_h = sf_h/pf_b</span>
 
+<div class="viewcode-block" id="butterworth_coefficient">
+<a class="viewcode-back" href="../../utils.html#utils.filter.butterworth_coefficient">[docs]</a>
+<span class="k">def</span> <span class="nf">butterworth_coefficient</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;low-pass&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate butterworth filter coefficient according to the desired order</span>
+
+<span class="sd">    :param float w: cut-off frequency in rad/s</span>
+<span class="sd">    :param float n: order of butterworth filter</span>
+
+<span class="sd">    :returns: </span>
+<span class="sd">        - a (ndarray) - butterworth filter coefficient</span>
+<span class="sd">        - b (ndarray) - butterworth filter coefficient with cut-off frequency</span>
+<span class="sd">        </span>
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] &#39;Low pass filter explanations &lt;https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb&gt;&#39;</span>
+<span class="sd">    .. [2] &#39;High pass filter explanations &lt;https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb&gt;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">gamma</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">((</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">gamma</span><span class="p">))</span><span class="o">*</span><span class="n">a</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+    <span class="c1"># Calculate butterworth coefficient with cut-off frequency</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># low pass calculation</span>
+    <span class="k">if</span> <span class="n">mode</span><span class="o">==</span><span class="s2">&quot;low-pass&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">c</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">n</span><span class="o">-</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="n">j</span><span class="p">)</span>
+    <span class="c1"># high pass calculation</span>
+    <span class="k">elif</span> <span class="n">mode</span><span class="o">==</span><span class="s2">&quot;high-pass&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">j</span><span class="p">))</span>
+            <span class="n">c</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="nb">pow</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">c</span></div>
+
+
+<div class="viewcode-block" id="low_pass_filter_1st">
+<a class="viewcode-back" href="../../utils.html#utils.filter.low_pass_filter_1st">[docs]</a>
+<span class="k">def</span> <span class="nf">low_pass_filter_1st</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create 1st order low pass filter by Bilinear (Tustin) transform</span>
+<span class="sd">    </span>
+<span class="sd">    :param float w: cut-off frequency in rad/s</span>
+<span class="sd">    :param float fs: sampling frequency in hz</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - X (list) - denominator coefficient (X)</span>
+<span class="sd">        - Y (list) - numerator coefficient (Y)</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] &#39;Low pass filter explanations &lt;https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb&gt;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#                                               w         2*pi*f     Y(s)</span>
+    <span class="c1"># continuous time in frequency domain H(s) = -------- = ---------- = ----</span>
+    <span class="c1">#                                             s + w     s + 2*pi*f   X(s)</span>
+    <span class="c1">#                        2(1-z^-1)</span>
+    <span class="c1"># bilinear transform s = ----------</span>
+    <span class="c1">#                        dt(1+z^-1)</span>
+    <span class="c1">#                                             w            w*dt + w*dt*z^-1        Y(z)</span>
+    <span class="c1"># discrete time in frequency domain H(z) = -------- = -------------------------- = ----</span>
+    <span class="c1">#                                           s + w     (w*dt - 2) + (w*dt+2)*z^-1   X(z)</span>
+    <span class="c1">#</span>
+    <span class="c1">#                                                 -(w*dt - 2)Y[n-1] + (w*dt)X[n] + (w*dt)X[n-1]</span>
+    <span class="c1"># general form after inverse z transform = Y[n] = ---------------------------------------------</span>
+    <span class="c1">#                                                                   w*dt + 2</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">fs</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">dt</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">dt</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="n">D</span><span class="p">]</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">[(</span><span class="n">w</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span><span class="o">/</span><span class="n">D</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span><span class="o">/</span><span class="n">D</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
+
+
+<div class="viewcode-block" id="low_pass_filter_2nd">
+<a class="viewcode-back" href="../../utils.html#utils.filter.low_pass_filter_2nd">[docs]</a>
+<span class="k">def</span> <span class="nf">low_pass_filter_2nd</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create 2nd order low pass filter by Bilinear (Tustin) transform</span>
+<span class="sd">    </span>
+<span class="sd">    :param float w: cut-off frequency in rad/s</span>
+<span class="sd">    :param float fs: sampling frequency in hz</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - X (list) - denominator coefficient (X)</span>
+<span class="sd">        - Y (list) - numerator coefficient (Y)</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] &#39;Low pass filter explanations &lt;https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/LowPass/Analytic%20Derivation%20for%20Low-Pass%202.0.ipynb&gt;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#                                               w         2*pi*f     Y(s)</span>
+    <span class="c1"># continuous time in frequency domain H(s) = -------- = ---------- = ----</span>
+    <span class="c1">#                                             s + w     s + 2*pi*f   X(s)</span>
+    <span class="c1">#                        2(1-z^-1)</span>
+    <span class="c1"># bilinear transform s = ----------</span>
+    <span class="c1">#                        dt(1+z^-1)</span>
+    <span class="c1">#                                             w                                w^2*dt^2 + 2*w^2*dt^2*z^-1 + w^2*dt^2*z^-2                            Y(z)</span>
+    <span class="c1"># discrete time in frequency domain H(z) = -------- = ------------------------------------------------------------------------------------------- = ----</span>
+    <span class="c1">#                                           s + w     (4 + 2*2^0.5*w*dt + w^2*dt^2) + (-8 + 2*w^2*dt^2)*z^-1 + (4 - 2*2^0.5*w*dt + w^2*dt^2)*z^-2   X(z)</span>
+    <span class="c1">#</span>
+    <span class="c1">#                                                 (4 - 2*2^0.5*w*dt + w^2*dt^2)Y[n-2] + (-8 + 2*w^2*dt^2)Y[n-1] + (w^2*dt^2)X[n] + (2*w^2*dt^2)X[n-1] + (w^2*dt^2)X[n-1]</span>
+    <span class="c1"># general form after inverse z transform = Y[n] = ----------------------------------------------------------------------------------------------------------------------</span>
+    <span class="c1">#                                                                                         4 + 2*2^0.5*w*dt + w^2*dt^2</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">fs</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="mi">2</span><span class="o">^</span><span class="mf">0.5</span><span class="o">*</span><span class="n">w</span><span class="o">*</span><span class="n">dt</span> <span class="o">+</span> <span class="n">w</span><span class="o">^</span><span class="mi">2</span><span class="o">*</span><span class="n">dt</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">D</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="mi">2</span><span class="o">**</span><span class="mf">0.5</span><span class="o">*</span><span class="n">w</span><span class="o">*</span><span class="n">dt</span> <span class="o">+</span> <span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">D</span><span class="p">]</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">[(</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">D</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">D</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">D</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
+
+
+<div class="viewcode-block" id="high_pass_filter_1st">
+<a class="viewcode-back" href="../../utils.html#utils.filter.high_pass_filter_1st">[docs]</a>
+<span class="k">def</span> <span class="nf">high_pass_filter_1st</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create 1st order high pass filter by Bilinear (Tustin) transform</span>
+
+<span class="sd">    :param float w: cut-off frequency in rad/s</span>
+<span class="sd">    :param float fs: sampling frequency in hz</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - X (list) - denominator coefficient (X)</span>
+<span class="sd">        - Y (list) - numerator coefficient (Y)</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] &#39;High pass filter explanations &lt;https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb&gt;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#                                               s           s</span>
+    <span class="c1"># continuous time in frequency domain H(s) = -------- = ----------</span>
+    <span class="c1">#                                             s + w     s + 2*pi*f  </span>
+    <span class="c1">#                        2(1-z^-1)</span>
+    <span class="c1"># bilinear transform s = ----------</span>
+    <span class="c1">#                        dt(1+z^-1)</span>
+    <span class="c1">#                                             s             2 - 2*z^-1               Y(z)</span>
+    <span class="c1"># discrete time in frequency domain H(z) = -------- = ---------------------------- = ----</span>
+    <span class="c1">#                                           s + w     (w*dt + 2) + (w*dt - 2)*z^-1   X(z)</span>
+    <span class="c1">#</span>
+    <span class="c1">#                                                 -(w*dt - 2)Y[n-1] + (2)X[n] - (2)X[n-1]</span>
+    <span class="c1"># general form after inverse z transform = Y[n] = ---------------------------------------</span>
+    <span class="c1">#                                                                w*dt + 2</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">fs</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">dt</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">dt</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="n">D</span><span class="p">]</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="o">/</span><span class="n">D</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="o">/</span><span class="n">D</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
+
+
+<div class="viewcode-block" id="high_pass_filter_2nd">
+<a class="viewcode-back" href="../../utils.html#utils.filter.high_pass_filter_2nd">[docs]</a>
+<span class="k">def</span> <span class="nf">high_pass_filter_2nd</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create 2nd order high pass filter by Bilinear (Tustin) transform</span>
+
+<span class="sd">    :param float w: cut-off frequency in rad/s</span>
+<span class="sd">    :param float fs: sampling frequency in hz</span>
+<span class="sd">    :returns: </span>
+<span class="sd">        - X (list) - denominator coefficient (X)</span>
+<span class="sd">        - Y (list) - numerator coefficient (Y)</span>
+
+<span class="sd">    .. Reference</span>
+<span class="sd">    .. [1] &#39;High pass filter explanations &lt;https://github.com/curiores/ArduinoTutorials/blob/main/BasicFilters/Design/HighPass/Analytic%20Derivation%20for%20High%20Pass.ipynb&gt;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#                                                       s**2           </span>
+    <span class="c1"># continuous time in frequency domain H(s) = --------------------------</span>
+    <span class="c1">#                                            s**2 + (2**0.5)*w*s + w**2</span>
+    <span class="c1">#                        2(1-z^-1)</span>
+    <span class="c1"># bilinear transform s = ----------</span>
+    <span class="c1">#                        dt(1+z^-1)</span>
+    <span class="c1">#                                             s                                  4 - 8*z^-1 + 4*z^-2                                  Y(z)</span>
+    <span class="c1"># discrete time in frequency domain H(z) = -------- = ----------------------------------------------------------------------------  = ----</span>
+    <span class="c1">#                                           s + w     (4+2*2^0.5*dt+dt^2*w^2) + (-8+2*dt^2*w^2)*z^-1 + (4-2*2^0.5*dt+dt^2*w^2)*z^-2   X(z)</span>
+    <span class="c1">#</span>
+    <span class="c1">#                                                 (4-2*2^0.5*dt+dt^2*w^2)Y[n-2] + (-8+2*dt^2*w^2)Y[n-1]+ (4)X[n] - (8)X[n-1] + (4)X[n-2]</span>
+    <span class="c1"># general form after inverse z transform = Y[n] = --------------------------------------------------------------------------------------</span>
+    <span class="c1">#                                                                              (4+2*2^0.5*dt+dt^2*w^2)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">fs</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span> <span class="o">+</span> <span class="p">(</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="o">/</span><span class="n">D</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="o">/</span><span class="n">D</span><span class="p">,</span> <span class="mi">4</span><span class="o">/</span><span class="n">D</span><span class="p">]</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="n">D</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span> <span class="o">+</span> <span class="p">(</span><span class="n">dt</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="n">D</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
+
+    
 <div class="viewcode-block" id="sliding_window">
 <a class="viewcode-back" href="../../utils.html#utils.filter.sliding_window">[docs]</a>
 <span class="k">def</span> <span class="nf">sliding_window</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window_size</span><span class="p">):</span>
@@ -107,7 +284,7 @@
 <span class="sd">        - result (list) - smoothed data</span>
 
 <span class="sd">    .. Reference</span>
-<span class="sd">    .. [1] `algorithm explanations &lt;https://blog.csdn.net/u012611644/article/details/126153999&gt;`</span>
+<span class="sd">    .. [1] &#39;algorithm explanations &lt;https://blog.csdn.net/u012611644/article/details/126153999&gt;&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">window_size</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Window size larger than data length&quot;</span><span class="p">)</span>
@@ -130,6 +307,7 @@
         <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
+
 
 </pre></div>
 

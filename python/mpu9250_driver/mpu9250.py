@@ -19,8 +19,8 @@ class MPU9250():
     :param bool calibration: calibrate gyroscope and accelerometer
 
     .. Reference
-    .. [1] `MPU-9250 Product Specification <https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf>`
-    .. [2] `MPU-9250 Register Map and Descriptions <https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf>`
+    .. [1] 'MPU-9250 Product Specification <https://invensense.tdk.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf>'
+    .. [2] 'MPU-9250 Register Map and Descriptions <https://invensense.tdk.com/wp-content/uploads/2015/02/RM-MPU-9250A-00-v1.6.pdf>'
     """
     def __init__(self, nav_frame, axis, hz, calibration):
         # I2C connection parameter
@@ -248,6 +248,7 @@ class MPU9250():
         """
         MPU9250 initialization for accelerometer, gyroscope, magnetometer
         """
+        self.temp = self.get_temp()
         self.ax, self.ay, self.az = self.get_accel()
         self.gx, self.gy, self.gz = self.get_gyro()
         self.mx, self.my, self.mz = self.get_mag()

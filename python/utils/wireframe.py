@@ -54,8 +54,8 @@ class wireframe:
     Positive of z axis is Blue, Negative of z axis is Yellow \n
 
     .. Reference
-    .. [1] `Cube property references <https://en.wikipedia.org/wiki/Cube>`
-    .. [2] `Github references <https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master>`
+    .. [1] 'Cube property references <https://en.wikipedia.org/wiki/Cube>'
+    .. [2] 'Github references <https://github.com/DonovanZhu/9DoF_MARG_Madgwick_Filter/tree/master>'
     """
     def __init__(self, nav_frame):
         self.vertices = []
@@ -92,6 +92,7 @@ class wireframe:
             cube_faces = [(1, 5, 7, 3), (0, 4, 6, 2), (4, 5, 7, 6), (0, 1, 3, 2), (6, 7, 3, 2), (4, 5, 1, 0)]
             face_colors = [(0, 0, 255), (255, 255, 0), (0, 255, 0), (255, 0, 255), (0, 255, 255), (255, 0, 0)]
         self.add_faces(cube_faces, face_colors)
+        
     def add_vertices(self, vertice_list, color_list):
         """
         Add vertice into IMU model

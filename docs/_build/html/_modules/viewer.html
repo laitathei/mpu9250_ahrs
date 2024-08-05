@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>viewer &mdash; mpu9250_ahrs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=01f34227"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            mpu9250_ahrs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">python</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">mpu9250_ahrs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">viewer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for viewer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pygame</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">utils.wireframe</span> <span class="kn">import</span> <span class="n">wireframe</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+<span class="kn">from</span> <span class="nn">mpu9250_driver.mpu9250</span> <span class="kn">import</span> <span class="n">MPU9250</span>
+<span class="kn">from</span> <span class="nn">ahrs</span> <span class="kn">import</span> <span class="n">madgwick</span><span class="p">,</span> <span class="n">mahony</span><span class="p">,</span> <span class="n">ekf</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<div class="viewcode-block" id="imu_viewer">
+<a class="viewcode-back" href="../viewer.html#viewer.imu_viewer">[docs]</a>
+<span class="k">class</span> <span class="nc">imu_viewer</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">hz</span><span class="p">,</span> <span class="n">nav_frame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create window to display IMU information and visualize the IMU model</span>
+
+<span class="sd">        :param int width: display window width</span>
+<span class="sd">        :param int height: display window height</span>
+<span class="sd">        :param int hz: window update rate</span>
+<span class="sd">        :param str nav_frame: navigation frame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hz</span> <span class="o">=</span> <span class="n">hz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">=</span> <span class="n">nav_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_rate</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Clock</span><span class="p">()</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">SysFont</span><span class="p">(</span><span class="s1">&#39;arial&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span><span class="p">)</span>
+        <span class="c1"># self.font = pygame.font.SysFont(&#39;Comic Sans MS&#39;, 15)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">background_color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s1">&#39;IMU attitude display with euler angle and quaternion&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Check parameter</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;ENU&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">!=</span> <span class="s2">&quot;NED&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Navigation frame should be either ENU or NED&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span> <span class="o">=</span> <span class="s2">&quot;zxy&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span> <span class="o">=</span> <span class="s2">&quot;zyx&quot;</span>
+
+<div class="viewcode-block" id="imu_viewer.run">
+<a class="viewcode-back" href="../viewer.html#viewer.imu_viewer.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imu</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create IMU wireframe and keep display IMU information until it close</span>
+
+<span class="sd">        :param IMU imu: imu object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wireframe</span> <span class="o">=</span> <span class="n">wireframe</span><span class="p">(</span><span class="n">imu</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wireframe</span><span class="o">.</span><span class="n">initialize_cube</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">pygame</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">QUIT</span><span class="p">:</span>
+                        <span class="n">pygame</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_rate</span><span class="o">.</span><span class="n">tick</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hz</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">imu</span><span class="o">.</span><span class="n">acc</span><span class="p">,</span> <span class="n">imu</span><span class="o">.</span><span class="n">gyr</span><span class="p">,</span> <span class="n">imu</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span> <span class="n">imu</span><span class="o">.</span><span class="n">euler</span><span class="p">,</span> <span class="n">imu</span><span class="o">.</span><span class="n">quaternion</span><span class="p">,</span> <span class="n">imu</span><span class="o">.</span><span class="n">body_frame</span><span class="p">,</span> <span class="n">imu</span><span class="o">.</span><span class="n">nav_frame</span><span class="p">)</span>
+                <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+                <span class="c1"># pygame.display.flip()</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;interrupted!&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="imu_viewer.display">
+<a class="viewcode-back" href="../viewer.html#viewer.imu_viewer.display">[docs]</a>
+    <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">gyr</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">euler</span><span class="p">,</span> <span class="n">quaternion</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">nav</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display IMU information and visualize the IMU model</span>
+
+<span class="sd">        :param ndarray acc: accelerometer data</span>
+<span class="sd">        :param ndarray gyr: gyroscope data</span>
+<span class="sd">        :param ndarray mag: magnetometer data</span>
+<span class="sd">        :param ndarray euler: euler angle</span>
+<span class="sd">        :param ndarray quaternion: quaternion</span>
+<span class="sd">        :param str body: body frame</span>
+<span class="sd">        :param str nav: navigation frame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">background_color</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wireframe</span><span class="o">.</span><span class="n">update_attitude</span><span class="p">(</span><span class="n">euler</span><span class="p">)</span>
+        
+        <span class="n">ax</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">acc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">ay</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">acc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">az</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">acc</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">gx</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">gyr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">gy</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">gyr</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">gz</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">gyr</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">mx</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">mag</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">my</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">mag</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">mz</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">mag</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">roll</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">euler</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">euler</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">yaw</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">euler</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">quaternion</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">quaternion</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">quaternion</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">quaternion</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Display acceleration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Acc (m/s^2): &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;ax: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ax</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;ay: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ay</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;az: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">az</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+
+        <span class="c1"># Display angular velocity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Gyro (rad/s): &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;gx: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gx</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;gy: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gy</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;gz: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gz</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+
+        <span class="c1"># Display magnetic field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Mag (µT): &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;mx: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mx</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;my: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">my</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;mz: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mz</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+
+        <span class="c1"># Display body and navigation frame setting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Body frame: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">body</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Navigation frame: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nav</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+
+        <span class="c1"># Display quaternion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Quaternion: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;w: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">w</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;x: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;y: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;z: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+
+        <span class="c1"># Display euler angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Euler Angles (Degree): &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;ENU&quot;</span><span class="p">:</span> <span class="c1"># zxy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Roll: </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">-axis)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">roll</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Pitch: </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">-axis)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Yaw: </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">-axis)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">yaw</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav_frame</span> <span class="o">==</span> <span class="s2">&quot;NED&quot;</span><span class="p">:</span> <span class="c1"># zyx</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Roll: </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">-axis)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">roll</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Pitch: </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">-axis)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Yaw: </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">-axis)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">yaw</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_seq</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+
+        <span class="c1"># Display observation message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_display</span><span class="p">(</span><span class="s2">&quot;Please observe the imu from top view&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="mf">0.95</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+    
+        <span class="c1"># Transform vertices to perspective view</span>
+        <span class="n">viewer_vertices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">viewer_depth</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">vertice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wireframe</span><span class="o">.</span><span class="n">vertices</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">vertice</span><span class="o">.</span><span class="n">x</span><span class="p">],[</span><span class="n">vertice</span><span class="o">.</span><span class="n">y</span><span class="p">],[</span><span class="n">vertice</span><span class="o">.</span><span class="n">z</span><span class="p">]])</span>
+            <span class="n">new_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wireframe</span><span class="o">.</span><span class="n">rotate_point</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            <span class="n">window_x</span><span class="p">,</span> <span class="n">window_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project2window</span><span class="p">(</span><span class="n">new_point</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">new_point</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="mi">70</span><span class="p">)</span>
+            <span class="n">viewer_vertices</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">window_x</span><span class="p">,</span> <span class="n">window_y</span><span class="p">))</span>
+            <span class="n">viewer_depth</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_point</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Calculate the average Z values of each face.</span>
+        <span class="n">avg_z</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wireframe</span><span class="o">.</span><span class="n">faces</span><span class="p">:</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">viewer_depth</span><span class="p">[</span><span class="n">face</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">viewer_depth</span><span class="p">[</span><span class="n">face</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+</span>
+                 <span class="n">viewer_depth</span><span class="p">[</span><span class="n">face</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">+</span> <span class="n">viewer_depth</span><span class="p">[</span><span class="n">face</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span> <span class="o">/</span> <span class="mf">4.0</span>
+            <span class="n">avg_z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="c1"># Draw the faces using the Painter&#39;s algorithm:</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">avg_z</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span> <span class="c1"># sort the list according to avg_z</span>
+            <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wireframe</span><span class="o">.</span><span class="n">faces</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">pointList</span> <span class="o">=</span> <span class="p">[</span><span class="n">viewer_vertices</span><span class="p">[</span><span class="n">face</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                         <span class="n">viewer_vertices</span><span class="p">[</span><span class="n">face</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                         <span class="n">viewer_vertices</span><span class="p">[</span><span class="n">face</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+                         <span class="n">viewer_vertices</span><span class="p">[</span><span class="n">face</span><span class="o">.</span><span class="n">vertice_indexs</span><span class="p">[</span><span class="mi">3</span><span class="p">]]]</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="p">,</span> <span class="n">face</span><span class="o">.</span><span class="n">color</span><span class="p">,</span> <span class="n">pointList</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="imu_viewer.message_display">
+<a class="viewcode-back" href="../viewer.html#viewer.imu_viewer.message_display">[docs]</a>
+    <span class="k">def</span> <span class="nf">message_display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">text_color</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display the color message in the window</span>
+
+<span class="sd">        :param str text: display text</span>
+<span class="sd">        :param int x: x-axis pixel</span>
+<span class="sd">        :param int y: y-axis pixel</span>
+<span class="sd">        :param tuple text_color: rgb color</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text_surface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">text_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">background_color</span><span class="p">)</span>
+        <span class="n">text_rect</span> <span class="o">=</span> <span class="n">text_surface</span><span class="o">.</span><span class="n">get_rect</span><span class="p">()</span>
+        <span class="n">text_rect</span><span class="o">.</span><span class="n">topleft</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">text_surface</span><span class="p">,</span> <span class="n">text_rect</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="imu_viewer.project2window">
+<a class="viewcode-back" href="../viewer.html#viewer.imu_viewer.project2window">[docs]</a>
+    <span class="k">def</span> <span class="nf">project2window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">scaling_constant</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project position into window coordinates pixel</span>
+
+<span class="sd">        :param int x: x-axis position</span>
+<span class="sd">        :param int y: y-axis position</span>
+<span class="sd">        :param int scaling_constant: scale up or down the point</span>
+
+<span class="sd">        :returns: </span>
+<span class="sd">            - window_x - sensor value in int16 format</span>
+<span class="sd">            - window_y - sensor value in int16 format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">window_x</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">scaling_constant</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">window_y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">scaling_constant</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">window_x</span><span class="p">,</span> <span class="n">window_y</span></div>
+</div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">window_width</span> <span class="o">=</span> <span class="mi">1080</span>
+    <span class="n">window_height</span> <span class="o">=</span> <span class="mi">720</span>
+    <span class="n">window_hz</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">nav_frame</span> <span class="o">=</span> <span class="s2">&quot;NED&quot;</span> <span class="c1"># ENU/NED</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">calibration</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># ahrs = madgwick.Madgwick(axis, 1, nav_frame)</span>
+    <span class="c1"># ahrs = mahony.Mahony(axis, 0.1, 0, nav_frame)</span>
+    <span class="c1"># ahrs = ekf.EKF(axis, [0.3**2, 0.5**2, 0.8**2], nav_frame)</span>
+    <span class="n">imu</span> <span class="o">=</span> <span class="n">MPU9250</span><span class="p">(</span><span class="n">nav_frame</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">window_hz</span><span class="p">,</span> <span class="n">calibration</span><span class="p">)</span>
+    <span class="n">imu</span><span class="o">.</span><span class="n">initialization</span><span class="p">()</span>
+    <span class="n">imu</span><span class="o">.</span><span class="n">start_thread</span><span class="p">()</span>
+    <span class="n">viewer</span> <span class="o">=</span> <span class="n">imu_viewer</span><span class="p">(</span><span class="n">window_width</span><span class="p">,</span> <span class="n">window_height</span><span class="p">,</span> <span class="n">window_hz</span><span class="p">,</span> <span class="n">nav_frame</span><span class="p">)</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">imu</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Teddy Lai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
