@@ -234,7 +234,7 @@ int AK8963::read_raw_data(int high_register, int low_register)
         }
     }
 
-    // Megre higher bytes and lower bytes data
+    // Merge higher bytes and lower bytes data
     unsigned_value = (high << 8) + low;
 
     // Calculate the unsigned int16 range to signed int16 range
@@ -254,7 +254,7 @@ int AK8963::read_8bit_register(int single_register)
         data = wiringPiI2CReadReg8(this->i2c, single_register);
         if (data != -1) {
             break;
-            return data;
         }
     }
+    return data;
 }
